@@ -227,12 +227,15 @@ const crocQueryContract = new ethers.Contract(
   provider
 );
 
-export const bar = async (): Promise<boolean> => {
+export const getGasPrice = async (): Promise<boolean> => {
   const gasPriceInWei = await provider.getBlockNumber();
-  const blockNumber = await provider.getBlockNumber();
   // const gasPrice = web3.utils.fromWei(gasPriceInWei, "gwei");
+  console.log("gas price in wei: " + gasPriceInWei);
+  return true;
+};
 
-  console.log("gas price: " + gasPriceInWei);
+export const getBlockNumber = async (): Promise<boolean> => {
+  const blockNumber = await provider.getBlockNumber();
   console.log("current block number: " + blockNumber);
   return true;
 };
@@ -251,14 +254,10 @@ export const getPrice = async (): Promise<number> => {
   return price;
 };
 
-export const delayMillis = (delayMs: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, delayMs));
+export const sum = (a: number, b: number): number => {
+  return a + b;
+};
 
-export const greet = (name: string): string => `Hello ${name}`;
-
-export const foo = async (): Promise<boolean> => {
-  console.log(greet("World"));
-  await delayMillis(1000);
-  console.log("done");
-  return true;
+export const fetchData = () => {
+  return "peanut butter";
 };
