@@ -23,5 +23,5 @@ yarn esbuild-browser
 ...
 
 # run the first example app (note: run 'yarn build-all' first)
-node ./examples/01-retrieve-spot-price.mjs
+yarn ts-node ./examples/01-retrieve-spot-price.ts
 ```
