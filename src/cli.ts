@@ -1,4 +1,4 @@
 #!/usr/bin/env node
-import { getGasPrice } from "./main";
+import { getGasPrice } from ".";
 
 getGasPrice();

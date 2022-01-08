@@ -1,11 +1,4 @@
-import { ethers } from "ethers";
-// import QUERY_ABI from "../../abis/query.json";
-
-const NODE_URL =
-  "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/ropsten";
-const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
-
-const contractAddresses = {
+export const contractAddresses = {
   ZERO_ADDR: "0x0000000000000000000000000000000000000000",
   WETH_ADDR: "0x10e13e6de3bd3a5d2e0361f56a695eb08731e40b",
   USDC_ADDR: "0x83e77C197E744D21810A1f970cD24A246E0932a1",
@@ -13,7 +6,7 @@ const contractAddresses = {
   QUERY_ADDR: "0x21E85d6C75a99B132e08dBDdB3166b2550D9e3b6",
 };
 
-const QUERY_ABI = [
+export const QUERY_ABI = [
   {
     inputs: [
       {
@@ -220,44 +213,3 @@ const QUERY_ABI = [
     type: "function",
   },
 ];
-
-const crocQueryContract = new ethers.Contract(
-  contractAddresses["QUERY_ADDR"],
-  QUERY_ABI,
-  provider
-);
-
-export const getGasPrice = async (): Promise<boolean> => {
-  const gasPriceInWei = await provider.getBlockNumber();
-  // const gasPrice = web3.utils.fromWei(gasPriceInWei, "gwei");
-  console.log("gas price in wei: " + gasPriceInWei);
-  return true;
-};
-
-export const getBlockNumber = async (): Promise<boolean> => {
-  const blockNumber = await provider.getBlockNumber();
-  console.log("current block number: " + blockNumber);
-  return true;
-};
-export const getPrice = async (): Promise<number> => {
-  const price = await crocQueryContract.queryPrice(
-    // baseTokenAddress,
-    // quoteTokenAddress,
-    "0x1440186D311F764Ce7e3C2164E2Dff4cf1826A97", // mkr
-    "0x83e77c197e744d21810a1f970cd24a246e0932a1", // usdc
-    // "0xccea4dfe9f0dbccf6357b935846bf67778167d99", // wbtc
-    // POOL_IDX
-
-    35000
-  );
-  console.log(`spot price: ${price}`);
-  return price;
-};
-
-export const sum = (a: number, b: number): number => {
-  return a + b;
-};
-
-export const fetchData = () => {
-  return "peanut butter";
-};

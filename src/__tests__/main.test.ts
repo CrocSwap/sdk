@@ -1,4 +1,4 @@
-import { sum } from "../main";
+import { sum } from "../index";
 
 test("1 is 1?", () => {
   expect(1).toBe(1);
