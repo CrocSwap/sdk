@@ -1,3 +1,2 @@
-export * from "./callForGasPrice";
-export * from "./callForPairPrice";
 export * from "./swap";
+export * from "./math";

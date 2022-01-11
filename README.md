@@ -3,7 +3,7 @@
 ## Getting Started
 
 ```bash
-# Clone the repository
+# Clone the repository (you can also click "Use this template")
 git clone https://github.com/CrocSwap/sdk.git your_project_name
 cd your_project_name
 

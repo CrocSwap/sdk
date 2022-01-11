@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "ES2016",
     "module": "commonjs",
     "moduleResolution": "node",
     "declaration": true,
@@ -18,21 +18,10 @@
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "sourceMap": true,
-    "outDir": "./dist/tsc/",
-    "types": [
-      "node",
-      "jest"
-    ],
-    "lib": [
-      "ES6",
-      "DOM"
-    ]
+    "outDir": "./dist/",
+    "types": ["node", "jest"],
+    "lib": ["ES2016", "DOM"]
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.test.ts"
-  ]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "**/*.test.ts"]
 }
