@@ -2,6 +2,8 @@
 
 ## Getting Started
 
+### https://www.npmjs.com/package/@crocswap-libs/sdk
+
 ```bash
 # Clone the repository (you can also click "Use this template")
 git clone https://github.com/CrocSwap/sdk.git your_project_name
