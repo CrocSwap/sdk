@@ -68,9 +68,11 @@ const testReceipt = {
 type ParsedReceipt = {
   blockNumber: number;
   timestamp: number;
+  transactionHash: string;
   gasUsed: number;
   gasCostInEther: number;
   gasPriceInGwei: number;
+  status: boolean;
   buyAddress: string;
   sellAddress: string;
   sellSymbol: string;

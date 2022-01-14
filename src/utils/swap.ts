@@ -101,9 +101,11 @@ type Web3Receipt = {
 type ParsedReceipt = {
   blockNumber: number;
   timestamp: number;
+  transactionHash: string;
   gasUsed: number;
   gasCostInEther: number;
   gasPriceInGwei: number;
+  status: boolean;
   buyAddress: string;
   sellAddress: string;
   sellSymbol: string;
@@ -127,6 +129,9 @@ export async function parseWeb3TxReceipt(
   const blockNumber = receipt.blockNumber;
 
   const timestamp = (await provider.getBlock(blockNumber)).timestamp;
+
+  const transactionHash = receipt.transactionHash;
+
   const gasUsed = receipt.gasUsed;
   const effectiveGasPrice = parseInt(receipt.effectiveGasPrice);
   const effectiveGasPriceInGwei = ethers.utils.formatUnits(
@@ -135,6 +140,8 @@ export async function parseWeb3TxReceipt(
   );
   const gasCostInWei = gasUsed * effectiveGasPrice;
   const gasCostInEther = ethers.utils.formatEther(gasCostInWei.toString());
+
+  const status = receipt.status;
 
   const events = receipt.events;
   const baseQty = events[0].raw.data.toString();
@@ -217,9 +224,11 @@ export async function parseWeb3TxReceipt(
   const parsedReceipt: ParsedReceipt = {
     blockNumber: blockNumber,
     timestamp: timestamp,
+    transactionHash: transactionHash,
     gasUsed: gasUsed,
     gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
     gasCostInEther: parseFloat(gasCostInEther),
+    status: status,
     sellQtyUnscaled: sellQtyUnscaled,
     buyQtyUnscaled: buyQtyUnscaled,
     sellAddress: sellAddress,
