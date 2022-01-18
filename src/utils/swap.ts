@@ -300,12 +300,12 @@ export async function parseEthersTxReceipt(
   const transactionHash = receipt.transactionHash;
 
   const gasUsed = parseInt(receipt.gasUsed.hex);
-  const effectiveGasPrice = receipt.effectiveGasPrice.toString();
+  const effectiveGasPrice = parseInt(receipt.effectiveGasPrice.hex);
   const effectiveGasPriceInGwei = ethers.utils.formatUnits(
     effectiveGasPrice,
     "gwei"
   );
-  const gasCostInWei = gasUsed * parseInt(effectiveGasPrice);
+  const gasCostInWei = gasUsed * effectiveGasPrice;
   const gasCostInEther = ethers.utils.formatEther(gasCostInWei.toString());
 
   const status = receipt.status === 1 ? true : false;
