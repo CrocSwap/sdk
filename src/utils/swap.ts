@@ -125,11 +125,12 @@ type EthersReceipt = {
   byzantium: boolean;
   confirmations: number;
   contractAddress?: string | null;
-  cumulativeGasUsed: { type: string; hex: string };
-  effectiveGasPrice: { type: string; hex: string };
+  cumulativeGasUsed: BigNumber;
+  effectiveGasPrice: BigNumber;
   events: EthersEvents;
   from: string;
-  gasUsed: { type: string; hex: string };
+  // gasUsed: { type: string; hex: string };
+  gasUsed: BigNumber;
   logs: EthersEvents;
   logsBloom: string;
   status: number;
@@ -299,8 +300,8 @@ export async function parseEthersTxReceipt(
 
   const transactionHash = receipt.transactionHash;
 
-  const gasUsed = parseInt(receipt.gasUsed.hex);
-  const effectiveGasPrice = parseInt(receipt.effectiveGasPrice.hex);
+  const gasUsed = receipt.gasUsed.toNumber();
+  const effectiveGasPrice = receipt.effectiveGasPrice.toNumber();
   const effectiveGasPriceInGwei = ethers.utils.formatUnits(
     effectiveGasPrice,
     "gwei"

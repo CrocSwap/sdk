@@ -1,5 +1,7 @@
 import { parseWeb3TxReceipt, parseEthersTxReceipt } from "..";
 
+import { BigNumber } from "ethers";
+
 const testWeb3Receipt = {
   blockHash:
     "0x671bc2d6d650f6227dd0e0af6688c681ec1031d5e5efa3cfaf7e493086372373",
@@ -70,10 +72,7 @@ const testEthersReceipt = {
   from: "0xd825D73CDD050ecbEBC0B3a8D9C5952d1F64722e",
   contractAddress: null,
   transactionIndex: 38,
-  gasUsed: {
-    type: "BigNumber",
-    hex: "0x019e7d",
-  },
+  gasUsed: BigNumber.from("0x019e7d"),
   logsBloom:
     "0x00000000000000000000000000000000000000100000000000080000000000000000000000000000000000000000100000000800000000400000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000004000000000000000000004000000000000000000000080000000000000000000400000000000000000000000002000000000000000000002000000000000000000000000002000000000000000000000000000000000008000000000000000000000000000000000000",
   blockHash:
@@ -116,14 +115,9 @@ const testEthersReceipt = {
   ],
   blockNumber: 11838227,
   confirmations: 1,
-  cumulativeGasUsed: {
-    type: "BigNumber",
-    hex: "0x1bb486",
-  },
-  effectiveGasPrice: {
-    type: "BigNumber",
-    hex: "0x024093f083",
-  },
+  cumulativeGasUsed: BigNumber.from("0x1bb486"),
+
+  effectiveGasPrice: BigNumber.from("0x024093f083"),
   status: 1,
   type: 2,
   byzantium: true,
@@ -163,7 +157,7 @@ const testEthersReceipt = {
   ],
 };
 
-type parsedEthersReceipt = {
+type parsedReceipt = {
   blockNumber: number;
   timestamp: number;
   transactionHash: string;
@@ -188,8 +182,8 @@ beforeAll(async () => {
   await callParseWeb3TxReceipt();
 });
 
-let parsedWeb3Receipt: parsedEthersReceipt;
-let parsedEthersReceipt: parsedEthersReceipt;
+let parsedWeb3Receipt: parsedReceipt;
+let parsedEthersReceipt: parsedReceipt;
 async function callParseWeb3TxReceipt() {
   parsedWeb3Receipt = await parseWeb3TxReceipt(testWeb3Receipt);
   console.log({ parsedWeb3Receipt });
@@ -199,68 +193,68 @@ async function callParseEthersTxReceipt() {
   // console.log({ parsedEthersReceipt });
 }
 
-// test("gas used is correct?", async () => {
-//   expect(parsedWeb3Receipt.gasUsed).toBe(105925);
-// });
+test("gas used is correct?", async () => {
+  expect(parsedWeb3Receipt.gasUsed).toBe(105925);
+});
 
-// test("total cost in ether is correct?", async () => {
-//   expect(parsedWeb3Receipt.gasCostInEther).toBe(0.0008612399473789);
-// });
+test("total cost in ether is correct?", async () => {
+  expect(parsedWeb3Receipt.gasCostInEther).toBe(0.0008612399473789);
+});
 
-// test("effective gas price in gwei is correct?", async () => {
-//   expect(parsedWeb3Receipt.gasPriceInGwei).toBe(8.130657988);
-// });
-// test("base quantity scaled for decimals is correct?", async () => {
-//   expect(parsedWeb3Receipt.sellQtyUnscaled).toBe(1.0);
-// });
-// test("quote quantity scaled for decimals is correct?", async () => {
-//   expect(parsedWeb3Receipt.buyQtyUnscaled).toBe(0.00001958);
-// });
-// test("sell address is correct?", async () => {
-//   expect(parsedWeb3Receipt.sellAddress).toBe(
-//     "0x83e77c197e744d21810a1f970cd24a246e0932a1"
-//   );
-// });
-// test("buy address is correct?", async () => {
-//   expect(parsedWeb3Receipt.buyAddress).toBe(
-//     "0xccea4dfe9f0dbccf6357b935846bf67778167d99"
-//   );
-// });
-// test("conversion rate string is correct?", async () => {
-//   expect(parsedWeb3Receipt.conversionRateString).toBe(
-//     "Swapped 1 USDC for 0.00001958 WBTC at a rate of 51072.52 USDC per WBTC"
-//   );
-// });
+test("effective gas price in gwei is correct?", async () => {
+  expect(parsedWeb3Receipt.gasPriceInGwei).toBe(8.130657988);
+});
+test("base quantity scaled for decimals is correct?", async () => {
+  expect(parsedWeb3Receipt.sellQtyUnscaled).toBe(1.0);
+});
+test("quote quantity scaled for decimals is correct?", async () => {
+  expect(parsedWeb3Receipt.buyQtyUnscaled).toBe(0.00001958);
+});
+test("sell address is correct?", async () => {
+  expect(parsedWeb3Receipt.sellAddress).toBe(
+    "0x83e77c197e744d21810a1f970cd24a246e0932a1"
+  );
+});
+test("buy address is correct?", async () => {
+  expect(parsedWeb3Receipt.buyAddress).toBe(
+    "0xccea4dfe9f0dbccf6357b935846bf67778167d99"
+  );
+});
+test("conversion rate string is correct?", async () => {
+  expect(parsedWeb3Receipt.conversionRateString).toBe(
+    "Swapped 1 USDC for 0.00001958 WBTC at a rate of 51072.52 USDC per WBTC"
+  );
+});
 
 test("gas used is correct?", async () => {
   expect(parsedEthersReceipt.gasUsed).toBe(106109);
 });
 
-// test("total cost in ether is correct?", async () => {
-//   expect(parsedEthersReceipt.gasCostInEther).toBe(0.0008612399473789);
-// });
+test("total cost in ether is correct?", async () => {
+  expect(parsedEthersReceipt.gasCostInEther).toBe(0.001026431806097911);
+});
 
-// test("effective gas price in gwei is correct?", async () => {
-//   expect(parsedEthersReceipt.gasPriceInGwei).toBe(8.130657988);
-// });
-// test("base quantity scaled for decimals is correct?", async () => {
-//   expect(parsedEthersReceipt.sellQtyUnscaled).toBe(1.0);
-// });
-// test("quote quantity scaled for decimals is correct?", async () => {
-//   expect(parsedEthersReceipt.buyQtyUnscaled).toBe(0.00001958);
-// });
-// test("sell address is correct?", async () => {
-//   expect(parsedEthersReceipt.sellAddress).toBe(
-//     "0x83e77c197e744d21810a1f970cd24a246e0932a1"
-//   );
-// });
-// test("buy address is correct?", async () => {
-//   expect(parsedEthersReceipt.buyAddress).toBe(
-//     "0xccea4dfe9f0dbccf6357b935846bf67778167d99"
-//   );
-// });
-// test("conversion rate string is correct?", async () => {
-//   expect(parsedEthersReceipt.conversionRateString).toBe(
-//     "Swapped 1 USDC for 0.00001958 WBTC at a rate of 51072.52 USDC per WBTC"
-//   );
-// });
+test("effective gas price in gwei is correct?", async () => {
+  expect(parsedEthersReceipt.gasPriceInGwei).toBe(9.673371779);
+});
+test("base quantity scaled for decimals is correct?", async () => {
+  expect(parsedEthersReceipt.sellQtyUnscaled).toBe(0.00004037);
+});
+test("quote quantity scaled for decimals is correct?", async () => {
+  expect(parsedEthersReceipt.buyQtyUnscaled).toBe(2);
+});
+test("sell address is correct?", async () => {
+  expect(parsedEthersReceipt.sellAddress).toBe(
+    "0xccea4dfe9f0dbccf6357b935846bf67778167d99"
+  );
+});
+test("buy address is correct?", async () => {
+  expect(parsedEthersReceipt.buyAddress).toBe(
+    "0x83e77c197e744d21810a1f970cd24a246e0932a1"
+  );
+});
+test("conversion rate string is correct?", async () => {
+  expect(parsedEthersReceipt.conversionRateString).toBe(
+    "Swapped 0.00004037 WBTC for 2 USDC at a rate of 49541.74 USDC per WBTC"
+  );
+});
