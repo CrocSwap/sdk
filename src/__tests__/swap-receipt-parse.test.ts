@@ -38,7 +38,7 @@ const testWeb3Receipt = {
         topics: [
           "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
           "0x000000000000000000000000d825d73cdd050ecbebc0b3a8d9c5952d1f64722e",
-          "0x0000000000000000000000006c40e8a335bf5956debd2fb88d5c98cc0a760559",
+          "0x000000000000000000000000B6Ff2e53408f38A5a363586746d1dB306AF5caa4",
         ],
       },
     },
@@ -59,7 +59,7 @@ const testWeb3Receipt = {
         data: "0x00000000000000000000000000000000000000000000000000000000000007a6",
         topics: [
           "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-          "0x0000000000000000000000006c40e8a335bf5956debd2fb88d5c98cc0a760559",
+          "0x000000000000000000000000B6Ff2e53408f38A5a363586746d1dB306AF5caa4",
           "0x000000000000000000000000d825d73cdd050ecbebc0b3a8d9c5952d1f64722e",
         ],
       },
@@ -88,7 +88,7 @@ const testEthersReceipt = {
       address: "0x83e77C197E744D21810A1f970cD24A246E0932a1",
       topics: [
         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-        "0x0000000000000000000000006c40e8a335bf5956debd2fb88d5c98cc0a760559",
+        "0x000000000000000000000000B6Ff2e53408f38A5a363586746d1dB306AF5caa4",
         "0x000000000000000000000000d825d73cdd050ecbebc0b3a8d9c5952d1f64722e",
       ],
       data: "0x00000000000000000000000000000000000000000000000000000000001e8480",
@@ -105,7 +105,7 @@ const testEthersReceipt = {
       topics: [
         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
         "0x000000000000000000000000d825d73cdd050ecbebc0b3a8d9c5952d1f64722e",
-        "0x0000000000000000000000006c40e8a335bf5956debd2fb88d5c98cc0a760559",
+        "0x000000000000000000000000B6Ff2e53408f38A5a363586746d1dB306AF5caa4",
       ],
       data: "0x0000000000000000000000000000000000000000000000000000000000000fc5",
       logIndex: 29,
@@ -130,7 +130,7 @@ const testEthersReceipt = {
       address: "0x83e77C197E744D21810A1f970cD24A246E0932a1",
       topics: [
         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
-        "0x0000000000000000000000006c40e8a335bf5956debd2fb88d5c98cc0a760559",
+        "0x000000000000000000000000B6Ff2e53408f38A5a363586746d1dB306AF5caa4",
         "0x000000000000000000000000d825d73cdd050ecbebc0b3a8d9c5952d1f64722e",
       ],
       data: "0x00000000000000000000000000000000000000000000000000000000001e8480",
@@ -147,7 +147,7 @@ const testEthersReceipt = {
       topics: [
         "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
         "0x000000000000000000000000d825d73cdd050ecbebc0b3a8d9c5952d1f64722e",
-        "0x0000000000000000000000006c40e8a335bf5956debd2fb88d5c98cc0a760559",
+        "0x000000000000000000000000B6Ff2e53408f38A5a363586746d1dB306AF5caa4",
       ],
       data: "0x0000000000000000000000000000000000000000000000000000000000000fc5",
       logIndex: 29,
@@ -204,27 +204,27 @@ test("total cost in ether is correct?", async () => {
 test("effective gas price in gwei is correct?", async () => {
   expect(parsedWeb3Receipt.gasPriceInGwei).toBe(8.130657988);
 });
-// test("base quantity scaled for decimals is correct?", async () => {
-//   expect(parsedWeb3Receipt.sellQtyUnscaled).toBe(1.0);
-// });
-// test("quote quantity scaled for decimals is correct?", async () => {
-//   expect(parsedWeb3Receipt.buyQtyUnscaled).toBe(0.00001958);
-// });
-// test("sell address is correct?", async () => {
-//   expect(parsedWeb3Receipt.sellAddress).toBe(
-//     "0x83e77c197e744d21810a1f970cd24a246e0932a1"
-//   );
-// });
-// test("buy address is correct?", async () => {
-//   expect(parsedWeb3Receipt.buyAddress).toBe(
-//     "0xccea4dfe9f0dbccf6357b935846bf67778167d99"
-//   );
-// });
-// test("conversion rate string is correct?", async () => {
-//   expect(parsedWeb3Receipt.conversionRateString).toBe(
-//     "Swapped 1 USDC for 0.00001958 WBTC at a rate of 51072.52 USDC per WBTC"
-//   );
-// });
+test("base quantity scaled for decimals is correct?", async () => {
+  expect(parsedWeb3Receipt.sellQtyUnscaled).toBe(1.0);
+});
+test("quote quantity scaled for decimals is correct?", async () => {
+  expect(parsedWeb3Receipt.buyQtyUnscaled).toBe(0.00001958);
+});
+test("sell address is correct?", async () => {
+  expect(parsedWeb3Receipt.sellAddress).toBe(
+    "0x83e77c197e744d21810a1f970cd24a246e0932a1"
+  );
+});
+test("buy address is correct?", async () => {
+  expect(parsedWeb3Receipt.buyAddress).toBe(
+    "0xccea4dfe9f0dbccf6357b935846bf67778167d99"
+  );
+});
+test("conversion rate string is correct?", async () => {
+  expect(parsedWeb3Receipt.conversionRateString).toBe(
+    "Swapped 1 USDC for 0.00001958 WBTC at a rate of 51072.52 USDC per WBTC"
+  );
+});
 
 test("gas used is correct?", async () => {
   expect(parsedEthersReceipt.gasUsed).toBe(106109);
