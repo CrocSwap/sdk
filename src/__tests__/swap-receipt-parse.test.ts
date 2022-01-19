@@ -186,7 +186,7 @@ let parsedWeb3Receipt: parsedReceipt;
 let parsedEthersReceipt: parsedReceipt;
 async function callParseWeb3TxReceipt() {
   parsedWeb3Receipt = await parseWeb3TxReceipt(testWeb3Receipt);
-  console.log({ parsedWeb3Receipt });
+  // console.log({ parsedWeb3Receipt });
 }
 async function callParseEthersTxReceipt() {
   parsedEthersReceipt = await parseEthersTxReceipt(testEthersReceipt);
