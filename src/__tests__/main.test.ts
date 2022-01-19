@@ -1,5 +1,4 @@
 // import { sum } from "../index";
-
 import { scaleQty } from "../index";
 
 test("1 is 1?", () => {
