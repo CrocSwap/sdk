@@ -1,5 +1,4 @@
-import { BigNumber } from "@ethersproject/bignumber";
-import { ethers } from "ethers";
+import { ethers, BigNumber } from "ethers";
 import { contractAddresses } from "..";
 import { ERC20_ABI } from "..";
 import { toFixedNumber } from ".";
