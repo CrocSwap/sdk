@@ -16,14 +16,16 @@ cd your_project_name
 yarn install
 
 # Now you can run various yarn commands:
-yarn cli
 yarn lint
 yarn test
 yarn build-all
 yarn ts-node <filename>
-yarn esbuild-browser
 ...
 
+# featured capabilities
+
+parse a transaction receipt from ethers.js and web3.js
+
 # run the first example app (note: run 'yarn build-all' first)
-yarn ts-node ./examples/01-retrieve-spot-price.ts
+# yarn ts-node ./examples/01-retrieve-spot-price.ts
 ```
