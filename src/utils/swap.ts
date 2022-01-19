@@ -47,8 +47,8 @@ export function unscalePrice(
 export function scaleQty(qty: string, tokenDecimals: number): BigNumber {
   // const scaledQty = qty * Math.pow(10, tokenDecimals);
 
-  const amount = ethers.utils.parseUnits(qty, tokenDecimals);
-  return amount;
+  const bigQtyScaled = ethers.utils.parseUnits(qty, tokenDecimals);
+  return bigQtyScaled;
   // const bigQty = BigNumber.from(qty);
   // const baseBigNum = BigNumber.from(10);
   // const decimalsBigNum = BigNumber.from(tokenDecimals);
@@ -57,9 +57,10 @@ export function scaleQty(qty: string, tokenDecimals: number): BigNumber {
   // return bigQtyScaled;
 }
 
-export function unscaleQty(qty: number, tokenDecimals: number): number {
-  const unscaledQty = qty * Math.pow(10, -1 * tokenDecimals);
-  return unscaledQty;
+export function unscaleQty(qty: string, tokenDecimals: number): string {
+  // const unscaledQty = qty * Math.pow(10, -1 * tokenDecimals);
+  const bigQtyUnscaled = ethers.utils.formatUnits(qty, tokenDecimals);
+  return bigQtyUnscaled;
 }
 
 type RawEventData = {
@@ -336,8 +337,12 @@ export async function parseEthersTxReceipt(
   const quoteSymbol = await quoteContract.symbol();
 
   // const baseQtyUnscaled = ethers.utils.formatUnits(baseQty, baseDecimals);
-  const baseQtyUnscaled = unscaleQty(baseQty, baseDecimals);
-  const quoteQtyUnscaled = unscaleQty(quoteQty, quoteDecimals);
+  const baseQtyUnscaled = parseFloat(
+    unscaleQty(baseQty.toString(), baseDecimals)
+  );
+  const quoteQtyUnscaled = parseFloat(
+    unscaleQty(quoteQty.toString(), quoteDecimals)
+  );
   // ethers.utils.formatUnits(quoteQty, quoteDecimals)
   // const baseSender = ethers.utils.hexStripZeros(events[0].raw.topics[1]);
   // const baseReceiver = ethers.utils.hexStripZeros(events[0].raw.topics[2]);
