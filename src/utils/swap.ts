@@ -328,13 +328,10 @@ export async function parseEthersTxReceipt(
   const baseSymbol = await baseContract.symbol();
   const quoteSymbol = await quoteContract.symbol();
 
-  const baseQtyUnscaled = parseFloat(
-    ethers.utils.formatUnits(baseQty, baseDecimals)
-  );
-  const quoteQtyUnscaled = parseFloat(
-    ethers.utils.formatUnits(quoteQty, quoteDecimals)
-  );
-
+  // const baseQtyUnscaled = ethers.utils.formatUnits(baseQty, baseDecimals);
+  const baseQtyUnscaled = unscaleQty(baseQty, baseDecimals);
+  const quoteQtyUnscaled = unscaleQty(quoteQty, quoteDecimals);
+  // ethers.utils.formatUnits(quoteQty, quoteDecimals)
   // const baseSender = ethers.utils.hexStripZeros(events[0].raw.topics[1]);
   // const baseReceiver = ethers.utils.hexStripZeros(events[0].raw.topics[2]);
   const quoteSender = ethers.utils
