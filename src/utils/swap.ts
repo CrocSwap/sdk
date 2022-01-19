@@ -44,10 +44,17 @@ export function unscalePrice(
   return price * Math.pow(10, quoteDecimals - baseDecimals);
 }
 
-export function scaleQty(qty: number, tokenDecimals: number): BigNumber {
-  const scaledQty = qty * Math.pow(10, tokenDecimals);
-  const scaledQtyRoundedDown = Math.floor(scaledQty);
-  return BigNumber.from(scaledQtyRoundedDown);
+export function scaleQty(qty: string, tokenDecimals: number): BigNumber {
+  // const scaledQty = qty * Math.pow(10, tokenDecimals);
+
+  const amount = ethers.utils.parseUnits(qty, tokenDecimals);
+  return amount;
+  // const bigQty = BigNumber.from(qty);
+  // const baseBigNum = BigNumber.from(10);
+  // const decimalsBigNum = BigNumber.from(tokenDecimals);
+  // const multiplier = baseBigNum.pow(decimalsBigNum);
+  // const bigQtyScaled = bigQty.mul(multiplier);
+  // return bigQtyScaled;
 }
 
 export function unscaleQty(qty: number, tokenDecimals: number): number {
