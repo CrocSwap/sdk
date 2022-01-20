@@ -126,7 +126,28 @@ type Web3Receipt = {
   type: string;
 };
 
-type EthersReceipt = {
+type EthersTokenReceipt = {
+  blockHash: string;
+  blockNumber: number;
+  byzantium: boolean;
+  confirmations: number;
+  contractAddress?: string | null;
+  cumulativeGasUsed: BigNumber;
+  effectiveGasPrice: BigNumber;
+  events: EthersEvents;
+  from: string;
+  // gasUsed: { type: string; hex: string };
+  gasUsed: BigNumber;
+  logs: EthersEvents;
+  logsBloom: string;
+  status: number;
+  to: string;
+  transactionHash: string;
+  transactionIndex: number;
+  type: number;
+};
+
+type EthersNativeReceipt = {
   blockHash: string;
   blockNumber: number;
   byzantium: boolean;
@@ -294,128 +315,260 @@ export async function parseWeb3TxReceipt(
 }
 
 export async function parseEthersTxReceipt(
-  receipt: EthersReceipt
+  receipt: EthersTokenReceipt | EthersNativeReceipt
 ): Promise<ParsedReceipt> {
   const NODE_URL =
     "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/ropsten";
   const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
+  if (receipt.logs.length === 1) {
+    // console.log("native tx");
+    // console.log("receipt: " + JSON.stringify(receipt));
+    const blockNumber = receipt.blockNumber;
 
-  // console.log("receipt: " + JSON.stringify(receipt));
-  const blockNumber = receipt.blockNumber;
+    const timestamp = (await provider.getBlock(blockNumber)).timestamp;
 
-  const timestamp = (await provider.getBlock(blockNumber)).timestamp;
+    const transactionHash = receipt.transactionHash;
+    const tx = await provider.getTransaction(transactionHash);
+    // console.log({ tx });
+    const txValueInWei = tx.value;
+    // const txValueInEther = parseInt(txBigValue.toString());
 
-  const transactionHash = receipt.transactionHash;
+    const gasUsed = receipt.gasUsed.toNumber();
+    const effectiveGasPrice = receipt.effectiveGasPrice.toNumber();
+    const effectiveGasPriceInGwei = ethers.utils.formatUnits(
+      effectiveGasPrice,
+      "gwei"
+    );
+    const gasCostInWei = gasUsed * effectiveGasPrice;
+    const gasCostInEther = ethers.utils.formatEther(gasCostInWei.toString());
 
-  const gasUsed = receipt.gasUsed.toNumber();
-  const effectiveGasPrice = receipt.effectiveGasPrice.toNumber();
-  const effectiveGasPriceInGwei = ethers.utils.formatUnits(
-    effectiveGasPrice,
-    "gwei"
-  );
-  const gasCostInWei = gasUsed * effectiveGasPrice;
-  const gasCostInEther = ethers.utils.formatEther(gasCostInWei.toString());
+    const status = receipt.status === 1 ? true : false;
 
-  const status = receipt.status === 1 ? true : false;
+    const logs = receipt.logs;
+    const quoteQty = parseInt(logs[0].data);
+    // const baseDecimals = 6;
+    const baseQty = txValueInWei;
+    // const quoteDecimals = 8;
 
-  const logs = receipt.logs;
-  const baseQty = parseInt(logs[0].data);
-  // const baseDecimals = 6;
-  const quoteQty = parseInt(logs[1].data);
-  // const quoteDecimals = 8;
+    const baseAddress = "0x0000000000000000000000000000000000000000";
+    const quoteAddress = logs[0].address.toLowerCase();
 
-  const baseAddress = logs[0].address.toLowerCase();
-  const quoteAddress = logs[1].address.toLowerCase();
+    // const baseContract = new ethers.Contract(baseAddress, ERC20_ABI, provider);
+    const quoteContract = new ethers.Contract(
+      quoteAddress,
+      ERC20_ABI,
+      provider
+    );
 
-  const baseContract = new ethers.Contract(baseAddress, ERC20_ABI, provider);
-  const quoteContract = new ethers.Contract(quoteAddress, ERC20_ABI, provider);
+    const baseDecimals = 18;
+    const quoteDecimals = await quoteContract.decimals();
 
-  const baseDecimals = await baseContract.decimals();
-  const quoteDecimals = await quoteContract.decimals();
+    const baseSymbol = "ETH";
+    const quoteSymbol = await quoteContract.symbol();
 
-  const baseSymbol = await baseContract.symbol();
-  const quoteSymbol = await quoteContract.symbol();
+    // const baseQtyUnscaled = ethers.utils.formatUnits(baseQty, baseDecimals);
+    const baseQtyUnscaled = parseFloat(
+      unscaleQty(baseQty.toString(), baseDecimals)
+    );
+    const quoteQtyUnscaled = parseFloat(
+      unscaleQty(quoteQty.toString(), quoteDecimals)
+    );
+    // ethers.utils.formatUnits(quoteQty, quoteDecimals)
+    // const baseSender = ethers.utils.hexStripZeros(events[0].raw.topics[1]);
+    // const baseReceiver = ethers.utils.hexStripZeros(events[0].raw.topics[2]);
+    const quoteSender = ethers.utils
+      .hexStripZeros(logs[0].topics[1])
+      .toLowerCase();
+    // const quoteReceiver = ethers.utils.hexStripZeros(events[1].raw.topics[2]);
 
-  // const baseQtyUnscaled = ethers.utils.formatUnits(baseQty, baseDecimals);
-  const baseQtyUnscaled = parseFloat(
-    unscaleQty(baseQty.toString(), baseDecimals)
-  );
-  const quoteQtyUnscaled = parseFloat(
-    unscaleQty(quoteQty.toString(), quoteDecimals)
-  );
-  // ethers.utils.formatUnits(quoteQty, quoteDecimals)
-  // const baseSender = ethers.utils.hexStripZeros(events[0].raw.topics[1]);
-  // const baseReceiver = ethers.utils.hexStripZeros(events[0].raw.topics[2]);
-  const quoteSender = ethers.utils
-    .hexStripZeros(logs[1].topics[1])
-    .toLowerCase();
-  // const quoteReceiver = ethers.utils.hexStripZeros(events[1].raw.topics[2]);
+    let sellQtyUnscaled,
+      buyQtyUnscaled,
+      sellAddress,
+      buyAddress,
+      buySymbol,
+      sellSymbol;
 
-  let sellQtyUnscaled,
-    buyQtyUnscaled,
-    sellAddress,
-    buyAddress,
-    buySymbol,
-    sellSymbol;
+    if (quoteSender === contractAddresses["CROC_SWAP_ADDR"].toLowerCase()) {
+      buyQtyUnscaled = quoteQtyUnscaled;
+      sellQtyUnscaled = baseQtyUnscaled;
+      buyAddress = quoteAddress;
+      sellAddress = baseAddress;
+      buySymbol = quoteSymbol;
+      sellSymbol = baseSymbol;
+    } else {
+      buyQtyUnscaled = baseQtyUnscaled;
+      sellQtyUnscaled = quoteQtyUnscaled;
+      buyAddress = baseAddress;
+      sellAddress = quoteAddress;
+      buySymbol = baseSymbol;
+      sellSymbol = quoteSymbol;
+    }
 
-  if (quoteSender === contractAddresses["CROC_SWAP_ADDR"].toLowerCase()) {
-    buyQtyUnscaled = quoteQtyUnscaled;
-    sellQtyUnscaled = baseQtyUnscaled;
-    buyAddress = quoteAddress;
-    sellAddress = baseAddress;
-    buySymbol = quoteSymbol;
-    sellSymbol = baseSymbol;
+    const conversionRate = sellQtyUnscaled / buyQtyUnscaled;
+
+    let lessExpensiveSymbol, moreExpensiveSymbol;
+    let readableConversionRate;
+
+    if (conversionRate < 1) {
+      lessExpensiveSymbol = buySymbol;
+      moreExpensiveSymbol = sellSymbol;
+      readableConversionRate = 1 / conversionRate;
+    } else {
+      lessExpensiveSymbol = sellSymbol;
+      moreExpensiveSymbol = buySymbol;
+      readableConversionRate = conversionRate;
+    }
+
+    if (readableConversionRate < 2) {
+      readableConversionRate = toFixedNumber(readableConversionRate, 6);
+    } else {
+      readableConversionRate = toFixedNumber(readableConversionRate, 2);
+    }
+
+    const conversionRateString = `Swapped ${sellQtyUnscaled} ${sellSymbol} for ${buyQtyUnscaled} ${buySymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
+
+    const parsedReceipt: ParsedReceipt = {
+      blockNumber: blockNumber,
+      timestamp: timestamp,
+      transactionHash: transactionHash,
+      gasUsed: gasUsed,
+      gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
+      gasCostInEther: parseFloat(gasCostInEther),
+      status: status,
+      sellQtyUnscaled: sellQtyUnscaled,
+      buyQtyUnscaled: buyQtyUnscaled,
+      sellAddress: sellAddress,
+      sellSymbol: sellSymbol,
+      buyAddress: buyAddress,
+      buySymbol: buySymbol,
+      moreExpensiveSymbol: moreExpensiveSymbol,
+      lessExpensiveSymbol: lessExpensiveSymbol,
+      readableConversionRate: readableConversionRate,
+      conversionRateString: conversionRateString,
+    };
+    return parsedReceipt;
   } else {
-    buyQtyUnscaled = baseQtyUnscaled;
-    sellQtyUnscaled = quoteQtyUnscaled;
-    buyAddress = baseAddress;
-    sellAddress = quoteAddress;
-    buySymbol = baseSymbol;
-    sellSymbol = quoteSymbol;
+    // console.log("receipt: " + JSON.stringify(receipt));
+    // console.log("token receipt");
+    const blockNumber = receipt.blockNumber;
+
+    const timestamp = (await provider.getBlock(blockNumber)).timestamp;
+
+    const transactionHash = receipt.transactionHash;
+
+    const gasUsed = receipt.gasUsed.toNumber();
+    const effectiveGasPrice = receipt.effectiveGasPrice.toNumber();
+    const effectiveGasPriceInGwei = ethers.utils.formatUnits(
+      effectiveGasPrice,
+      "gwei"
+    );
+    const gasCostInWei = gasUsed * effectiveGasPrice;
+    const gasCostInEther = ethers.utils.formatEther(gasCostInWei.toString());
+
+    const status = receipt.status === 1 ? true : false;
+
+    const logs = receipt.logs;
+    const baseQty = parseInt(logs[0].data);
+    // const baseDecimals = 6;
+    const quoteQty = parseInt(logs[1].data);
+    // const quoteDecimals = 8;
+
+    const baseAddress = logs[0].address.toLowerCase();
+    const quoteAddress = logs[1].address.toLowerCase();
+
+    const baseContract = new ethers.Contract(baseAddress, ERC20_ABI, provider);
+    const quoteContract = new ethers.Contract(
+      quoteAddress,
+      ERC20_ABI,
+      provider
+    );
+
+    const baseDecimals = await baseContract.decimals();
+    const quoteDecimals = await quoteContract.decimals();
+
+    const baseSymbol = await baseContract.symbol();
+    const quoteSymbol = await quoteContract.symbol();
+
+    // const baseQtyUnscaled = ethers.utils.formatUnits(baseQty, baseDecimals);
+    const baseQtyUnscaled = parseFloat(
+      unscaleQty(baseQty.toString(), baseDecimals)
+    );
+    const quoteQtyUnscaled = parseFloat(
+      unscaleQty(quoteQty.toString(), quoteDecimals)
+    );
+    // ethers.utils.formatUnits(quoteQty, quoteDecimals)
+    // const baseSender = ethers.utils.hexStripZeros(events[0].raw.topics[1]);
+    // const baseReceiver = ethers.utils.hexStripZeros(events[0].raw.topics[2]);
+    const quoteSender = ethers.utils
+      .hexStripZeros(logs[1].topics[1])
+      .toLowerCase();
+    // const quoteReceiver = ethers.utils.hexStripZeros(events[1].raw.topics[2]);
+
+    let sellQtyUnscaled,
+      buyQtyUnscaled,
+      sellAddress,
+      buyAddress,
+      buySymbol,
+      sellSymbol;
+
+    if (quoteSender === contractAddresses["CROC_SWAP_ADDR"].toLowerCase()) {
+      buyQtyUnscaled = quoteQtyUnscaled;
+      sellQtyUnscaled = baseQtyUnscaled;
+      buyAddress = quoteAddress;
+      sellAddress = baseAddress;
+      buySymbol = quoteSymbol;
+      sellSymbol = baseSymbol;
+    } else {
+      buyQtyUnscaled = baseQtyUnscaled;
+      sellQtyUnscaled = quoteQtyUnscaled;
+      buyAddress = baseAddress;
+      sellAddress = quoteAddress;
+      buySymbol = baseSymbol;
+      sellSymbol = quoteSymbol;
+    }
+
+    const conversionRate = sellQtyUnscaled / buyQtyUnscaled;
+
+    let lessExpensiveSymbol, moreExpensiveSymbol;
+    let readableConversionRate;
+
+    if (conversionRate < 1) {
+      lessExpensiveSymbol = buySymbol;
+      moreExpensiveSymbol = sellSymbol;
+      readableConversionRate = 1 / conversionRate;
+    } else {
+      lessExpensiveSymbol = sellSymbol;
+      moreExpensiveSymbol = buySymbol;
+      readableConversionRate = conversionRate;
+    }
+
+    if (readableConversionRate < 2) {
+      readableConversionRate = toFixedNumber(readableConversionRate, 6);
+    } else {
+      readableConversionRate = toFixedNumber(readableConversionRate, 2);
+    }
+
+    const conversionRateString = `Swapped ${sellQtyUnscaled} ${sellSymbol} for ${buyQtyUnscaled} ${buySymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
+
+    const parsedReceipt: ParsedReceipt = {
+      blockNumber: blockNumber,
+      timestamp: timestamp,
+      transactionHash: transactionHash,
+      gasUsed: gasUsed,
+      gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
+      gasCostInEther: parseFloat(gasCostInEther),
+      status: status,
+      sellQtyUnscaled: sellQtyUnscaled,
+      buyQtyUnscaled: buyQtyUnscaled,
+      sellAddress: sellAddress,
+      sellSymbol: sellSymbol,
+      buyAddress: buyAddress,
+      buySymbol: buySymbol,
+      moreExpensiveSymbol: moreExpensiveSymbol,
+      lessExpensiveSymbol: lessExpensiveSymbol,
+      readableConversionRate: readableConversionRate,
+      conversionRateString: conversionRateString,
+    };
+    return parsedReceipt;
   }
-
-  const conversionRate = sellQtyUnscaled / buyQtyUnscaled;
-
-  let lessExpensiveSymbol, moreExpensiveSymbol;
-  let readableConversionRate;
-
-  if (conversionRate < 1) {
-    lessExpensiveSymbol = buySymbol;
-    moreExpensiveSymbol = sellSymbol;
-    readableConversionRate = 1 / conversionRate;
-  } else {
-    lessExpensiveSymbol = sellSymbol;
-    moreExpensiveSymbol = buySymbol;
-    readableConversionRate = conversionRate;
-  }
-
-  if (readableConversionRate < 2) {
-    readableConversionRate = toFixedNumber(readableConversionRate, 6);
-  } else {
-    readableConversionRate = toFixedNumber(readableConversionRate, 2);
-  }
-
-  const conversionRateString = `Swapped ${sellQtyUnscaled} ${sellSymbol} for ${buyQtyUnscaled} ${buySymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
-
-  const parsedReceipt: ParsedReceipt = {
-    blockNumber: blockNumber,
-    timestamp: timestamp,
-    transactionHash: transactionHash,
-    gasUsed: gasUsed,
-    gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
-    gasCostInEther: parseFloat(gasCostInEther),
-    status: status,
-    sellQtyUnscaled: sellQtyUnscaled,
-    buyQtyUnscaled: buyQtyUnscaled,
-    sellAddress: sellAddress,
-    sellSymbol: sellSymbol,
-    buyAddress: buyAddress,
-    buySymbol: buySymbol,
-    moreExpensiveSymbol: moreExpensiveSymbol,
-    lessExpensiveSymbol: lessExpensiveSymbol,
-    readableConversionRate: readableConversionRate,
-    conversionRateString: conversionRateString,
-  };
-
-  return parsedReceipt;
 }
