@@ -67,7 +67,7 @@ const testWeb3Receipt = {
   },
 };
 
-const testEthersReceipt = {
+const testEthersTokenReceipt = {
   to: "0xB6Ff2e53408f38A5a363586746d1dB306AF5caa4",
   from: "0xd825D73CDD050ecbEBC0B3a8D9C5952d1F64722e",
   contractAddress: null,
@@ -157,6 +157,63 @@ const testEthersReceipt = {
   ],
 };
 
+const testEthersNativeReceipt = {
+  to: "0xB6Ff2e53408f38A5a363586746d1dB306AF5caa4",
+  from: "0xa86dabFBb529a4C8186BdD52bd226aC81757E090",
+  contractAddress: null,
+  transactionIndex: 12,
+  gasUsed: BigNumber.from("0x01626a"),
+  logsBloom:
+    "0x00004000000000000400000000000000000000000000000000000000001000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000008000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000040000000000008000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002000400000000000",
+  blockHash:
+    "0xc5283f0b723332f32606484009ab572ef5467d3ed55c70a8a93dfc1d3feb9aac",
+  transactionHash:
+    "0xa1e62967292574eada0a423926bace7eb3a69e0d38f72369e1eff8fe577c8d6a",
+  logs: [
+    {
+      transactionIndex: 12,
+      blockNumber: 11848148,
+      transactionHash:
+        "0xa1e62967292574eada0a423926bace7eb3a69e0d38f72369e1eff8fe577c8d6a",
+      address: "0xaD6D458402F60fD3Bd25163575031ACDce07538D",
+      topics: [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x000000000000000000000000b6ff2e53408f38a5a363586746d1db306af5caa4",
+        "0x000000000000000000000000a86dabfbb529a4c8186bdd52bd226ac81757e090",
+      ],
+      data: "0x000000000000000000000000000000000000000000000000001d0e0605539fff",
+      logIndex: 10,
+      blockHash:
+        "0xc5283f0b723332f32606484009ab572ef5467d3ed55c70a8a93dfc1d3feb9aac",
+    },
+  ],
+  blockNumber: 11848148,
+  confirmations: 1,
+  cumulativeGasUsed: BigNumber.from("0x0efb72"),
+  effectiveGasPrice: BigNumber.from("0x037c399fb4"),
+  status: 1,
+  type: 2,
+  byzantium: true,
+  events: [
+    {
+      transactionIndex: 12,
+      blockNumber: 11848148,
+      transactionHash:
+        "0xa1e62967292574eada0a423926bace7eb3a69e0d38f72369e1eff8fe577c8d6a",
+      address: "0xaD6D458402F60fD3Bd25163575031ACDce07538D",
+      topics: [
+        "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+        "0x000000000000000000000000b6ff2e53408f38a5a363586746d1db306af5caa4",
+        "0x000000000000000000000000a86dabfbb529a4c8186bdd52bd226ac81757e090",
+      ],
+      data: "0x000000000000000000000000000000000000000000000000001d0e0605539fff",
+      logIndex: 10,
+      blockHash:
+        "0xc5283f0b723332f32606484009ab572ef5467d3ed55c70a8a93dfc1d3feb9aac",
+    },
+  ],
+};
+
 type parsedReceipt = {
   blockNumber: number;
   timestamp: number;
@@ -178,19 +235,28 @@ type parsedReceipt = {
 };
 
 beforeAll(async () => {
-  await callParseEthersTxReceipt();
+  await callParseEthersTokenTxReceipt();
   await callParseWeb3TxReceipt();
+  await callParseEthersNativeTxReceipt();
 });
 
 let parsedWeb3Receipt: parsedReceipt;
-let parsedEthersReceipt: parsedReceipt;
+let parsedEthersTokenReceipt: parsedReceipt;
+let parsedEthersNativeReceipt: parsedReceipt;
+
 async function callParseWeb3TxReceipt() {
   parsedWeb3Receipt = await parseWeb3TxReceipt(testWeb3Receipt);
   // console.log({ parsedWeb3Receipt });
 }
-async function callParseEthersTxReceipt() {
-  parsedEthersReceipt = await parseEthersTxReceipt(testEthersReceipt);
-  // console.log({ parsedEthersReceipt });
+async function callParseEthersTokenTxReceipt() {
+  parsedEthersTokenReceipt = await parseEthersTxReceipt(testEthersTokenReceipt);
+  // console.log({ parsedEthersTokenReceipt });
+}
+async function callParseEthersNativeTxReceipt() {
+  parsedEthersNativeReceipt = await parseEthersTxReceipt(
+    testEthersNativeReceipt
+  );
+  // console.log({ parsedEthersTokenReceipt });
 }
 
 test("gas used is correct?", async () => {
@@ -215,6 +281,11 @@ test("sell address is correct?", async () => {
     "0x83e77c197e744d21810a1f970cd24a246e0932a1"
   );
 });
+test("native base address is correct?", async () => {
+  expect(parsedEthersNativeReceipt.sellAddress).toBe(
+    "0x0000000000000000000000000000000000000000"
+  );
+});
 test("buy address is correct?", async () => {
   expect(parsedWeb3Receipt.buyAddress).toBe(
     "0xccea4dfe9f0dbccf6357b935846bf67778167d99"
@@ -227,34 +298,40 @@ test("conversion rate string is correct?", async () => {
 });
 
 test("gas used is correct?", async () => {
-  expect(parsedEthersReceipt.gasUsed).toBe(106109);
+  expect(parsedEthersTokenReceipt.gasUsed).toBe(106109);
 });
 
 test("total cost in ether is correct?", async () => {
-  expect(parsedEthersReceipt.gasCostInEther).toBe(0.001026431806097911);
+  expect(parsedEthersTokenReceipt.gasCostInEther).toBe(0.001026431806097911);
 });
 
 test("effective gas price in gwei is correct?", async () => {
-  expect(parsedEthersReceipt.gasPriceInGwei).toBe(9.673371779);
+  expect(parsedEthersTokenReceipt.gasPriceInGwei).toBe(9.673371779);
 });
-test("base quantity scaled for decimals is correct?", async () => {
-  expect(parsedEthersReceipt.sellQtyUnscaled).toBe(0.00004037);
+test("token swap base quantity scaled for decimals is correct?", async () => {
+  expect(parsedEthersTokenReceipt.sellQtyUnscaled).toBe(0.00004037);
 });
-test("quote quantity scaled for decimals is correct?", async () => {
-  expect(parsedEthersReceipt.buyQtyUnscaled).toBe(2);
+test("native swap base quantity scaled for decimals is correct?", async () => {
+  expect(parsedEthersNativeReceipt.sellQtyUnscaled).toBe(0.0001);
+});
+test("token swap quote quantity scaled for decimals is correct?", async () => {
+  expect(parsedEthersTokenReceipt.buyQtyUnscaled).toBe(2);
+});
+test("native swap quote quantity scaled for decimals is correct?", async () => {
+  expect(parsedEthersNativeReceipt.buyQtyUnscaled).toBe(0.008178193346568191);
 });
 test("sell address is correct?", async () => {
-  expect(parsedEthersReceipt.sellAddress).toBe(
+  expect(parsedEthersTokenReceipt.sellAddress).toBe(
     "0xccea4dfe9f0dbccf6357b935846bf67778167d99"
   );
 });
 test("buy address is correct?", async () => {
-  expect(parsedEthersReceipt.buyAddress).toBe(
+  expect(parsedEthersTokenReceipt.buyAddress).toBe(
     "0x83e77c197e744d21810a1f970cd24a246e0932a1"
   );
 });
 test("conversion rate string is correct?", async () => {
-  expect(parsedEthersReceipt.conversionRateString).toBe(
+  expect(parsedEthersTokenReceipt.conversionRateString).toBe(
     "Swapped 0.00004037 WBTC for 2 USDC at a rate of 49541.74 USDC per WBTC"
   );
 });

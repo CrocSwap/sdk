@@ -15,6 +15,11 @@ test("scaledQty float as string", () => {
   const scaledQty = scaleQty(".1", 18).toString();
   expect(scaledQty).toBe("100000000000000000");
 });
+test("throws error on scaledQty longer than decimals", () => {
+  expect(() => {
+    scaleQty("1.1234567", 6);
+  }).toThrowError();
+});
 
 test("unscaleQty integer as string", () => {
   const unscaledQty = unscaleQty("100", 2).toString();
