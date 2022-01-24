@@ -1,67 +1,7 @@
-import { ethers, BigNumber } from "ethers";
-import { contractAddresses } from "..";
+import { ethers, BigNumber, Contract, Signer } from "ethers";
 import { ERC20_ABI } from "..";
 import { toFixedNumber } from ".";
-
-const FLOAT_PRECISION = 10000000000;
-const Q_64 = BigNumber.from(2).pow(64);
-// const Q_48 = BigInt(2) ** BigInt(48);
-
-export const MIN_TICK = -665454;
-export const MAX_TICK = 831818;
-
-export function toSqrtPrice(price: number): BigNumber {
-  const sqrtFixed = Math.round(Math.sqrt(price) * FLOAT_PRECISION);
-  return BigNumber.from(sqrtFixed).mul(Q_64).div(FLOAT_PRECISION);
-}
-
-export function fromSqrtPrice(val: BigNumber) {
-  const root = val.mul(FLOAT_PRECISION).div(Q_64).toNumber() / FLOAT_PRECISION;
-  return root * root;
-}
-
-export function maxSqrtPrice(): BigNumber {
-  return BigNumber.from("21267430153580247136652501917186561138").sub(1);
-}
-
-export function minSqrtPrice(): BigNumber {
-  return BigNumber.from("65538");
-}
-
-export function scalePrice(
-  price: number,
-  baseDecimals: number,
-  quoteDecimals: number
-): number {
-  return price * Math.pow(10, baseDecimals - quoteDecimals);
-}
-
-export function unscalePrice(
-  price: number,
-  baseDecimals: number,
-  quoteDecimals: number
-): number {
-  return price * Math.pow(10, quoteDecimals - baseDecimals);
-}
-
-export function scaleQty(qty: string, tokenDecimals: number): BigNumber {
-  // const scaledQty = qty * Math.pow(10, tokenDecimals);
-
-  const bigQtyScaled = ethers.utils.parseUnits(qty, tokenDecimals);
-  return bigQtyScaled;
-  // const bigQty = BigNumber.from(qty);
-  // const baseBigNum = BigNumber.from(10);
-  // const decimalsBigNum = BigNumber.from(tokenDecimals);
-  // const multiplier = baseBigNum.pow(decimalsBigNum);
-  // const bigQtyScaled = bigQty.mul(multiplier);
-  // return bigQtyScaled;
-}
-
-export function unscaleQty(qty: string, tokenDecimals: number): string {
-  // const unscaledQty = qty * Math.pow(10, -1 * tokenDecimals);
-  const bigQtyUnscaled = ethers.utils.formatUnits(qty, tokenDecimals);
-  return bigQtyUnscaled;
-}
+import { contractAddresses } from "..";
 
 type RawEventData = {
   data: string;
@@ -187,6 +127,58 @@ type ParsedReceipt = {
   lessExpensiveSymbol: string;
   conversionRateString: string;
 };
+
+const FLOAT_PRECISION = 10000000000;
+const Q_64 = BigNumber.from(2).pow(64);
+// const Q_48 = BigInt(2) ** BigInt(48);
+
+export const MIN_TICK = -665454;
+export const MAX_TICK = 831818;
+
+export function toSqrtPrice(price: number): BigNumber {
+  const sqrtFixed = Math.round(Math.sqrt(price) * FLOAT_PRECISION);
+  return BigNumber.from(sqrtFixed).mul(Q_64).div(FLOAT_PRECISION);
+}
+
+export function fromSqrtPrice(val: BigNumber) {
+  const root = val.mul(FLOAT_PRECISION).div(Q_64).toNumber() / FLOAT_PRECISION;
+  return root * root;
+}
+
+export function maxSqrtPrice(): BigNumber {
+  return BigNumber.from("21267430153580247136652501917186561138").sub(1);
+}
+
+export function minSqrtPrice(): BigNumber {
+  return BigNumber.from("65538");
+}
+
+export function scalePrice(
+  price: number,
+  baseDecimals: number,
+  quoteDecimals: number
+): number {
+  return price * Math.pow(10, baseDecimals - quoteDecimals);
+}
+
+export function unscalePrice(
+  price: number,
+  baseDecimals: number,
+  quoteDecimals: number
+): number {
+  return price * Math.pow(10, quoteDecimals - baseDecimals);
+}
+
+export function scaleQty(qty: string, tokenDecimals: number): BigNumber {
+  const bigQtyScaled = ethers.utils.parseUnits(qty, tokenDecimals);
+  return bigQtyScaled;
+}
+
+export function unscaleQty(qty: string, tokenDecimals: number): string {
+  // const unscaledQty = qty * Math.pow(10, -1 * tokenDecimals);
+  const bigQtyUnscaled = ethers.utils.formatUnits(qty, tokenDecimals);
+  return bigQtyUnscaled;
+}
 
 export async function parseWeb3TxReceipt(
   receipt: Web3Receipt
@@ -320,6 +312,8 @@ export async function parseEthersTxReceipt(
   const NODE_URL =
     "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/ropsten";
   const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
+
+  // receipts for native ETH swaps only have one log
   if (receipt.logs.length === 1) {
     // console.log("native tx");
     // console.log("receipt: " + JSON.stringify(receipt));
@@ -571,4 +565,15 @@ export async function parseEthersTxReceipt(
     };
     return parsedReceipt;
   }
+}
+
+export async function approveToken(tokenAddress: string, signer: Signer) {
+  const dex = contractAddresses["CROC_SWAP_ADDR"];
+
+  const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
+
+  const qty = ethers.BigNumber.from("1000000000000000000000");
+  const tx = await tokenContract.approve(dex, qty);
+
+  return tx;
 }
