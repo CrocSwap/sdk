@@ -1,7 +1,5 @@
 import { ethers, BigNumber, Contract, Signer } from "ethers";
-import { ERC20_ABI } from "..";
-import { toFixedNumber } from ".";
-import { contractAddresses } from "..";
+import { contractAddresses, ERC20_ABI, toFixedNumber } from "..";
 
 type RawEventData = {
   data: string;
@@ -576,4 +574,72 @@ export async function approveToken(tokenAddress: string, signer: Signer) {
   const tx = await tokenContract.approve(dex, qty);
 
   return tx;
+}
+
+export async function getTokenAllowance(
+  tokenAddress: string,
+  account: string,
+  signer: Signer
+) {
+  const dex = contractAddresses["CROC_SWAP_ADDR"];
+  const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
+
+  const allowance = await tokenContract.allowance(account, dex);
+  return allowance;
+}
+
+export async function getTokenDecimals(tokenAddress: string) {
+  if (tokenAddress === contractAddresses.ZERO_ADDR) {
+    return 18;
+  }
+  const NODE_URL =
+    "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/ropsten";
+  const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
+  const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider);
+  const decimals = await tokenContract.decimals();
+  return decimals;
+}
+
+export async function getTokenBalanceOffChain(
+  tokenAddress: string,
+  account: string,
+  signer: Signer
+) {
+  console.log({ tokenAddress });
+  if (tokenAddress === contractAddresses.ZERO_ADDR) {
+    const nativeBalance = await signer.getBalance();
+    return nativeBalance.toString();
+  }
+
+  const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
+
+  const tokenBalanceBigNum = await tokenContract.balanceOf(account);
+  return tokenBalanceBigNum.toString();
+}
+
+export async function getUnscaledTokenBalance(
+  tokenAddress: string,
+  account: string,
+  signer: Signer
+) {
+  const sellTokenDecimals = await getTokenDecimals(tokenAddress);
+
+  const tokenBalanceOffChain = await getTokenBalanceOffChain(
+    tokenAddress,
+    account,
+    signer
+  );
+
+  if (tokenBalanceOffChain <= 0) {
+    console.log("balance is 0");
+    // setSellTokenBalance(0);
+    return 0;
+  } else {
+    console.log({ tokenBalanceOffChain });
+    console.log({ sellTokenDecimals });
+
+    const unscaledBalance = unscaleQty(tokenBalanceOffChain, sellTokenDecimals);
+    console.log({ unscaledBalance });
+    return unscaledBalance;
+  }
 }
