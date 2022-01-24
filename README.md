@@ -19,6 +19,8 @@ yarn install
 yarn lint
 yarn test
 yarn build-all
+yarn build-local (builds and copies /dist to node_modules/@crocswap-libs/sdk)
+(note for above command - you may need to update this command in package.json with the correct path to your local interface directory.)
 yarn ts-node <filename>
 ...
 
