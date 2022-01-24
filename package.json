@@ -22,7 +22,9 @@
     "ts-node": "ts-node",
     "docs": "typedoc --entryPoints src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "build-all": "yarn clean && yarn build"
+    "build-all": "yarn clean && yarn build",
+    "copy-local": "cp -r dist ../crocswap-interface/node_modules/@crocswap-libs/sdk/",
+    "build-local": "yarn build-all && yarn copy-local"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",
