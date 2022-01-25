@@ -1,5 +1,11 @@
 import { ethers, BigNumber, Contract, Signer } from "ethers";
-import { contractAddresses, ERC20_ABI, toFixedNumber } from "..";
+import {
+  contractAddresses,
+  CROC_ABI,
+  ERC20_ABI,
+  QUERY_ABI,
+  toFixedNumber,
+} from "..";
 
 type RawEventData = {
   data: string;
@@ -642,4 +648,182 @@ export async function getUnscaledTokenBalance(
     console.log({ unscaledBalance });
     return unscaledBalance;
   }
+}
+
+export function getBaseTokenAddress(token1: string, token2: string): string {
+  let baseTokenAddress = "";
+
+  if (!!token1 && !!token2) {
+    const token1BigNum = BigNumber.from(token1);
+    const token2BigNum = BigNumber.from(token2);
+    // if token1 - token2 < 0, then token1 is the "base" and token2 is the "quote" token
+    baseTokenAddress = token1BigNum.lt(token2BigNum) ? token1 : token2;
+  }
+  return baseTokenAddress;
+}
+export function getQuoteTokenAddress(token1: string, token2: string): string {
+  let quoteTokenAddress = "";
+
+  if (!!token1 && !!token2) {
+    const token1BigNum = BigNumber.from(token1);
+    const token2BigNum = BigNumber.from(token2);
+    // if token1 - token2 < 0, then token1 is the "base" and token2 is the "quote" token
+    quoteTokenAddress = token1BigNum.gt(token2BigNum) ? token1 : token2;
+  }
+  return quoteTokenAddress;
+}
+
+export async function getSpotPrice(
+  baseTokenAddress: string,
+  quoteTokenAddress: string,
+  pool: number
+) {
+  const NODE_URL =
+    "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/ropsten";
+  const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
+
+  const queryAddress = contractAddresses["QUERY_ADDR"];
+  const queryContract = new Contract(queryAddress, QUERY_ABI, provider);
+
+  const price = await queryContract.queryPrice(
+    baseTokenAddress,
+    quoteTokenAddress,
+    pool
+  );
+
+  return price;
+}
+
+export async function getUnscaledSpotPrice(
+  baseTokenAddress: string,
+  quoteTokenAddress: string
+) {
+  const price = await getSpotPrice(baseTokenAddress, quoteTokenAddress, 35000);
+  const bigNumPrice = ethers.BigNumber.from(price);
+
+  const unscaledSpotPrice = unscalePrice(
+    fromSqrtPrice(bigNumPrice),
+    await getTokenDecimals(baseTokenAddress),
+    await getTokenDecimals(quoteTokenAddress)
+  );
+  return unscaledSpotPrice;
+}
+
+export async function getLimitPrice(
+  sellTokenAddress: string,
+  buyTokenAddress: string,
+  slippageTolerance: number
+) {
+  const sellTokenIsBase =
+    sellTokenAddress === getBaseTokenAddress(sellTokenAddress, buyTokenAddress);
+  const baseTokenAddress = sellTokenIsBase ? sellTokenAddress : buyTokenAddress;
+  const quoteTokenAddress = sellTokenIsBase
+    ? buyTokenAddress
+    : sellTokenAddress;
+
+  let limitPrice;
+
+  if (sellTokenIsBase) {
+    limitPrice = toSqrtPrice(
+      scalePrice(
+        (await getUnscaledSpotPrice(baseTokenAddress, quoteTokenAddress)) *
+          (1 + slippageTolerance * 0.01),
+        await getTokenDecimals(baseTokenAddress),
+        await getTokenDecimals(quoteTokenAddress)
+      )
+    );
+  } else {
+    limitPrice = toSqrtPrice(
+      scalePrice(
+        (await getUnscaledSpotPrice(baseTokenAddress, quoteTokenAddress)) *
+          (1 - slippageTolerance * 0.01),
+        await getTokenDecimals(baseTokenAddress),
+        await getTokenDecimals(quoteTokenAddress)
+      )
+    );
+  }
+  return limitPrice;
+}
+
+export async function sendSwap(
+  sellTokenAddress: string,
+  buyTokenAddress: string,
+  qtyIsSellToken: boolean,
+  qty: number,
+  slippageTolerance: number,
+  POOL_IDX: number,
+  signer: Signer
+) {
+  const crocContract = new ethers.Contract(
+    contractAddresses["CROC_SWAP_ADDR"],
+    CROC_ABI,
+    signer
+  );
+
+  let tx;
+
+  const baseTokenAddress = getBaseTokenAddress(
+    buyTokenAddress,
+    sellTokenAddress
+  );
+  const quoteTokenAddress = getQuoteTokenAddress(
+    buyTokenAddress,
+    sellTokenAddress
+  );
+
+  const sellTokenIsBase = sellTokenAddress === baseTokenAddress ? true : false;
+
+  let qtyIsBase;
+
+  if (qtyIsSellToken && sellTokenIsBase) {
+    qtyIsBase = true;
+  } else if (!qtyIsSellToken && !sellTokenIsBase) {
+    qtyIsBase = true;
+  } else {
+    qtyIsBase = false;
+  }
+
+  let crocQty;
+  if (qtyIsSellToken) {
+    crocQty = scaleQty(
+      qty.toString(),
+      await getTokenDecimals(sellTokenAddress)
+    );
+  } else {
+    crocQty = scaleQty(qty.toString(), await getTokenDecimals(buyTokenAddress));
+  }
+
+  const limitPrice = getLimitPrice(
+    sellTokenAddress,
+    buyTokenAddress,
+    slippageTolerance
+  );
+
+  if (sellTokenAddress === contractAddresses.ZERO_ADDR) {
+    tx = await crocContract.swap(
+      baseTokenAddress,
+      quoteTokenAddress,
+      POOL_IDX,
+      sellTokenIsBase, // ?? isBuy (i.e. converting base token for quote token)
+      qtyIsBase, // qty is base token -- boolean whether qty represents BASE or QUOTE
+      crocQty, // quantity of token to divest
+      limitPrice, // slippage-adjusted price client will accept
+      false, // ?? surplus
+      { value: crocQty }
+      // { gasLimit: 1000000 }
+    );
+  } else {
+    tx = await crocContract.swap(
+      baseTokenAddress,
+      quoteTokenAddress,
+      POOL_IDX,
+      sellTokenIsBase, // ?? isBuy (i.e. converting base token for quote token)
+      qtyIsBase, // qty is base token -- boolean whether qty represents BASE or QUOTE
+      crocQty, // quantity of token to divest
+      limitPrice, // slippage-adjusted price client will accept
+      false // ?? surplus
+      // { gasLimit: 1000000 }
+    );
+  }
+  return tx;
 }
