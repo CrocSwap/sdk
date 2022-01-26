@@ -3,3 +3,6 @@ export const contractAddresses = {
   CROC_SWAP_ADDR: "0xB6Ff2e53408f38A5a363586746d1dB306AF5caa4",
   QUERY_ADDR: "0x3F6B274529dDe713CF7703129f219e38dC0D83b5",
 };
+
+export const MIN_TICK = -665454;
+export const MAX_TICK = 831818;

@@ -132,19 +132,18 @@ type ParsedReceipt = {
   conversionRateString: string;
 };
 
-const FLOAT_PRECISION = 10000000000;
-const Q_64 = BigNumber.from(2).pow(64);
-// const Q_48 = BigInt(2) ** BigInt(48);
-
-export const MIN_TICK = -665454;
-export const MAX_TICK = 831818;
-
 export function toSqrtPrice(price: number): BigNumber {
+  const FLOAT_PRECISION = 10000000000;
+  const Q_64 = BigNumber.from(2).pow(64);
+  // const Q_48 = BigInt(2) ** BigInt(48);
   const sqrtFixed = Math.round(Math.sqrt(price) * FLOAT_PRECISION);
   return BigNumber.from(sqrtFixed).mul(Q_64).div(FLOAT_PRECISION);
 }
 
 export function fromSqrtPrice(val: BigNumber) {
+  const FLOAT_PRECISION = 10000000000;
+  const Q_64 = BigNumber.from(2).pow(64);
+  // const Q_48 = BigInt(2) ** BigInt(48);
   const root = val.mul(FLOAT_PRECISION).div(Q_64).toNumber() / FLOAT_PRECISION;
   return root * root;
 }
@@ -611,9 +610,13 @@ export async function getTokenBalanceOffChain(
   account: string,
   signer: Signer
 ) {
-  console.log({ tokenAddress });
   if (tokenAddress === contractAddresses.ZERO_ADDR) {
-    const nativeBalance = await signer.getBalance();
+    let nativeBalance = BigNumber.from(0);
+    try {
+      nativeBalance = await signer.getBalance(account);
+    } catch (error) {
+      console.log(error);
+    }
     return nativeBalance.toString();
   }
 
@@ -630,22 +633,22 @@ export async function getUnscaledTokenBalance(
 ) {
   const sellTokenDecimals = await getTokenDecimals(tokenAddress);
 
-  const tokenBalanceOffChain = await getTokenBalanceOffChain(
-    tokenAddress,
-    account,
-    signer
-  );
+  let tokenBalanceOffChain;
+  try {
+    tokenBalanceOffChain = await getTokenBalanceOffChain(
+      tokenAddress,
+      account,
+      signer
+    );
+  } catch (error) {
+    console.log(error);
+  }
 
   if (tokenBalanceOffChain <= 0) {
-    console.log("balance is 0");
-    // setSellTokenBalance(0);
     return 0;
   } else {
-    console.log({ tokenBalanceOffChain });
-    console.log({ sellTokenDecimals });
-
     const unscaledBalance = unscaleQty(tokenBalanceOffChain, sellTokenDecimals);
-    console.log({ unscaledBalance });
+    // console.log({ unscaledBalance });
     return unscaledBalance;
   }
 }
