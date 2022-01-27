@@ -1,13 +1,13 @@
-import { ethers, BigNumber, Contract, Signer } from "ethers";
+import { ethers, Signer } from "ethers";
 import {
   CROC_ABI,
   ERC20_ABI,
-  QUERY_ABI,
 } from "./abis";
 import { Web3Receipt, EthersTokenReceipt, EthersNativeReceipt } from './utils/web3';
 import { getTokenDecimals, fromDisplayQty, toDisplayQty, getBaseTokenAddress, getQuoteTokenAddress } from './utils/token';
-import { fromDisplayPrice, encodeCrocPrice, toDisplayPrice, decodeCrocPrice, getSpotPrice } from './utils/price';
+import { encodeCrocPrice, getSpotPrice } from './utils/price';
 import { NODE_URL, POOL_PRIMARY, contractAddresses } from './constants';
+import { toFixedNumber } from './utils/math';
 
 export type ParsedSwapReceipt = {
   blockNumber: number;

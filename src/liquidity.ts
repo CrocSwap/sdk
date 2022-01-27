@@ -1,5 +1,5 @@
 import { BigNumber, ethers } from "ethers";
-import { MAX_LIQ } from '..';
+import { MAX_LIQ } from './constants';
 
 type Address = string;
 type PoolType = number
