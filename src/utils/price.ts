@@ -27,7 +27,7 @@ export async function getSpotPriceDisplay(
     baseTokenAddress: string,
     quoteTokenAddress: string,
     pool: number = POOL_PRIMARY): Promise<number> {
-    let price = getSpotPrice(baseTokenAddress, quoteTokenAddress, pool)
+    const price = getSpotPrice(baseTokenAddress, quoteTokenAddress, pool)
     return toDisplayPrice(await price, await getTokenDecimals(baseTokenAddress), 
         await getTokenDecimals(quoteTokenAddress))
 }
@@ -41,9 +41,9 @@ export function encodeCrocPrice (price: number): BigNumber {
 }
   
 export function decodeCrocPrice (val: BigNumber) {
-    let x = val.lt(Number.MAX_SAFE_INTEGER-1) ? 
+    const x = val.lt(Number.MAX_SAFE_INTEGER-1) ? 
         val.toNumber() : parseFloat(val.toString())
-    let sq = x / (2 ** 64) 
+    const sq = x / (2 ** 64) 
     return sq*sq
 }
   

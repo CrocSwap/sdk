@@ -61,8 +61,8 @@ export async function getTokenBalanceDisplay(
   tokenAddress: string,
   account: string,
   signer: Signer): Promise<string> {
-  let tokenDecimals = getTokenDecimals(tokenAddress)
-  let balance = getTokenBalance(tokenAddress, account, signer)
+  const tokenDecimals = getTokenDecimals(tokenAddress)
+  const balance = getTokenBalance(tokenAddress, account, signer)
   return toDisplayQty(await balance, await tokenDecimals)
 }
 

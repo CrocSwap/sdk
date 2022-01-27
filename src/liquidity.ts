@@ -20,10 +20,10 @@ export class WarmPathEncoder {
     private poolIdx: PoolType;
     private abiCoder: ethers.utils.AbiCoder;
 
-    private MINT_CONCENTRATED: number = 1;
-    private BURN_CONCENTRATED: number = 2;
-    private MINT_AMBIENT: number = 3;
-    private BURN_AMBIENT: number = 4;
+    private readonly MINT_CONCENTRATED: number = 1;
+    private readonly BURN_CONCENTRATED: number = 2;
+    private readonly MINT_AMBIENT: number = 3;
+    private readonly BURN_AMBIENT: number = 4;
 
 
     encodeMintConc (lowerTick: number, upperTick: number, liq: BigNumber, limitLow: BigNumber, limitHigh: BigNumber,
