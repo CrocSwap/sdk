@@ -1,12 +1,14 @@
 import { BigNumber, ethers, Contract } from 'ethers';
 import { MIN_TICK, MAX_TICK, NODE_URL, contractAddresses, QUERY_ABI } from '..';
-  
+import { getTokenDecimals } from './token';
+import { POOL_PRIMARY } from '../constants';
+
 type Tick = number
 
 export async function getSpotPrice(
     baseTokenAddress: string,
     quoteTokenAddress: string,
-    pool: number): Promise<number> {
+    pool: number = POOL_PRIMARY): Promise<number> {
     const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
   
     const queryAddress = contractAddresses["QUERY_ADDR"];
@@ -20,15 +22,28 @@ export async function getSpotPrice(
   
     return decodeCrocPrice(price);
 }
+
+export async function getSpotPriceDisplay(
+    baseTokenAddress: string,
+    quoteTokenAddress: string,
+    pool: number = POOL_PRIMARY): Promise<number> {
+    const price = getSpotPrice(baseTokenAddress, quoteTokenAddress, pool)
+    return toDisplayPrice(await price, await getTokenDecimals(baseTokenAddress), 
+        await getTokenDecimals(quoteTokenAddress))
+}
   
 export function encodeCrocPrice (price: number): BigNumber {
     const floatPrice = Math.sqrt(price) * (2 ** 64)
-    return BigNumber.from(Math.round(floatPrice))
+    const pinPrice = Math.round(floatPrice)
+    const parseObj = pinPrice > Number.MAX_SAFE_INTEGER ? 
+        pinPrice.toString() : pinPrice
+    return BigNumber.from(parseObj)
 }
   
 export function decodeCrocPrice (val: BigNumber) {
-    let x = val.toNumber()
-    let sq = x / (2 ** 64) 
+    const x = val.lt(Number.MAX_SAFE_INTEGER-1) ? 
+        val.toNumber() : parseFloat(val.toString())
+    const sq = x / (2 ** 64) 
     return sq*sq
 }
   

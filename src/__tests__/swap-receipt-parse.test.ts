@@ -1,4 +1,5 @@
-import { parseWeb3TxReceipt, parseEthersTxReceipt } from "..";
+import { parseSwapEthersTxReceipt } from "../swap";
+import { parseSwapWeb3TxReceipt } from "../swap";
 
 import { BigNumber } from "ethers";
 
@@ -245,15 +246,15 @@ let parsedEthersTokenReceipt: parsedReceipt;
 let parsedEthersNativeReceipt: parsedReceipt;
 
 async function callParseWeb3TxReceipt() {
-  parsedWeb3Receipt = await parseWeb3TxReceipt(testWeb3Receipt);
+  parsedWeb3Receipt = await parseSwapWeb3TxReceipt(testWeb3Receipt);
   // console.log({ parsedWeb3Receipt });
 }
 async function callParseEthersTokenTxReceipt() {
-  parsedEthersTokenReceipt = await parseEthersTxReceipt(testEthersTokenReceipt);
+  parsedEthersTokenReceipt = await parseSwapEthersTxReceipt(testEthersTokenReceipt);
   // console.log({ parsedEthersTokenReceipt });
 }
 async function callParseEthersNativeTxReceipt() {
-  parsedEthersNativeReceipt = await parseEthersTxReceipt(
+  parsedEthersNativeReceipt = await parseSwapEthersTxReceipt(
     testEthersNativeReceipt
   );
   // console.log({ parsedEthersTokenReceipt });

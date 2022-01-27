@@ -1,13 +1,13 @@
-import { ethers, BigNumber, Contract, Signer } from "ethers";
+import { ethers, Signer } from "ethers";
 import {
   CROC_ABI,
   ERC20_ABI,
-  QUERY_ABI,
 } from "./abis";
 import { Web3Receipt, EthersTokenReceipt, EthersNativeReceipt } from './utils/web3';
 import { getTokenDecimals, fromDisplayQty, toDisplayQty, getBaseTokenAddress, getQuoteTokenAddress } from './utils/token';
-import { fromDisplayPrice, encodeCrocPrice, toDisplayPrice, decodeCrocPrice, getSpotPrice } from './utils/price';
+import { encodeCrocPrice, getSpotPrice } from './utils/price';
 import { NODE_URL, POOL_PRIMARY, contractAddresses } from './constants';
+import { toFixedNumber } from './utils/math';
 
 export type ParsedSwapReceipt = {
   blockNumber: number;
@@ -29,7 +29,7 @@ export type ParsedSwapReceipt = {
   conversionRateString: string;
 };
 
-export async function parseSwapTxReceipt(
+export async function parseSwapWeb3TxReceipt(
   receipt: Web3Receipt
 ): Promise<ParsedSwapReceipt> {
   
@@ -152,7 +152,7 @@ export async function parseSwapTxReceipt(
   return parsedReceipt;
 }
 
-export async function parseEthersTxReceipt(
+export async function parseSwapEthersTxReceipt(
   receipt: EthersTokenReceipt | EthersNativeReceipt
 ): Promise<ParsedSwapReceipt> {
   const provider = new ethers.providers.JsonRpcProvider(NODE_URL);

@@ -57,6 +57,15 @@ export async function getTokenDecimals(tokenAddress: string): Promise<number> {
   return decimals;
 }
   
+export async function getTokenBalanceDisplay(
+  tokenAddress: string,
+  account: string,
+  signer: Signer): Promise<string> {
+  const tokenDecimals = getTokenDecimals(tokenAddress)
+  const balance = getTokenBalance(tokenAddress, account, signer)
+  return toDisplayQty(await balance, await tokenDecimals)
+}
+
 export async function getTokenBalance(
   tokenAddress: string,
   account: string,
@@ -82,7 +91,7 @@ export function fromDisplayQty (qty: string, tokenDecimals: number): BigNumber {
   return bigQtyScaled;
 }
 
-export function toDisplayQty (qty: string, tokenDecimals: number): string {
+export function toDisplayQty (qty: string | BigNumber, tokenDecimals: number): string {
   const bigQtyUnscaled = ethers.utils.formatUnits(qty, tokenDecimals);
   return bigQtyUnscaled;
 }
