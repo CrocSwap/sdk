@@ -29,7 +29,7 @@ export type ParsedSwapReceipt = {
   conversionRateString: string;
 };
 
-export async function parseSwapTxReceipt(
+export async function parseSwapWeb3TxReceipt(
   receipt: Web3Receipt
 ): Promise<ParsedSwapReceipt> {
   
@@ -152,7 +152,7 @@ export async function parseSwapTxReceipt(
   return parsedReceipt;
 }
 
-export async function parseEthersTxReceipt(
+export async function parseSwapEthersTxReceipt(
   receipt: EthersTokenReceipt | EthersNativeReceipt
 ): Promise<ParsedSwapReceipt> {
   const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
