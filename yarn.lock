@@ -286,14 +286,6 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@crocswap-libs/sdk@^0.0.9-9":
-  version "0.0.9-9"
-  resolved "https://registry.yarnpkg.com/@crocswap-libs/sdk/-/sdk-0.0.9-9.tgz#fa80e578ca6eed6574de432b303d013f3be87f82"
-  integrity sha512-AsIV7g32Vfq57XEoLlDn1pY136bCy/zRTi/H4QQTvLQuKupHLbJ93CJqHkQhSzRkh3VD4N8X1IC0E6UHHIEwVg==
-  dependencies:
-    "@ethersproject/bignumber" "^5.5.0"
-    ethers "^5.5.3"
-
 "@cspotcode/source-map-consumer@0.8.0":
   version "0.8.0"
   resolved "https://registry.yarnpkg.com/@cspotcode/source-map-consumer/-/source-map-consumer-0.8.0.tgz#33bf4b7b39c178821606f669bbc447a6a629786b"
