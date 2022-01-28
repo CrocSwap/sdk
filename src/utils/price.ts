@@ -1,6 +1,6 @@
 import { BigNumber, ethers, Contract } from 'ethers';
 import { MIN_TICK, MAX_TICK, NODE_URL, contractAddresses, QUERY_ABI } from '..';
-import { getTokenDecimals } from './token';
+import { getTokenDecimals, getQuoteTokenAddress, getBaseTokenAddress } from './token';
 import { POOL_PRIMARY } from '../constants';
 
 type Tick = number
@@ -26,8 +26,18 @@ export async function getSpotPrice(
 export async function getSpotPriceDisplay(
     baseTokenAddress: string,
     quoteTokenAddress: string,
-    pool: number = POOL_PRIMARY): Promise<number> {
-    const price = getSpotPrice(baseTokenAddress, quoteTokenAddress, pool)
+    poolIdx: number = POOL_PRIMARY): Promise<number> {
+    const poolBase = getBaseTokenAddress(baseTokenAddress, quoteTokenAddress)
+    const poolQuote = getQuoteTokenAddress(baseTokenAddress, quoteTokenAddress)
+    const isInverted = poolQuote === baseTokenAddress
+
+    // Flip the price if the quote token for display purposes is not the quote
+    // token on-chain.
+    let price = getSpotPrice(poolBase, poolQuote, poolIdx)
+    if (isInverted) {
+        price = price.then(x => x / 1.0)
+    }
+    
     return toDisplayPrice(await price, await getTokenDecimals(baseTokenAddress), 
         await getTokenDecimals(quoteTokenAddress))
 }
