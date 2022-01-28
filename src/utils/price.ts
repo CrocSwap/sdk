@@ -29,25 +29,27 @@ export async function getSpotPriceDisplay(
     poolIdx: number = POOL_PRIMARY): Promise<number> {
     const poolBase = getBaseTokenAddress(baseTokenAddress, quoteTokenAddress)
     const poolQuote = getQuoteTokenAddress(baseTokenAddress, quoteTokenAddress)
-    const isInverted = poolQuote === baseTokenAddress
+    const isInverted = (poolQuote === baseTokenAddress)
 
-    // Flip the price if the quote token for display purposes is not the quote
-    // token on-chain.
-    let price = getSpotPrice(poolBase, poolQuote, poolIdx)
-    if (isInverted) {
-        price = price.then(x => x / 1.0)
-    }
-    
+    let price = getSpotPrice(poolBase, poolQuote, poolIdx)    
     return toDisplayPrice(await price, await getTokenDecimals(baseTokenAddress), 
-        await getTokenDecimals(quoteTokenAddress))
+        await getTokenDecimals(quoteTokenAddress), isInverted)
 }
   
 export function encodeCrocPrice (price: number): BigNumber {
-    const floatPrice = Math.sqrt(price) * (2 ** 64)
+    let floatPrice = Math.sqrt(price) * (2 ** 64)
+    let scale = 0
+
+    const PRECISION_BITS = 16
+    while (floatPrice > Number.MAX_SAFE_INTEGER) {
+        floatPrice = floatPrice / (2 ** PRECISION_BITS)
+        scale = scale + PRECISION_BITS
+    }
+
     const pinPrice = Math.round(floatPrice)
-    const parseObj = pinPrice > Number.MAX_SAFE_INTEGER ? 
-        pinPrice.toString() : pinPrice
-    return BigNumber.from(parseObj)
+    const bnSeed = BigNumber.from(pinPrice)
+
+    return bnSeed.mul(BigNumber.from(2).pow(scale))
 }
   
 export function decodeCrocPrice (val: BigNumber) {
@@ -58,31 +60,36 @@ export function decodeCrocPrice (val: BigNumber) {
 }
   
 export function toDisplayPrice(
-    price: number,
-    baseDecimals: number,
-    quoteDecimals: number
-  ): number {
-    return price * Math.pow(10, baseDecimals - quoteDecimals);
+    price: number, baseDecimals: number, quoteDecimals: number,
+    isInverted: boolean = false): number {
+    if (isInverted) {
+        return (1/price) * Math.pow(10, baseDecimals - quoteDecimals);
+    } else {
+        return price * Math.pow(10, quoteDecimals - baseDecimals);
+    }
 }
   
-export function fromDisplayPrice(
-    price: number,
-    baseDecimals: number,
-    quoteDecimals: number
-  ): number {
-    return price * Math.pow(10, quoteDecimals - baseDecimals);
+export function fromDisplayPrice(price: number, baseDecimals: number, quoteDecimals: number,
+    isInverted: boolean = false): number {
+    if (isInverted) {
+        return (1/price) * Math.pow(10, quoteDecimals - baseDecimals);
+    } else {
+        return price * Math.pow(10, baseDecimals - quoteDecimals);
+    }
 }
 
 export function pinTickLower (price: number, nTicksGrid: number): Tick {
     const priceInTicks = Math.log(price) / Math.log(1.0001)
     const tickGrid = Math.floor(priceInTicks / nTicksGrid) * nTicksGrid
-    return Math.max(tickGrid, MIN_TICK)
+    const horizon = Math.floor(MIN_TICK / nTicksGrid) * nTicksGrid
+    return Math.max(tickGrid, horizon)
 }
 
 export function pinTickUpper (price: number, nTicksGrid: number): Tick {
     const priceInTicks = Math.log(price) / Math.log(1.0001)
     const tickGrid = Math.ceil(priceInTicks / nTicksGrid) * nTicksGrid
-    return Math.min(tickGrid, MAX_TICK)
+    const horizon = Math.ceil(MAX_TICK / nTicksGrid) * nTicksGrid
+    return Math.min(tickGrid, horizon)
 }
 
 export function tickToPrice (tick: Tick): number {

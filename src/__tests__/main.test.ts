@@ -1,6 +1,8 @@
 // import { sum } from "../index";
 import { fromDisplayQty } from "../utils/token";
 import { toDisplayQty } from "../utils/token";
+import { encodeCrocPrice } from "../utils";
+import { BigNumber } from "ethers";
 
 test("1 is 1?", () => {
   expect(1).toBe(1);
@@ -25,23 +27,19 @@ test("unscaleQty integer as string", () => {
   const unscaledQty = toDisplayQty("100", 2).toString();
   expect(unscaledQty).toBe("1.0");
 });
+
 test("throws error on unscaleQty float as string", () => {
   expect(() => {
     toDisplayQty("100.1", 2).toString();
   }).toThrowError();
-  // expect(unscaledQty).toBe("1.1");
 });
-// console.log("bignum: " + scaledQty);
-// console.log("string: " + scaledQty.toString());
 
-// test("adds 1 + 2 to equal 3", () => {
-//   expect(sum(1, 2)).toBe(3);
-// });
+test("encode croc price", () => {
+  const price = encodeCrocPrice(625)
+  expect(price.eq(BigNumber.from(25).mul(BigNumber.from(2).pow(64))))
+});
 
-// test("adding positive numbers is not zero", () => {
-//   for (let a = 1; a < 10; a++) {
-//     for (let b = 1; b < 10; b++) {
-//       expect(a + b).not.toBe(0);
-//     }
-//   }
-// });
+test("encode croc price oversized", () => {
+  const price = encodeCrocPrice(625 * 2 ** 40)
+  expect(price.eq(BigNumber.from(25 * 2 ** 20).mul(BigNumber.from(2).pow(64))))
+});
