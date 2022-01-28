@@ -95,3 +95,22 @@ export function pinTickUpper (price: number, nTicksGrid: number): Tick {
 export function tickToPrice (tick: Tick): number {
     return Math.pow(1.0001, tick)
 }
+
+/* Returns the ratio of quote to base tokens necessary to support the collateral for a given
+ * range order over the specified ticks. If no quote token collateral is required returns 0
+ * if no base token collateral is required returns Infinity */
+export function calcRangeTilt (mktPrice: number, lowerTick: Tick, upperTick: Tick): number {
+    const lowerPrice = tickToPrice(lowerTick)
+    const upperPrice = tickToPrice(upperTick)
+
+    if (mktPrice > upperPrice) {
+        return Infinity
+    } else if (mktPrice < lowerPrice) {
+        return 0
+    } else {
+        const basePartial = Math.sqrt(lowerPrice / mktPrice)
+        const quotePartial = Math.sqrt(mktPrice / upperPrice)
+        return quotePartial / basePartial
+    }
+}
+

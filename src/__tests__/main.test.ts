@@ -1,7 +1,7 @@
 // import { sum } from "../index";
 import { fromDisplayQty } from "../utils/token";
 import { toDisplayQty } from "../utils/token";
-import { encodeCrocPrice } from "../utils";
+import { encodeCrocPrice, pinTickUpper, pinTickLower, calcRangeTilt } from "../utils";
 import { BigNumber } from "ethers";
 
 test("1 is 1?", () => {
@@ -42,4 +42,20 @@ test("encode croc price", () => {
 test("encode croc price oversized", () => {
   const price = encodeCrocPrice(625 * 2 ** 40)
   expect(price.eq(BigNumber.from(25 * 2 ** 20).mul(BigNumber.from(2).pow(64))))
+});
+
+test("pin tick upper", () => {
+  expect(pinTickUpper(5943, 50)).toBe(86950)
+  expect(pinTickUpper(0.042, 50)).toBe(-31700)
+});
+
+test("pin tick lower", () => {
+  expect(pinTickLower(5943, 50)).toBe(86900)
+  expect(pinTickLower(0.042, 50)).toBe(-31750)
+});
+
+test("range collateral tilt", () => {
+  expect(calcRangeTilt(0.9, -5000, -3000)).toBe(Infinity)
+  expect(calcRangeTilt(0.9, 3000, 5000)).toBe(0)
+  expect(calcRangeTilt(0.9, -5000, 5000)).toBe(0.9)
 });
