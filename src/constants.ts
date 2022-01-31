@@ -21,3 +21,5 @@ export const NODE_URL =
     "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/ropsten";
 
 export const POOL_PRIMARY = 35000
+
+export const GRID_SIZE_DFLT = 30

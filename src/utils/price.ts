@@ -1,7 +1,7 @@
 import { BigNumber, ethers, Contract } from 'ethers';
 import { MIN_TICK, MAX_TICK, NODE_URL, contractAddresses, QUERY_ABI } from '..';
 import { getTokenDecimals, getQuoteTokenAddress, getBaseTokenAddress } from './token';
-import { POOL_PRIMARY } from '../constants';
+import { POOL_PRIMARY, GRID_SIZE_DFLT } from '../constants';
 
 type Tick = number
 
@@ -78,14 +78,14 @@ export function fromDisplayPrice(price: number, baseDecimals: number, quoteDecim
     }
 }
 
-export function pinTickLower (price: number, nTicksGrid: number): Tick {
+export function pinTickLower (price: number, nTicksGrid: number = GRID_SIZE_DFLT): Tick {
     const priceInTicks = Math.log(price) / Math.log(1.0001)
     const tickGrid = Math.floor(priceInTicks / nTicksGrid) * nTicksGrid
     const horizon = Math.floor(MIN_TICK / nTicksGrid) * nTicksGrid
     return Math.max(tickGrid, horizon)
 }
 
-export function pinTickUpper (price: number, nTicksGrid: number): Tick {
+export function pinTickUpper (price: number, nTicksGrid: number = GRID_SIZE_DFLT): Tick {
     const priceInTicks = Math.log(price) / Math.log(1.0001)
     const tickGrid = Math.ceil(priceInTicks / nTicksGrid) * nTicksGrid
     const horizon = Math.ceil(MAX_TICK / nTicksGrid) * nTicksGrid
