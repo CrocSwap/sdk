@@ -22,8 +22,8 @@ export function getBaseTokenAddress(token1: string, token2: string): string {
     baseTokenAddress = token1BigNum.lt(token2BigNum) ? token1 : token2;
   }
   return baseTokenAddress;
-
 }
+
 export function getQuoteTokenAddress(token1: string, token2: string): string {
   let quoteTokenAddress = "";
 
@@ -54,7 +54,7 @@ export async function getTokenDecimals(tokenAddress: string): Promise<number> {
   const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
   const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider);
   const decimals = await tokenContract.decimals();
-  return decimals;
+  return decimals.toNumber();
 }
   
 export async function getTokenBalanceDisplay(
