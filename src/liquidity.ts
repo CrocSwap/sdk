@@ -4,7 +4,27 @@ import { MAX_LIQ } from './constants';
 type Address = string;
 type PoolType = number
 
+/* Converts a fixed base token collateral amount to pool liquidity units. This conversion only applies
+ * to the current pool price. If price moves the ratio between token collateral and liquidity will also
+ * change. Note that this function will only work when token qty or liquidity is less than 2^64
 
+ * @param price The current (non-display) price ratio in the pool.
+ * @param qty The quantity (in non-display wei) of base token to convert
+ * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
+export function liquidityForBaseQty (price: number, qty: BigNumber): BigNumber {
+    return BigNumber.from(Math.floor(qty.toNumber() / price))
+}
+
+/* Converts a fixed quote token collateral amount to pool liquidity units. This conversion only applies
+ * to the current pool price. If price moves the ratio between token collateral and liquidity will also
+ * change. Note that this function will only work when token qty or liquidity is less than 2^64
+ * 
+ * @param price The current (non-display) price ratio in the pool.
+ * @param qty The quantity (in non-display wei) of quote token to convert
+ * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this quote token quantity. */
+export function liquidityForQuoteQty (price: number, qty: BigNumber): BigNumber {
+    return BigNumber.from(Math.floor(qty.toNumber() * price))
+}
 
 export class WarmPathEncoder {
 

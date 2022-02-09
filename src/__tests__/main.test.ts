@@ -9,6 +9,7 @@ import {
   calcRangeTilt,
 } from "../utils";
 import { BigNumber } from "ethers";
+import { liquidityForBaseQty, liquidityForQuoteQty } from "../liquidity";
 
 test("1 is 1?", () => {
   expect(1).toBe(1);
@@ -66,9 +67,14 @@ test("range collateral tilt", () => {
   expect(calcRangeTilt(0.9, -5000, 5000)).toBe(0.9);
 });
 
-test("pin tick lower - default gridsize", () => {
-  // console.log(fromDisplayPrice(205, 18, 6, false));
-  console.log(pinTickLower(1 / 0.004855857142746036));
-  console.log(pinTickLower(205.936865645617));
-  expect(1).toBe(1);
+test("liquidity quote tokens", () => {
+  expect(liquidityForQuoteQty(0.01, BigNumber.from(10000)).toNumber()).toBe(100)
+  // Rounds down
+  expect(liquidityForQuoteQty(0.01075, BigNumber.from(9998)).toNumber()).toBe(107)
+});
+
+test("liquidity base tokens", () => {
+  expect(liquidityForBaseQty(0.01, BigNumber.from(50)).toNumber()).toBe(5000)
+  // Rounds down
+  expect(liquidityForBaseQty(109, BigNumber.from(9999)).toNumber()).toBe(91)
 });
