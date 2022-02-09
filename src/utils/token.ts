@@ -54,7 +54,7 @@ export async function getTokenDecimals(tokenAddress: string): Promise<number> {
   const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
   const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider);
   const decimals = await tokenContract.decimals();
-  return decimals.toNumber();
+  return decimals;
 }
   
 export async function getTokenBalanceDisplay(
