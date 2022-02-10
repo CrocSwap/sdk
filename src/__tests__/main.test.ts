@@ -67,19 +67,19 @@ test("range collateral tilt", () => {
   expect(calcRangeTilt(0.9, -5000, 5000)).toBe(0.9);
 });
 
-test("liquidity quote tokens", () => {
-  expect(liquidityForQuoteQty(0.01 ** 2, BigNumber.from(10000)).toNumber()).toBe(100)
+test("liquidity base tokens", () => {
+  expect(liquidityForBaseQty(0.01 ** 2, BigNumber.from(10000)).toNumber()).toBe(100)
   // Rounds down
-  expect(liquidityForQuoteQty(0.01075 ** 2, BigNumber.from(9998)).toNumber()).toBe(107)
+  expect(liquidityForBaseQty(0.01075 ** 2, BigNumber.from(9998)).toNumber()).toBe(107)
 });
 
-test("liquidity base tokens", () => {
-  expect(liquidityForBaseQty(0.01 ** 2, BigNumber.from(50)).toNumber()).toBe(5000)
+test("liquidity quote tokens", () => {
+  expect(liquidityForQuoteQty(0.01 ** 2, BigNumber.from(50)).toNumber()).toBe(5000)
   // Rounds down
-  expect(liquidityForBaseQty(109 ** 2, BigNumber.from(9999)).toNumber()).toBe(91)
+  expect(liquidityForQuoteQty(109 ** 2, BigNumber.from(9999)).toNumber()).toBe(91)
 });
 
 test("liquidity wild number", () => {
   expect(liquidityForBaseQty(0.004567483987661575, 
-    BigNumber.from(4567483987661)).toNumber()).toBe(67583163492547)
+    BigNumber.from(1000000000000000)).toNumber()).toBe(67583163492556)
 });
