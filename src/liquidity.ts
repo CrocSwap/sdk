@@ -215,6 +215,9 @@ export async function sendAmbientMint(
     limitHigh,
     false
   );
-  const tx = await crocContract.tradeWarm(args);
+  const tx = await crocContract.tradeWarm(args, {
+    value: BigNumber.from(10).pow(18),
+    gasLimit: 1000000,
+  });
   return tx;
 }
