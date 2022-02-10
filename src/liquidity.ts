@@ -1,5 +1,6 @@
 import { BigNumber, ethers } from "ethers";
 import { MAX_LIQ } from './constants';
+import { bigNumToFloat, floatToBigNum } from './utils';
 
 type Address = string;
 type PoolType = number
@@ -12,7 +13,7 @@ type PoolType = number
  * @param qty The quantity (in non-display wei) of base token to convert
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
 export function liquidityForBaseQty (price: number, qty: BigNumber): BigNumber {
-    return BigNumber.from(Math.floor(qty.toNumber() / price))
+    return floatToBigNum(Math.floor(bigNumToFloat(qty) / price))
 }
 
 /* Converts a fixed quote token collateral amount to pool liquidity units. This conversion only applies
@@ -23,7 +24,7 @@ export function liquidityForBaseQty (price: number, qty: BigNumber): BigNumber {
  * @param qty The quantity (in non-display wei) of quote token to convert
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this quote token quantity. */
 export function liquidityForQuoteQty (price: number, qty: BigNumber): BigNumber {
-    return BigNumber.from(Math.floor(qty.toNumber() * price))
+    return floatToBigNum(Math.floor(bigNumToFloat(qty) * price))
 }
 
 export class WarmPathEncoder {
