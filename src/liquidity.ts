@@ -1,6 +1,6 @@
 import { BigNumber, ethers } from "ethers";
 import { MAX_LIQ } from './constants';
-import { bigNumToFloat, floatToBigNum } from './utils';
+import { bigNumToFloat, floatToBigNum, encodeCrocPrice } from './utils';
 
 type Address = string;
 type PoolType = number
@@ -47,38 +47,40 @@ export class WarmPathEncoder {
     private readonly BURN_AMBIENT: number = 4;
 
 
-    encodeMintConc (lowerTick: number, upperTick: number, liq: BigNumber, limitLow: BigNumber, limitHigh: BigNumber,
+    encodeMintConc (lowerTick: number, upperTick: number, liq: BigNumber, limitLow: number, limitHigh: number,
         useSurplus: boolean) {
-        return this.encodeWarmPath(this.MINT_CONCENTRATED, lowerTick, upperTick, liq, limitLow, limitHigh, useSurplus)
+        return this.encodeWarmPath(this.MINT_CONCENTRATED, lowerTick, upperTick, liq, 
+            limitLow, limitHigh, useSurplus)
     }
 
-    encodeBurnConc (lowerTick: number, upperTick: number, liq: BigNumber, limitLow: BigNumber, limitHigh: BigNumber,
+    encodeBurnConc (lowerTick: number, upperTick: number, liq: BigNumber, limitLow: number, limitHigh: number,
         useSurplus: boolean) {
         return this.encodeWarmPath(this.BURN_CONCENTRATED, lowerTick, upperTick, liq, limitLow, limitHigh, useSurplus)
     }
 
-    encodeBurnConcAll (lowerTick: number, upperTick: number, limitLow: BigNumber, limitHigh: BigNumber,
+    encodeBurnConcAll (lowerTick: number, upperTick: number, limitLow: number, limitHigh: number,
         useSurplus: boolean) {
         return this.encodeWarmPath(this.BURN_CONCENTRATED, lowerTick, upperTick, MAX_LIQ, limitLow, limitHigh, useSurplus)
     }
 
-    encodeMintAmbient (liq: BigNumber, limitLow: BigNumber, limitHigh: BigNumber, useSurplus: boolean) {
+    encodeMintAmbient (liq: BigNumber, limitLow: number, limitHigh: number, useSurplus: boolean) {
         return this.encodeWarmPath(this.MINT_AMBIENT, 0, 0, liq, limitLow, limitHigh, useSurplus)
     }
 
-    encodeBurnAmbient (liq: BigNumber, limitLow: BigNumber, limitHigh: BigNumber, useSurplus: boolean) {
+    encodeBurnAmbient (liq: BigNumber, limitLow: number, limitHigh: number, useSurplus: boolean) {
         return this.encodeWarmPath(this.BURN_AMBIENT, 0, 0, liq, limitLow, limitHigh, useSurplus)
     }
 
-    encodeBurnAmbientAll (limitLow: BigNumber, limitHigh: BigNumber, useSurplus: boolean) {
+    encodeBurnAmbientAll (limitLow: number, limitHigh: number, useSurplus: boolean) {
         return this.encodeWarmPath(this.BURN_AMBIENT, 0, 0, MAX_LIQ, limitLow, limitHigh, useSurplus)
     }
 
     private encodeWarmPath (callCode: number, lowerTick: number, upperTick: number, liq: BigNumber, 
-        limitLow: BigNumber, limitHigh: BigNumber, useSurplus: boolean): string {
+        limitLow: number, limitHigh: number, useSurplus: boolean): string {
         return this.abiCoder.encode(
             [ "uint8", "address", "address", "uint24", "int24", "int24", "uint128", "uint128", "uint128", "bool" ], 
-            [ callCode, this.base, this.quote, this.poolIdx, lowerTick, upperTick, liq, limitLow, limitHigh, useSurplus  ]);
+            [ callCode, this.base, this.quote, this.poolIdx, lowerTick, upperTick, liq, 
+                encodeCrocPrice(limitLow), encodeCrocPrice(limitHigh), useSurplus  ]);
     }
 }
     
