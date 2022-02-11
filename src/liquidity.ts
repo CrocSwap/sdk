@@ -2,6 +2,7 @@ import { BigNumber, ethers, Signer } from "ethers";
 import { MAX_LIQ, contractAddresses } from "./constants";
 import { bigNumToFloat, floatToBigNum, encodeCrocPrice } from "./utils";
 import { CROC_ABI } from "./abis";
+import { parseEther } from "ethers/lib/utils";
 
 type Address = string;
 type PoolType = number;
@@ -14,7 +15,7 @@ type PoolType = number;
  * @param qty The quantity (in non-display wei) of base token to convert
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
 export function liquidityForBaseQty(price: number, qty: BigNumber): BigNumber {
-  return floatToBigNum(Math.floor(bigNumToFloat(qty) / Math.sqrt(price)))
+  return floatToBigNum(Math.floor(bigNumToFloat(qty) / Math.sqrt(price)));
 }
 
 /* Converts a fixed quote token collateral amount to pool liquidity units. This conversion only applies
@@ -196,6 +197,7 @@ export async function sendAmbientMint(
   liquidity: BigNumber,
   limitLow: number,
   limitHigh: number,
+  ethValue: number,
   signer: Signer
 ) {
   const crocContract = new ethers.Contract(
@@ -220,7 +222,7 @@ export async function sendAmbientMint(
   // if baseToken = ETH
   if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
     tx = await crocContract.tradeWarm(args, {
-      value: BigNumber.from(10).pow(18),
+      value: parseEther(ethValue.toString()),
       gasLimit: 1000000,
     });
   } else {
