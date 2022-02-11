@@ -21,10 +21,11 @@ export function floatToBigNum (x: number): BigNumber {
 
   const PRECISION_BITS = 16;
   while (floatPrice > Number.MAX_SAFE_INTEGER) {
-    floatPrice = floatPrice / 2 ** PRECISION_BITS;
+    floatPrice = floatPrice / (2 ** PRECISION_BITS);
     scale = scale + PRECISION_BITS;
   }
 
   const pinPrice = Math.round(floatPrice);
-  return BigNumber.from(pinPrice);
+  const mult = BigNumber.from(2).pow(scale)
+  return BigNumber.from(pinPrice).mul(mult);
 }
