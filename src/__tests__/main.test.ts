@@ -9,7 +9,7 @@ import {
   calcRangeTilt,
 } from "../utils";
 import { BigNumber } from "ethers";
-import { liquidityForBaseQty, liquidityForQuoteQty } from "../liquidity";
+import { liquidityForBaseQty, liquidityForQuoteQty, baseConcFactor, quoteConcFactor, concDepositSkew, liquidityForBaseConc, liquidityForQuoteConc } from "../liquidity";
 import { ambientPosSlot } from "../position";
 import { contractAddresses } from "../constants";
 
@@ -69,10 +69,46 @@ test("range collateral tilt", () => {
   expect(calcRangeTilt(0.9, -5000, 5000)).toBe(0.9);
 });
 
-test("liquidity base tokens", () => {
+test("base conc factor", () => {
+  expect(baseConcFactor(25.0, 9.0, 100.0)).toBe(0.4)
+  expect(baseConcFactor(1.0, 9.0, 100.0)).toBe(0)
+  expect(baseConcFactor(400.0, 9.0, 100.0)).toBe(0.35)
+})
+
+test("quote conc factor", () => {
+  expect(quoteConcFactor(25.0, 9.0, 64.0)).toBe(0.375)
+  expect(quoteConcFactor(1.0, 16.0, 100.0)).toBe(0.15)
+  expect(quoteConcFactor(400.0, 9.0, 100.0)).toBe(0)
+})
+
+test("conc deposit skew", () => {
+  expect(concDepositSkew(25.0, 9.0, 100.0)).toBe(0.8)
+  expect(concDepositSkew(1.0, 16.0, 100.0)).toBe(0)
+  expect(concDepositSkew(400.0, 9.0, 100.0)).toBe(Infinity)
+})
+
+test("liquidity quote tokens", () => {
   expect(liquidityForQuoteQty(0.01 ** 2, BigNumber.from(10000)).toNumber()).toBe(100)
   // Rounds down
   expect(liquidityForQuoteQty(0.01075 ** 2, BigNumber.from(9998)).toNumber()).toBe(107)
+});
+
+test("liquidity base tokens", () => {
+  expect(liquidityForBaseQty(0.01 ** 2, BigNumber.from(50)).toNumber()).toBe(5000)
+  // Rounds down
+  expect(liquidityForBaseQty(109 ** 2, BigNumber.from(9999)).toNumber()).toBe(91)
+});
+
+test("liquidity quote concentrated", () => {
+  expect(liquidityForQuoteConc(0.01 ** 2, BigNumber.from(10000), 0.005 ** 2, 0.02 ** 2).toNumber()).toBe(50)
+  expect(liquidityForQuoteConc(0.01 ** 2, BigNumber.from(10000), 0.015 ** 2, 0.02 ** 2).toNumber()).toBe(16)
+  expect(liquidityForQuoteConc(0.01 ** 2, BigNumber.from(10000), 0.001 ** 2, 0.005 ** 2).toNumber()).toBe(0)
+});
+
+test("liquidity base concentrated", () => {
+  expect(liquidityForBaseConc(0.01 ** 2, BigNumber.from(50), 0.005 ** 2, 0.02 ** 2).toNumber()).toBe(2500)
+  expect(liquidityForBaseConc(0.01 ** 2, BigNumber.from(50), 0.015 ** 2, 0.02 ** 2).toNumber()).toBe(0)
+  expect(liquidityForBaseConc(0.01 ** 2, BigNumber.from(50), 0.001 ** 2, 0.005 ** 2).toNumber()).toBe(2000)
 });
 
 test("liquidity quote tokens", () => {

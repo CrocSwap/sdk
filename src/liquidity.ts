@@ -14,8 +14,8 @@ type PoolType = number;
  * @param price The current (non-display) price ratio in the pool.
  * @param qty The quantity (in non-display wei) of base token to convert
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
-export function liquidityForBaseQty(price: number, qty: BigNumber): BigNumber {
-  return floatToBigNum(Math.floor(bigNumToFloat(qty) / Math.sqrt(price)));
+export function liquidityForBaseQty(price: number, qty: BigNumber, mult: number = 1.0): BigNumber {
+  return floatToBigNum(Math.floor(bigNumToFloat(qty) / Math.sqrt(price) * mult));
 }
 
 /* Converts a fixed quote token collateral amount to pool liquidity units. This conversion only applies
@@ -25,8 +25,77 @@ export function liquidityForBaseQty(price: number, qty: BigNumber): BigNumber {
  * @param price The current (non-display) price ratio in the pool.
  * @param qty The quantity (in non-display wei) of quote token to convert
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this quote token quantity. */
-export function liquidityForQuoteQty(price: number, qty: BigNumber): BigNumber {
-  return floatToBigNum(Math.floor(bigNumToFloat(qty) * Math.sqrt(price)));
+export function liquidityForQuoteQty(price: number, qty: BigNumber, mult: number = 1.0): BigNumber {
+  return floatToBigNum(Math.floor(bigNumToFloat(qty) * Math.sqrt(price) * mult));
+}
+
+/* Converts a fixed amount of base token deposits to liquidity for a concentrated range order 
+ * 
+ * @param price The current (non-display) price ratio in the pool.
+ * @param qty The quantity (in non-display wei) of base token to convert
+ * @param lower The lower boundary price of the range order
+ * @param upper The upper boudnary price of the range order
+ * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
+export function liquidityForBaseConc (price: number, qty: BigNumber, 
+    lower: number, upper: number): BigNumber {
+    const concFactor = baseConcFactor(price, lower, upper)
+    return liquidityForBaseQty(price, qty, concFactor)
+}
+
+/* Converts a fixed amount of quote token deposits to liquidity for a concentrated range order 
+ * 
+ * @param price The current (non-display) price ratio in the pool.
+ * @param qty The quantity (in non-display wei) of base token to convert
+ * @param lower The lower boundary price of the range order
+ * @param upper The upper boudnary price of the range order
+ * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this quote token quantity. */
+export function liquidityForQuoteConc (price: number, qty: BigNumber, 
+    lower: number, upper: number): BigNumber {
+    const concFactor = quoteConcFactor(price, lower, upper)
+    return liquidityForQuoteQty(price, qty, concFactor)
+}
+
+/* Calculates the concentration leverage factor for the base token given the range relative to
+ * the current price in the pool.
+ *
+ * @param price The current price of the pool
+ * @param lower The lower price boundary of the range order
+ * @param upper The upper price boundary of the range order
+ * @return The fraction of base tokens needed relative to an ambient position with the same 
+ *         liquidity */
+export function baseConcFactor (price: number, lower: number, upper: number): number {
+    if (price < lower) { 
+        return 0
+    } else if (price > upper) {
+        return (Math.sqrt(upper) - Math.sqrt(lower)) / Math.sqrt(price)
+    } else {
+        return 1 - Math.sqrt(lower) / Math.sqrt(price)
+    }
+}
+
+/* Calculates the concentration leverage factor for the quote token given the range relative to
+ * the current price in the pool.
+ *
+ * @param price The current price of the pool
+ * @param lower The lower price boundary of the range order
+ * @param upper The upper price boundary of the range order
+ * @return The fraction of quote tokens needed relative to an ambient position with the same 
+ *         liquidity */
+export function quoteConcFactor (price: number, lower: number, upper: number): number {
+    return baseConcFactor(1/price, 1/upper, 1/lower)
+}
+
+/* Calculates the deposit ratio multiplier for a concentrated liquidity range order.
+ * 
+ * @param price The current price of the pool
+ * @param lower The lower price boundary of the range order
+ * @param upper The upper price boundary of the range order
+ * @return The ratio of base to quote token deposit amounts for this concentrated range
+ *         order *relative* to full-range ambient deposit ratio. */
+export function concDepositSkew (price: number, lower: number, upper: number): number {
+    const base = baseConcFactor(price, lower, upper)
+    const quote = quoteConcFactor(price, lower, upper) 
+    return base / quote
 }
 
 export class WarmPathEncoder {
