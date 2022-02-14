@@ -6,10 +6,12 @@ import {
   encodeCrocPrice,
   fromDisplayQty,
   tickToPrice,
+  truncateRightBits,
   // fromDisplayPrice,
 } from "./utils";
 import { CROC_ABI } from "./abis";
 import { parseEther } from "ethers/lib/utils";
+import { truncate } from 'fs';
 // import { concDepositSkew } from ".";
 
 type Address = string;
@@ -136,6 +138,11 @@ export function concDepositSkew(
   const base = baseConcFactor(price, lower, upper);
   const quote = quoteConcFactor(price, lower, upper);
   return base / quote;
+}
+
+export function roundForConcLiq (liq: BigNumber): BigNumber {
+    const CONC_LOTS_BITS = 10
+    return truncateRightBits(liq, CONC_LOTS_BITS)
 }
 
 export class WarmPathEncoder {
@@ -387,6 +394,8 @@ export async function sendConcMint(
   );
   console.log({ liqForBaseConc });
 
+  const sizedLiq = roundForConcLiq(liqForBaseConc)
+
   // const skew = concDepositSkew(poolWeiPrice, limitLowWei, limitHighWei);
 
   // console.log({ skew });
@@ -394,7 +403,7 @@ export async function sendConcMint(
   const args = warmPathEncoder.encodeMintConc(
     tickLower,
     tickHigher,
-    liqForBaseConc,
+    sizedLiq,
     limitLow,
     limitHigh,
     false
