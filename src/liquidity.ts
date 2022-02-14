@@ -5,6 +5,7 @@ import {
   floatToBigNum,
   encodeCrocPrice,
   fromDisplayQty,
+  tickToPrice,
   // fromDisplayPrice,
 } from "./utils";
 import { CROC_ABI } from "./abis";
@@ -349,7 +350,7 @@ export async function sendConcMint(
   poolWeiPrice: number,
   tickLower: number,
   tickHigher: number,
-  tokenQty: number,
+  tokenQty: string,
   limitLow: number,
   limitHigh: number,
   ethValue: number,
@@ -376,13 +377,13 @@ export async function sendConcMint(
   // const limitLowWei = fromDisplayQty(limitLow.toString(), 18);
   // const limitHighWei = fromDisplayQty(limitLow.toString(), 18);
 
-  const tokenQtyWei = fromDisplayQty(tokenQty.toString(), 18);
+  const tokenQtyWei = fromDisplayQty(tokenQty, 18);
 
   const liqForBaseConc = liquidityForBaseConc(
     poolWeiPrice,
     tokenQtyWei,
-    limitLow,
-    limitHigh
+    tickToPrice(tickLower),
+    tickToPrice(tickHigher)
   );
   console.log({ liqForBaseConc });
 
