@@ -11,7 +11,6 @@ import {
 } from "./utils";
 import { CROC_ABI } from "./abis";
 import { parseEther } from "ethers/lib/utils";
-import { truncate } from 'fs';
 // import { concDepositSkew } from ".";
 
 type Address = string;
@@ -99,11 +98,11 @@ export function baseConcFactor(
   upper: number
 ): number {
   if (price < lower) {
-    return 0;
+    return Infinity;
   } else if (price > upper) {
-    return (Math.sqrt(upper) - Math.sqrt(lower)) / Math.sqrt(price);
+    return Math.sqrt(price) / (Math.sqrt(upper) - Math.sqrt(lower))
   } else {
-    return 1 - Math.sqrt(lower) / Math.sqrt(price);
+    return 1 / (1 - Math.sqrt(lower) / Math.sqrt(price));
   }
 }
 
