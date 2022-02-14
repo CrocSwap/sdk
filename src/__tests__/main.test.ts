@@ -7,6 +7,7 @@ import {
   pinTickUpper,
   pinTickLower,
   calcRangeTilt,
+  truncateRightBits,
 } from "../utils";
 import { BigNumber } from "ethers";
 import { liquidityForBaseQty, liquidityForQuoteQty, baseConcFactor, quoteConcFactor, concDepositSkew, liquidityForBaseConc, liquidityForQuoteConc } from "../liquidity";
@@ -130,3 +131,7 @@ test("ambient slot", () => {
   const slot = "0x83143c5d6e1dadd337e7d8618d6c0bf50bdfd154f08c7f9310dda845cf77ad53"
   expect(ambientPosSlot(owner, contractAddresses.ZERO_ADDR, token)).toBe(slot)
 });
+
+test("truncate right bits", () => {
+  expect(truncateRightBits(BigNumber.from(48024845023), 10).toNumber()).toBe(48024844288)
+})

@@ -29,3 +29,8 @@ export function floatToBigNum (x: number): BigNumber {
   const mult = BigNumber.from(2).pow(scale)
   return BigNumber.from(pinPrice).mul(mult);
 }
+
+export function truncateRightBits (x: BigNumber, bits: number): BigNumber {
+  const mult = BigNumber.from(2).pow(bits)
+  return x.div(mult).mul(mult)
+}
