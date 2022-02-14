@@ -11,7 +11,6 @@ import {
 } from "./utils";
 import { CROC_ABI } from "./abis";
 import { parseEther } from "ethers/lib/utils";
-// import { concDepositSkew } from ".";
 
 type Address = string;
 type PoolType = number;
@@ -139,9 +138,9 @@ export function concDepositSkew(
   return base / quote;
 }
 
-export function roundForConcLiq (liq: BigNumber): BigNumber {
-    const CONC_LOTS_BITS = 10
-    return truncateRightBits(liq, CONC_LOTS_BITS)
+export function roundForConcLiq(liq: BigNumber): BigNumber {
+  const CONC_LOTS_BITS = 10;
+  return truncateRightBits(liq, CONC_LOTS_BITS);
 }
 
 export class WarmPathEncoder {
@@ -391,9 +390,9 @@ export async function sendConcMint(
     tickToPrice(tickLower),
     tickToPrice(tickHigher)
   );
-  console.log({ liqForBaseConc });
+  console.log("liqForBaseConc: " + liqForBaseConc.toString());
 
-  const sizedLiq = roundForConcLiq(liqForBaseConc)
+  const sizedLiq = roundForConcLiq(liqForBaseConc);
 
   // const skew = concDepositSkew(poolWeiPrice, limitLowWei, limitHighWei);
 
