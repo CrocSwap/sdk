@@ -1,8 +1,14 @@
 import { BigNumber, ethers, Signer } from "ethers";
 import { MAX_LIQ, contractAddresses } from "./constants";
-import { bigNumToFloat, floatToBigNum, encodeCrocPrice } from "./utils";
+import {
+  bigNumToFloat,
+  floatToBigNum,
+  encodeCrocPrice,
+  fromDisplayQty,
+} from "./utils";
 import { CROC_ABI } from "./abis";
 import { parseEther } from "ethers/lib/utils";
+// import { concDepositSkew } from ".";
 
 type Address = string;
 type PoolType = number;
@@ -14,8 +20,14 @@ type PoolType = number;
  * @param price The current (non-display) price ratio in the pool.
  * @param qty The quantity (in non-display wei) of base token to convert
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
-export function liquidityForBaseQty(price: number, qty: BigNumber, mult: number = 1.0): BigNumber {
-  return floatToBigNum(Math.floor(bigNumToFloat(qty) / Math.sqrt(price) * mult));
+export function liquidityForBaseQty(
+  price: number,
+  qty: BigNumber,
+  mult = 1.0
+): BigNumber {
+  return floatToBigNum(
+    Math.floor((bigNumToFloat(qty) / Math.sqrt(price)) * mult)
+  );
 }
 
 /* Converts a fixed quote token collateral amount to pool liquidity units. This conversion only applies
@@ -25,34 +37,48 @@ export function liquidityForBaseQty(price: number, qty: BigNumber, mult: number 
  * @param price The current (non-display) price ratio in the pool.
  * @param qty The quantity (in non-display wei) of quote token to convert
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this quote token quantity. */
-export function liquidityForQuoteQty(price: number, qty: BigNumber, mult: number = 1.0): BigNumber {
-  return floatToBigNum(Math.floor(bigNumToFloat(qty) * Math.sqrt(price) * mult));
+export function liquidityForQuoteQty(
+  price: number,
+  qty: BigNumber,
+  mult = 1.0
+): BigNumber {
+  return floatToBigNum(
+    Math.floor(bigNumToFloat(qty) * Math.sqrt(price) * mult)
+  );
 }
 
-/* Converts a fixed amount of base token deposits to liquidity for a concentrated range order 
- * 
+/* Converts a fixed amount of base token deposits to liquidity for a concentrated range order
+ *
  * @param price The current (non-display) price ratio in the pool.
  * @param qty The quantity (in non-display wei) of base token to convert
  * @param lower The lower boundary price of the range order
  * @param upper The upper boudnary price of the range order
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
-export function liquidityForBaseConc (price: number, qty: BigNumber, 
-    lower: number, upper: number): BigNumber {
-    const concFactor = baseConcFactor(price, lower, upper)
-    return liquidityForBaseQty(price, qty, concFactor)
+export function liquidityForBaseConc(
+  price: number,
+  qty: BigNumber,
+  lower: number,
+  upper: number
+): BigNumber {
+  const concFactor = baseConcFactor(price, lower, upper);
+  return liquidityForBaseQty(price, qty, concFactor);
 }
 
-/* Converts a fixed amount of quote token deposits to liquidity for a concentrated range order 
- * 
+/* Converts a fixed amount of quote token deposits to liquidity for a concentrated range order
+ *
  * @param price The current (non-display) price ratio in the pool.
  * @param qty The quantity (in non-display wei) of base token to convert
  * @param lower The lower boundary price of the range order
  * @param upper The upper boudnary price of the range order
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this quote token quantity. */
-export function liquidityForQuoteConc (price: number, qty: BigNumber, 
-    lower: number, upper: number): BigNumber {
-    const concFactor = quoteConcFactor(price, lower, upper)
-    return liquidityForQuoteQty(price, qty, concFactor)
+export function liquidityForQuoteConc(
+  price: number,
+  qty: BigNumber,
+  lower: number,
+  upper: number
+): BigNumber {
+  const concFactor = quoteConcFactor(price, lower, upper);
+  return liquidityForQuoteQty(price, qty, concFactor);
 }
 
 /* Calculates the concentration leverage factor for the base token given the range relative to
@@ -61,16 +87,20 @@ export function liquidityForQuoteConc (price: number, qty: BigNumber,
  * @param price The current price of the pool
  * @param lower The lower price boundary of the range order
  * @param upper The upper price boundary of the range order
- * @return The fraction of base tokens needed relative to an ambient position with the same 
+ * @return The fraction of base tokens needed relative to an ambient position with the same
  *         liquidity */
-export function baseConcFactor (price: number, lower: number, upper: number): number {
-    if (price < lower) { 
-        return 0
-    } else if (price > upper) {
-        return (Math.sqrt(upper) - Math.sqrt(lower)) / Math.sqrt(price)
-    } else {
-        return 1 - Math.sqrt(lower) / Math.sqrt(price)
-    }
+export function baseConcFactor(
+  price: number,
+  lower: number,
+  upper: number
+): number {
+  if (price < lower) {
+    return 0;
+  } else if (price > upper) {
+    return (Math.sqrt(upper) - Math.sqrt(lower)) / Math.sqrt(price);
+  } else {
+    return 1 - Math.sqrt(lower) / Math.sqrt(price);
+  }
 }
 
 /* Calculates the concentration leverage factor for the quote token given the range relative to
@@ -79,23 +109,31 @@ export function baseConcFactor (price: number, lower: number, upper: number): nu
  * @param price The current price of the pool
  * @param lower The lower price boundary of the range order
  * @param upper The upper price boundary of the range order
- * @return The fraction of quote tokens needed relative to an ambient position with the same 
+ * @return The fraction of quote tokens needed relative to an ambient position with the same
  *         liquidity */
-export function quoteConcFactor (price: number, lower: number, upper: number): number {
-    return baseConcFactor(1/price, 1/upper, 1/lower)
+export function quoteConcFactor(
+  price: number,
+  lower: number,
+  upper: number
+): number {
+  return baseConcFactor(1 / price, 1 / upper, 1 / lower);
 }
 
 /* Calculates the deposit ratio multiplier for a concentrated liquidity range order.
- * 
+ *
  * @param price The current price of the pool
  * @param lower The lower price boundary of the range order
  * @param upper The upper price boundary of the range order
  * @return The ratio of base to quote token deposit amounts for this concentrated range
  *         order *relative* to full-range ambient deposit ratio. */
-export function concDepositSkew (price: number, lower: number, upper: number): number {
-    const base = baseConcFactor(price, lower, upper)
-    const quote = quoteConcFactor(price, lower, upper) 
-    return base / quote
+export function concDepositSkew(
+  price: number,
+  lower: number,
+  upper: number
+): number {
+  const base = baseConcFactor(price, lower, upper);
+  const quote = quoteConcFactor(price, lower, upper);
+  return base / quote;
 }
 
 export class WarmPathEncoder {
@@ -282,6 +320,78 @@ export async function sendAmbientMint(
 
   const args = warmPathEncoder.encodeMintAmbient(
     liquidity,
+    limitLow,
+    limitHigh,
+    false
+  );
+
+  let tx;
+  // if baseToken = ETH
+  if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
+    tx = await crocContract.tradeWarm(args, {
+      value: parseEther(ethValue.toString()),
+      gasLimit: 1000000,
+    });
+  } else {
+    tx = await crocContract.tradeWarm(args, {
+      gasLimit: 1000000,
+    });
+  }
+
+  return tx;
+}
+
+export async function sendConcMint(
+  baseTokenAddress: string,
+  quoteTokenAddress: string,
+  poolPrice: number,
+  tickLower: number,
+  tickHigher: number,
+  tokenQty: number,
+  limitLow: number,
+  limitHigh: number,
+  ethValue: number,
+  signer: Signer
+) {
+  console.log({ poolPrice });
+  console.log({ tickLower });
+  console.log({ tickHigher });
+  console.log({ tokenQty });
+  console.log({ limitLow });
+  console.log({ limitHigh });
+
+  const crocContract = new ethers.Contract(
+    contractAddresses["CROC_SWAP_ADDR"],
+    CROC_ABI,
+    signer
+  );
+  const warmPathEncoder = new WarmPathEncoder(
+    baseTokenAddress,
+    quoteTokenAddress,
+    35000
+  );
+
+  // const limitLowWei = fromDisplayQty(limitLow.toString(), 18);
+  // const limitHighWei = fromDisplayQty(limitLow.toString(), 18);
+
+  const tokenQtyWei = fromDisplayQty(tokenQty.toString(), 18);
+
+  const liqForBaseConc = liquidityForBaseConc(
+    poolPrice,
+    tokenQtyWei,
+    limitLow,
+    limitHigh
+  );
+  console.log({ liqForBaseConc });
+
+  // const skew = concDepositSkew(poolWeiPrice, limitLowWei, limitHighWei);
+
+  // console.log({ skew });
+
+  const args = warmPathEncoder.encodeMintConc(
+    tickLower,
+    tickHigher,
+    liqForBaseConc,
     limitLow,
     limitHigh,
     false
