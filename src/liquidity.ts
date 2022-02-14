@@ -99,7 +99,7 @@ export function baseConcFactor(
   if (price < lower) {
     return Infinity;
   } else if (price > upper) {
-    return Math.sqrt(price) / (Math.sqrt(upper) - Math.sqrt(lower))
+    return Math.sqrt(price) / (Math.sqrt(upper) - Math.sqrt(lower));
   } else {
     return 1 / (1 - Math.sqrt(lower) / Math.sqrt(price));
   }
@@ -407,11 +407,12 @@ export async function sendConcMint(
     false
   );
 
+  const etherToSend = parseEther((ethValue * 1.01).toString());
   let tx;
   // if baseToken = ETH
   if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
     tx = await crocContract.tradeWarm(args, {
-      value: parseEther(ethValue.toString()),
+      value: etherToSend,
       gasLimit: 1000000,
     });
   } else {
