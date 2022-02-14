@@ -5,6 +5,7 @@ import {
   floatToBigNum,
   encodeCrocPrice,
   fromDisplayQty,
+  // fromDisplayPrice,
 } from "./utils";
 import { CROC_ABI } from "./abis";
 import { parseEther } from "ethers/lib/utils";
@@ -52,7 +53,7 @@ export function liquidityForQuoteQty(
  * @param price The current (non-display) price ratio in the pool.
  * @param qty The quantity (in non-display wei) of base token to convert
  * @param lower The lower boundary price of the range order
- * @param upper The upper boudnary price of the range order
+ * @param upper The upper boundary price of the range order
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
 export function liquidityForBaseConc(
   price: number,
@@ -345,6 +346,7 @@ export async function sendConcMint(
   baseTokenAddress: string,
   quoteTokenAddress: string,
   poolPrice: number,
+  poolWeiPrice: number,
   tickLower: number,
   tickHigher: number,
   tokenQty: number,
@@ -377,7 +379,7 @@ export async function sendConcMint(
   const tokenQtyWei = fromDisplayQty(tokenQty.toString(), 18);
 
   const liqForBaseConc = liquidityForBaseConc(
-    poolPrice,
+    poolWeiPrice,
     tokenQtyWei,
     limitLow,
     limitHigh
