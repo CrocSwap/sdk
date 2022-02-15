@@ -338,11 +338,11 @@ export async function sendAmbientMint(
   if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
     tx = await crocContract.tradeWarm(args, {
       value: parseEther(ethValue.toString()),
-      gasLimit: 1000000,
+      // gasLimit: 1000000,
     });
   } else {
     tx = await crocContract.tradeWarm(args, {
-      gasLimit: 1000000,
+      // gasLimit: 1000000,
     });
   }
 
@@ -419,11 +419,11 @@ export async function sendConcMint(
 
     tx = await crocContract.tradeWarm(args, {
       value: etherToSend,
-      gasLimit: 1000000,
+      // gasLimit: 1000000,
     });
   } else {
     tx = await crocContract.tradeWarm(args, {
-      gasLimit: 1000000,
+      // gasLimit: 1000000,
     });
   }
 
