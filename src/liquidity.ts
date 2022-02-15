@@ -7,6 +7,7 @@ import {
   fromDisplayQty,
   tickToPrice,
   truncateRightBits,
+  getTokenDecimals,
   // fromDisplayPrice,
 } from "./utils";
 import { CROC_ABI } from "./abis";
@@ -382,7 +383,11 @@ export async function sendConcMint(
   // const limitLowWei = fromDisplayQty(limitLow.toString(), 18);
   // const limitHighWei = fromDisplayQty(limitLow.toString(), 18);
 
-  const tokenQtyWei = fromDisplayQty(tokenQty, 18);
+  const baseTokenDecimals = await getTokenDecimals(baseTokenAddress);
+
+  // console.log({ baseTokenDecimals });
+
+  const tokenQtyWei = fromDisplayQty(tokenQty, baseTokenDecimals);
 
   const liqForBaseConc = liquidityForBaseConc(
     poolWeiPrice,
@@ -407,10 +412,11 @@ export async function sendConcMint(
     false
   );
 
-  const etherToSend = parseEther((ethValue * 1.01).toString());
   let tx;
   // if baseToken = ETH
   if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
+    const etherToSend = parseEther((ethValue * 1.01).toString());
+
     tx = await crocContract.tradeWarm(args, {
       value: etherToSend,
       gasLimit: 1000000,
