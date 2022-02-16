@@ -1,14 +1,14 @@
-import { contractAddresses, ERC20_ABI, NODE_URL } from '..';
-import { Signer, Contract, ethers, BigNumber } from 'ethers';
+import { contractAddresses, ERC20_ABI, NODE_URL } from "..";
+import { Signer, Contract, ethers, BigNumber } from "ethers";
 
 export async function approveToken(tokenAddress: string, signer: Signer) {
   const dex = contractAddresses["CROC_SWAP_ADDR"];
-  
+
   const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
-  
-  const qty = ethers.BigNumber.from("1000000000000000000000");
+
+  const qty = ethers.BigNumber.from(Number.MAX_SAFE_INTEGER - 1);
   const tx = await tokenContract.approve(dex, qty);
-  
+
   return tx;
 }
 
@@ -39,14 +39,15 @@ export function getQuoteTokenAddress(token1: string, token2: string): string {
 export async function getTokenAllowance(
   tokenAddress: string,
   account: string,
-  signer: Signer):Promise<BigNumber> {
+  signer: Signer
+): Promise<BigNumber> {
   const dex = contractAddresses["CROC_SWAP_ADDR"];
   const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
-  
+
   const allowance = await tokenContract.allowance(account, dex);
   return allowance;
 }
-  
+
 export async function getTokenDecimals(tokenAddress: string): Promise<number> {
   if (tokenAddress === contractAddresses.ZERO_ADDR) {
     return 18;
@@ -56,21 +57,22 @@ export async function getTokenDecimals(tokenAddress: string): Promise<number> {
   const decimals = await tokenContract.decimals();
   return decimals;
 }
-  
+
 export async function getTokenBalanceDisplay(
   tokenAddress: string,
   account: string,
-  signer: Signer): Promise<string> {
-  const tokenDecimals = getTokenDecimals(tokenAddress)
-  const balance = getTokenBalance(tokenAddress, account, signer)
-  return toDisplayQty(await balance, await tokenDecimals)
+  signer: Signer
+): Promise<string> {
+  const tokenDecimals = getTokenDecimals(tokenAddress);
+  const balance = getTokenBalance(tokenAddress, account, signer);
+  return toDisplayQty(await balance, await tokenDecimals);
 }
 
 export async function getTokenBalance(
   tokenAddress: string,
   account: string,
-  signer: Signer): Promise<BigNumber> {
-
+  signer: Signer
+): Promise<BigNumber> {
   if (tokenAddress === contractAddresses.ZERO_ADDR) {
     let nativeBalance = BigNumber.from(0);
     try {
@@ -79,19 +81,21 @@ export async function getTokenBalance(
       console.log(error);
     }
     return nativeBalance;
-
   } else {
     const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
     return await tokenContract.balanceOf(account);
   }
 }
 
-export function fromDisplayQty (qty: string, tokenDecimals: number): BigNumber {
+export function fromDisplayQty(qty: string, tokenDecimals: number): BigNumber {
   const bigQtyScaled = ethers.utils.parseUnits(qty, tokenDecimals);
   return bigQtyScaled;
 }
 
-export function toDisplayQty (qty: string | BigNumber, tokenDecimals: number): string {
+export function toDisplayQty(
+  qty: string | BigNumber,
+  tokenDecimals: number
+): string {
   const bigQtyUnscaled = ethers.utils.formatUnits(qty, tokenDecimals);
   return bigQtyUnscaled;
 }
