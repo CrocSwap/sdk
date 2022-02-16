@@ -157,11 +157,6 @@ export class WarmPathEncoder {
   private poolIdx: PoolType;
   private abiCoder: ethers.utils.AbiCoder;
 
-  private readonly MINT_CONCENTRATED: number = 1;
-  private readonly BURN_CONCENTRATED: number = 2;
-  private readonly MINT_AMBIENT: number = 3;
-  private readonly BURN_AMBIENT: number = 4;
-
   encodeMintConc(
     lowerTick: number,
     upperTick: number,
@@ -171,7 +166,7 @@ export class WarmPathEncoder {
     useSurplus: boolean
   ) {
     return this.encodeWarmPath(
-      this.MINT_CONCENTRATED,
+      MINT_CONCENTRATED,
       lowerTick,
       upperTick,
       liq,
@@ -190,7 +185,7 @@ export class WarmPathEncoder {
     useSurplus: boolean
   ) {
     return this.encodeWarmPath(
-      this.BURN_CONCENTRATED,
+      BURN_CONCENTRATED,
       lowerTick,
       upperTick,
       liq,
@@ -208,7 +203,7 @@ export class WarmPathEncoder {
     useSurplus: boolean
   ) {
     return this.encodeWarmPath(
-      this.BURN_CONCENTRATED,
+      BURN_CONCENTRATED,
       lowerTick,
       upperTick,
       MAX_LIQ,
@@ -225,7 +220,7 @@ export class WarmPathEncoder {
     useSurplus: boolean
   ) {
     return this.encodeWarmPath(
-      this.MINT_AMBIENT,
+      MINT_AMBIENT,
       0,
       0,
       liq,
@@ -242,7 +237,7 @@ export class WarmPathEncoder {
     useSurplus: boolean
   ) {
     return this.encodeWarmPath(
-      this.BURN_AMBIENT,
+      BURN_AMBIENT,
       0,
       0,
       liq,
@@ -258,7 +253,7 @@ export class WarmPathEncoder {
     useSurplus: boolean
   ) {
     return this.encodeWarmPath(
-      this.BURN_AMBIENT,
+      BURN_AMBIENT,
       0,
       0,
       MAX_LIQ,
@@ -278,18 +273,7 @@ export class WarmPathEncoder {
     useSurplus: boolean
   ): string {
     return this.abiCoder.encode(
-      [
-        "uint8",
-        "address",
-        "address",
-        "uint24",
-        "int24",
-        "int24",
-        "uint128",
-        "uint128",
-        "uint128",
-        "bool",
-      ],
+      WARM_ARG_TYPES,
       [
         callCode,
         this.base,
@@ -304,6 +288,50 @@ export class WarmPathEncoder {
       ]
     );
   }
+}
+
+const MINT_CONCENTRATED: number = 1;
+const BURN_CONCENTRATED: number = 2;
+const MINT_AMBIENT: number = 3;
+const BURN_AMBIENT: number = 4;
+
+const WARM_ARG_TYPES = [
+  "uint8",  // Type call 
+  "address", // Base
+  "address", // Quote
+  "uint24", // Pool Index
+  "int24", // Lower Tick
+  "int24", // Upper Tick
+  "uint128", // Liquidity
+  "uint128", // Lower limit
+  "uint128", // Upper limit
+  "bool", // Use Surplus
+]
+
+export function isTradeWarmCall (txData: string): boolean {
+  const TRADE_WARM_METHOD = "0xbb15"
+  return txData.slice(0, 6) === TRADE_WARM_METHOD
+}
+
+interface WarmPathArgs {
+  isMint: boolean,
+  isAmbient: boolean,
+  base: string,
+  quote: string,
+  poolIdx: number,
+  lowerTick: number,
+  upperTick: number,
+  liquidity: BigNumber
+}
+
+export function decodeWarmPathCall (txData: string): WarmPathArgs {
+  const argData = "0x".concat(txData.slice(6 + 4 + 128))
+  const encoder = new ethers.utils.AbiCoder()
+  const result = encoder.decode(WARM_ARG_TYPES, argData)
+  return { isMint: [MINT_AMBIENT, MINT_CONCENTRATED].includes(result[0]),
+    isAmbient: [MINT_AMBIENT, BURN_AMBIENT].includes(result[0]),
+    base: result[1], quote: result[2], poolIdx: result[3],
+    lowerTick: result[4], upperTick: result[5], liquidity: result[6] }
 }
 
 export async function sendAmbientMint(
