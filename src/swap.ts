@@ -1,13 +1,20 @@
 import { ethers, Signer } from "ethers";
+import { CROC_ABI, ERC20_ABI } from "./abis";
 import {
-  CROC_ABI,
-  ERC20_ABI,
-} from "./abis";
-import { Web3Receipt, EthersTokenReceipt, EthersNativeReceipt } from './utils/web3';
-import { getTokenDecimals, fromDisplayQty, toDisplayQty, getBaseTokenAddress, getQuoteTokenAddress } from './utils/token';
-import { encodeCrocPrice, getSpotPrice } from './utils/price';
-import { NODE_URL, POOL_PRIMARY, contractAddresses } from './constants';
-import { toFixedNumber } from './utils/math';
+  Web3Receipt,
+  EthersTokenReceipt,
+  EthersNativeReceipt,
+} from "./utils/web3";
+import {
+  getTokenDecimals,
+  fromDisplayQty,
+  toDisplayQty,
+  getBaseTokenAddress,
+  getQuoteTokenAddress,
+} from "./utils/token";
+import { encodeCrocPrice, getSpotPrice } from "./utils/price";
+import { NODE_URL, POOL_PRIMARY, contractAddresses } from "./constants";
+import { toFixedNumber } from "./utils/math";
 
 export type ParsedSwapReceipt = {
   blockNumber: number;
@@ -32,7 +39,6 @@ export type ParsedSwapReceipt = {
 export async function parseSwapWeb3TxReceipt(
   receipt: Web3Receipt
 ): Promise<ParsedSwapReceipt> {
-  
   const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
 
   // console.log("receipt: " + JSON.stringify(receipt));
@@ -207,9 +213,16 @@ export async function parseSwapEthersTxReceipt(
     const baseQtyUnscaled = parseFloat(
       toDisplayQty(baseQty.toString(), baseDecimals)
     );
-    const quoteQtyUnscaled = parseFloat(
-      toDisplayQty(quoteQty.toString(), quoteDecimals)
-    );
+
+    let quoteQtyUnscaled;
+    try {
+      quoteQtyUnscaled = parseFloat(
+        toDisplayQty(quoteQty.toString(), quoteDecimals)
+      );
+    } catch (error) {
+      quoteQtyUnscaled = 10000000000;
+    }
+
     // ethers.utils.formatUnits(quoteQty, quoteDecimals)
     // const baseSender = ethers.utils.hexStripZeros(events[0].raw.topics[1]);
     // const baseReceiver = ethers.utils.hexStripZeros(events[0].raw.topics[2]);
@@ -420,12 +433,14 @@ export async function getLimitPrice(
 
   if (sellTokenIsBase) {
     limitPrice = encodeCrocPrice(
-      await getSpotPrice(baseTokenAddress, quoteTokenAddress, POOL_PRIMARY) *
-        (1 + slippageTolerance * 0.01))
+      (await getSpotPrice(baseTokenAddress, quoteTokenAddress, POOL_PRIMARY)) *
+        (1 + slippageTolerance * 0.01)
+    );
   } else {
     limitPrice = encodeCrocPrice(
-      await getSpotPrice(baseTokenAddress, quoteTokenAddress, POOL_PRIMARY) *
-          (1 - slippageTolerance * 0.01))
+      (await getSpotPrice(baseTokenAddress, quoteTokenAddress, POOL_PRIMARY)) *
+        (1 - slippageTolerance * 0.01)
+    );
   }
   return limitPrice;
 }
@@ -475,7 +490,10 @@ export async function sendSwap(
       await getTokenDecimals(sellTokenAddress)
     );
   } else {
-    crocQty = fromDisplayQty(qty.toString(), await getTokenDecimals(buyTokenAddress));
+    crocQty = fromDisplayQty(
+      qty.toString(),
+      await getTokenDecimals(buyTokenAddress)
+    );
   }
 
   const limitPrice = getLimitPrice(

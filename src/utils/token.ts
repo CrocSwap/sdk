@@ -6,8 +6,9 @@ export async function approveToken(tokenAddress: string, signer: Signer) {
 
   const tokenContract = new Contract(tokenAddress, ERC20_ABI, signer);
 
-  const qty = ethers.BigNumber.from(Number.MAX_SAFE_INTEGER - 1);
-  const tx = await tokenContract.approve(dex, qty);
+  // const qty = ethers.BigNumber.from(Number.MAX_SAFE_INTEGER - 1);
+  const weiQty = fromDisplayQty("10000000000", 18);
+  const tx = await tokenContract.approve(dex, weiQty);
 
   return tx;
 }
