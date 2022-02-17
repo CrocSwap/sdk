@@ -1,7 +1,6 @@
-import { queryClaim, AmbientClaim, RangeClaim } from "../position";
+import { queryClaim, AmbientClaim, RangeClaim, queryPos, AmbientLiqPos, RangeLiqPos } from "../position";
 import { ethers } from "ethers";
 import { NODE_URL } from "..";
-
 
 let ropstenProvider = new ethers.providers.JsonRpcProvider(NODE_URL);
 const ambPos = "0x83143c5d6e1dadd337e7d8618d6c0bf50bdfd154f08c7f9310dda845cf77ad53"
@@ -32,3 +31,17 @@ test("concentrated liq claim", async () => {
     expect(claim.concLiq.toString()).toBe("277973882314227712")
     expect(claim.feeMileage).toBe(0)
 });
+
+test("ambient pos", async() => {
+    let pos = await queryPos(ambPos, ambMintTx, ropstenProvider) as AmbientLiqPos
+    expect(pos.ambientLiq.toString()).toBe("10136610108002")
+    expect(pos.quoteQty.toString()).toBe("150371202")    
+    expect(pos.baseQty.toString()).toBe("683314779938488320")
+})
+
+test("conc pos", async() => {
+    let pos = await queryPos(concPos, concMintTx, ropstenProvider) as RangeLiqPos
+    console.log(pos)
+    expect(pos.quoteQty.toString()).toBe("0")    
+    expect(pos.baseQty.toString()).toBe("10875090476728320")
+})

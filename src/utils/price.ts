@@ -6,15 +6,18 @@ import {
   getBaseTokenAddress,
 } from "./token";
 import { POOL_PRIMARY, GRID_SIZE_DFLT } from "../constants";
+import { JsonRpcProvider } from '@ethersproject/providers';
 
 type Tick = number;
 
 export async function getSpotPrice(
   baseTokenAddress: string,
   quoteTokenAddress: string,
-  pool: number = POOL_PRIMARY
+  pool: number = POOL_PRIMARY,
+  providerArg?: JsonRpcProvider
 ): Promise<number> {
-  const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
+  const provider = providerArg ? providerArg : 
+    new ethers.providers.JsonRpcProvider(NODE_URL);
 
   const queryAddress = contractAddresses["QUERY_ADDR"];
   const queryContract = new Contract(queryAddress, QUERY_ABI, provider);

@@ -1,8 +1,10 @@
 import { POOL_PRIMARY, contractAddresses } from "./constants";
-import { BytesLike, ethers, BigNumber } from 'ethers';
+import { BytesLike, ethers, BigNumber, Contract } from 'ethers';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { isTradeWarmCall, decodeWarmPathCall } from './liquidity';
-import { bigNumToFloat } from './utils/math';
+import { isTradeWarmCall, decodeWarmPathCall, baseTokenForConcLiq, quoteTokenForConcLiq, baseVirtualReserves, quoteVirtualReserves } from './liquidity';
+import { bigNumToFloat, fromFixedGrowth, floatToBigNum } from './utils/math';
+import { decodeCrocPrice, tickToPrice } from './utils';
+import { QUERY_ABI } from './abis/query';
 
 export interface AmbientClaim {  
     owner: string,
@@ -25,7 +27,69 @@ export interface RangeClaim {
     lpType: "range"
 }
 
+export type AmbientLiqPos = AmbientClaim & {
+    poolPrice: number,
+    ambientLiq: BigNumber,
+    baseQty: BigNumber,
+    quoteQty: BigNumber,
+    accumBaseFees: BigNumber,
+    accumQuoteFees: BigNumber
+}
+
+export type RangeLiqPos = RangeClaim & {
+    poolPrice: number,
+    lowerPrice: number,
+    upperPrice: number,
+    ambientLiq: BigNumber,
+    baseQty: BigNumber,
+    quoteQty: BigNumber,
+    accumBaseFees: BigNumber,
+    accumQuoteFees: BigNumber
+}
+
 type Hash = string
+
+export async function queryPos (posHash: Hash, txHash: Hash, provider: JsonRpcProvider):
+    Promise<AmbientLiqPos | RangeLiqPos | undefined> {
+    let claim = await queryClaim(posHash, txHash, provider)
+    if (claim === undefined) { 
+        return undefined 
+    } else if (claim.lpType === "ambient") {
+        return joinAmbientPos(claim, provider)
+    } else {
+        return joinConcPos(claim, provider)
+    }
+}
+
+async function joinConcPos (claim: RangeClaim, provider: JsonRpcProvider): Promise<RangeLiqPos> {
+    let queryContract = new Contract(contractAddresses.QUERY_ADDR, QUERY_ABI, provider)
+    let curve = queryContract.queryCurve(claim.baseToken, claim.quoteToken, claim.poolType);
+    let price = decodeCrocPrice((await curve).priceRoot_)
+
+    let lowerPrice = tickToPrice(claim.lowerTick)
+    let upperPrice = tickToPrice(claim.upperTick)
+    const baseQty = baseTokenForConcLiq(price, claim.concLiq, lowerPrice, upperPrice)
+    const quoteQty = quoteTokenForConcLiq(price, claim.concLiq, lowerPrice, upperPrice)
+
+    return Object.assign({ poolPrice: price, lowerPrice: lowerPrice, upperPrice: upperPrice,
+        ambientLiq: BigNumber.from(0), baseQty: baseQty, quoteQty: quoteQty,
+        accumBaseFees: BigNumber.from(0), accumQuoteFees: BigNumber.from(0)
+    }, claim)
+}
+
+async function joinAmbientPos (claim: AmbientClaim, provider: JsonRpcProvider): Promise<AmbientLiqPos> {
+    let queryContract = new Contract(contractAddresses.QUERY_ADDR, QUERY_ABI, provider)
+    let curve = queryContract.queryCurve(claim.baseToken, claim.quoteToken, claim.poolType);
+    let price = decodeCrocPrice((await curve).priceRoot_)
+    let ambiGrowth = fromFixedGrowth((await curve).accum_.ambientGrowth_)
+    let liq = floatToBigNum(bigNumToFloat(claim.ambientSeeds) * ambiGrowth)
+    return Object.assign({ poolPrice: price,
+        ambientLiq: liq, baseQty: baseVirtualReserves(price, liq), 
+        quoteQty: quoteVirtualReserves(price, liq),
+        accumBaseFees: BigNumber.from(0), accumQuoteFees: BigNumber.from(0)
+    }, claim)
+}
+
 
 export async function queryClaim (posHash: Hash, txHash: Hash, provider: JsonRpcProvider): 
     Promise<AmbientClaim | RangeClaim | undefined> {

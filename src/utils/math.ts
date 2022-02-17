@@ -34,3 +34,7 @@ export function truncateRightBits (x: BigNumber, bits: number): BigNumber {
   const mult = BigNumber.from(2).pow(bits)
   return x.div(mult).mul(mult)
 }
+
+export function fromFixedGrowth (x: BigNumber): number {
+  return 1 + bigNumToFloat(x) / (2 ** 48)
+}

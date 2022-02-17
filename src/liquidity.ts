@@ -26,7 +26,7 @@ type PoolType = number;
 export function liquidityForBaseQty(
   price: number,
   qty: BigNumber,
-  mult = 1.0
+  mult: number = 1.0
 ): BigNumber {
   return floatToBigNum(
     Math.floor((bigNumToFloat(qty) / Math.sqrt(price)) * mult)
@@ -48,6 +48,14 @@ export function liquidityForQuoteQty(
   return floatToBigNum(
     Math.floor(bigNumToFloat(qty) * Math.sqrt(price) * mult)
   );
+}
+
+export function baseVirtualReserves (price: number, liq: BigNumber, mult: number = 1.0): BigNumber {
+  return floatToBigNum(bigNumToFloat(liq) * Math.sqrt(price) * mult)
+}
+
+export function quoteVirtualReserves (price: number, liq: BigNumber, mult: number = 1.0): BigNumber {
+  return floatToBigNum(bigNumToFloat(liq) / Math.sqrt(price) * mult)
 }
 
 /* Converts a fixed amount of base token deposits to liquidity for a concentrated range order
@@ -83,6 +91,20 @@ export function liquidityForQuoteConc(
   const concFactor = quoteConcFactor(price, lower, upper);
   return liquidityForQuoteQty(price, qty, concFactor);
 }
+
+export function baseTokenForConcLiq (price: number, liq: BigNumber, 
+  lower: number, upper: number): 
+  BigNumber {
+  const concFactor = baseConcFactor(price, lower, upper)
+  return baseVirtualReserves(price, liq, 1/concFactor)
+}
+
+export function quoteTokenForConcLiq (price: number, liq: BigNumber, 
+  lower: number, upper: number): BigNumber {
+  const concFactor = quoteConcFactor(price, lower, upper)
+  return quoteVirtualReserves(price, liq, 1/concFactor)
+}
+
 
 /* Calculates the concentration leverage factor for the base token given the range relative to
  * the current price in the pool.
