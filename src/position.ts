@@ -10,7 +10,7 @@ export interface AmbientClaim {
     owner: string,
     baseToken: string,
     quoteToken: string,
-    poolType: number
+    poolType: number,
     ambientSeeds: BigNumber
     lpType: "ambient"
 }
@@ -47,7 +47,39 @@ export type RangeLiqPos = RangeClaim & {
     accumQuoteFees: BigNumber
 }
 
+export type LiqPos = AmbientLiqPos | RangeLiqPos
+
 type Hash = string
+
+export interface LPAnchor {
+    tx: string,
+    pos: string
+}
+
+export async function queryPosAnchors (anchors: LPAnchor[], provider: JsonRpcProvider): 
+    Promise<LiqPos[]> {
+    let posCandMap: Map<string, string[]> = new Map()
+    
+    anchors.forEach(a => { 
+        let entry = posCandMap.get(a.pos)
+        if (entry === undefined) {
+            entry = new Array()
+            posCandMap.set(a.pos, entry)
+        }
+        entry.push(a.tx)
+    })
+
+    let lps = Array.from(posCandMap.entries()).map(async ([pos, txs],) => {
+        for (let i = 0; i < txs.length; ++i) {
+            let lp = queryPos(pos, txs[i], provider)
+            if ((await lp) !== undefined) { return lp }
+        }
+        return undefined
+    })
+
+    return (await Promise.all(lps))
+        .filter(lp => lp !== undefined) as LiqPos[]
+}
 
 export async function queryPos (posHash: Hash, txHash: Hash, provider: JsonRpcProvider):
     Promise<AmbientLiqPos | RangeLiqPos | undefined> {
@@ -94,6 +126,8 @@ async function joinAmbientPos (claim: AmbientClaim, provider: JsonRpcProvider): 
 export async function queryClaim (posHash: Hash, txHash: Hash, provider: JsonRpcProvider): 
     Promise<AmbientClaim | RangeClaim | undefined> {
     const txn = await provider.getTransaction(txHash)
+    if (!txn) { return undefined }
+
     const callData = txn.data
     if (!isTradeWarmCall(callData)) { return undefined }
     let args = decodeWarmPathCall(callData)

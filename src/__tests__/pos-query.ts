@@ -1,4 +1,4 @@
-import { queryClaim, AmbientClaim, RangeClaim, queryPos, AmbientLiqPos, RangeLiqPos } from "../position";
+import { queryClaim, AmbientClaim, RangeClaim, queryPos, AmbientLiqPos, RangeLiqPos, queryPosAnchors } from "../position";
 import { ethers } from "ethers";
 import { NODE_URL } from "..";
 
@@ -41,7 +41,16 @@ test("ambient pos", async() => {
 
 test("conc pos", async() => {
     let pos = await queryPos(concPos, concMintTx, ropstenProvider) as RangeLiqPos
-    console.log(pos)
     expect(pos.quoteQty.toString()).toBe("0")    
     expect(pos.baseQty.toString()).toBe("10875090476728320")
+})
+
+test("query anchors", async() => {
+    const dummyTx = "0xe06b914ab50fe192d78fc4c6dbdfbd8395443d071e394f15e8b1b38524fbe6a5"
+    const dummyPos = "0x0"
+    const anchors = [{ tx: dummyTx, pos: dummyPos}, { tx: dummyTx, pos: ambPos},
+        { tx: ambMintTx, pos: ambPos}, { tx: dummyTx, pos: concPos},
+        { tx: concMintTx, pos: concPos}]
+    let pos = await queryPosAnchors(anchors, ropstenProvider)
+    console.log(pos)
 })
