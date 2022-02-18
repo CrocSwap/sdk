@@ -558,3 +558,76 @@ export async function sendConcMint(
 
   return tx;
 }
+
+export async function burnConcAll(
+  baseTokenAddress: string,
+  quoteTokenAddress: string,
+  lowerTick: number,
+  upperTick: number,
+  limitLow: number,
+  limitHigh: number,
+  signer: Signer
+) {
+  const crocContract = new ethers.Contract(
+    contractAddresses["CROC_SWAP_ADDR"],
+    CROC_ABI,
+    signer
+  );
+  const warmPathEncoder = new WarmPathEncoder(
+    baseTokenAddress,
+    quoteTokenAddress,
+    35000
+  );
+
+  const args = warmPathEncoder.encodeBurnConcAll(
+    lowerTick,
+    upperTick,
+    limitLow,
+    limitHigh,
+    false
+  );
+
+  // if baseToken = ETH
+  const tx = await crocContract.tradeWarm(args, {
+    // gasLimit: 1000000,
+  });
+
+  return tx;
+}
+export async function burnConcPartial(
+  baseTokenAddress: string,
+  quoteTokenAddress: string,
+  lowerTick: number,
+  upperTick: number,
+  liquidity: BigNumber,
+  limitLow: number,
+  limitHigh: number,
+  signer: Signer
+) {
+  const crocContract = new ethers.Contract(
+    contractAddresses["CROC_SWAP_ADDR"],
+    CROC_ABI,
+    signer
+  );
+  const warmPathEncoder = new WarmPathEncoder(
+    baseTokenAddress,
+    quoteTokenAddress,
+    35000
+  );
+
+  const args = warmPathEncoder.encodeBurnConc(
+    lowerTick,
+    upperTick,
+    liquidity,
+    limitLow,
+    limitHigh,
+    false
+  );
+
+  // if baseToken = ETH
+  const tx = await crocContract.tradeWarm(args, {
+    // gasLimit: 1000000,
+  });
+
+  return tx;
+}
