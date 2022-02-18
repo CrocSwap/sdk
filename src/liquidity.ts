@@ -50,12 +50,20 @@ export function liquidityForQuoteQty(
   );
 }
 
-export function baseVirtualReserves (price: number, liq: BigNumber, mult: number = 1.0): BigNumber {
-  return floatToBigNum(bigNumToFloat(liq) * Math.sqrt(price) * mult)
+export function baseVirtualReserves(
+  price: number,
+  liq: BigNumber,
+  mult: number = 1.0
+): BigNumber {
+  return floatToBigNum(bigNumToFloat(liq) * Math.sqrt(price) * mult);
 }
 
-export function quoteVirtualReserves (price: number, liq: BigNumber, mult: number = 1.0): BigNumber {
-  return floatToBigNum(bigNumToFloat(liq) / Math.sqrt(price) * mult)
+export function quoteVirtualReserves(
+  price: number,
+  liq: BigNumber,
+  mult: number = 1.0
+): BigNumber {
+  return floatToBigNum((bigNumToFloat(liq) / Math.sqrt(price)) * mult);
 }
 
 /* Converts a fixed amount of base token deposits to liquidity for a concentrated range order
@@ -92,19 +100,25 @@ export function liquidityForQuoteConc(
   return liquidityForQuoteQty(price, qty, concFactor);
 }
 
-export function baseTokenForConcLiq (price: number, liq: BigNumber, 
-  lower: number, upper: number): 
-  BigNumber {
-  const concFactor = baseConcFactor(price, lower, upper)
-  return baseVirtualReserves(price, liq, 1/concFactor)
+export function baseTokenForConcLiq(
+  price: number,
+  liq: BigNumber,
+  lower: number,
+  upper: number
+): BigNumber {
+  const concFactor = baseConcFactor(price, lower, upper);
+  return baseVirtualReserves(price, liq, 1 / concFactor);
 }
 
-export function quoteTokenForConcLiq (price: number, liq: BigNumber, 
-  lower: number, upper: number): BigNumber {
-  const concFactor = quoteConcFactor(price, lower, upper)
-  return quoteVirtualReserves(price, liq, 1/concFactor)
+export function quoteTokenForConcLiq(
+  price: number,
+  liq: BigNumber,
+  lower: number,
+  upper: number
+): BigNumber {
+  const concFactor = quoteConcFactor(price, lower, upper);
+  return quoteVirtualReserves(price, liq, 1 / concFactor);
 }
-
 
 /* Calculates the concentration leverage factor for the base token given the range relative to
  * the current price in the pool.
@@ -294,21 +308,18 @@ export class WarmPathEncoder {
     limitHigh: number,
     useSurplus: boolean
   ): string {
-    return this.abiCoder.encode(
-      WARM_ARG_TYPES,
-      [
-        callCode,
-        this.base,
-        this.quote,
-        this.poolIdx,
-        lowerTick,
-        upperTick,
-        liq,
-        encodeCrocPrice(limitLow),
-        encodeCrocPrice(limitHigh),
-        useSurplus,
-      ]
-    );
+    return this.abiCoder.encode(WARM_ARG_TYPES, [
+      callCode,
+      this.base,
+      this.quote,
+      this.poolIdx,
+      lowerTick,
+      upperTick,
+      liq,
+      encodeCrocPrice(limitLow),
+      encodeCrocPrice(limitHigh),
+      useSurplus,
+    ]);
   }
 }
 
@@ -318,7 +329,7 @@ const MINT_AMBIENT: number = 3;
 const BURN_AMBIENT: number = 4;
 
 const WARM_ARG_TYPES = [
-  "uint8",  // Type call 
+  "uint8", // Type call
   "address", // Base
   "address", // Quote
   "uint24", // Pool Index
@@ -328,32 +339,38 @@ const WARM_ARG_TYPES = [
   "uint128", // Lower limit
   "uint128", // Upper limit
   "bool", // Use Surplus
-]
+];
 
-export function isTradeWarmCall (txData: string): boolean {
-  const TRADE_WARM_METHOD = "0xbb15"
-  return txData.slice(0, 6) === TRADE_WARM_METHOD
+export function isTradeWarmCall(txData: string): boolean {
+  const TRADE_WARM_METHOD = "0xbb15";
+  return txData.slice(0, 6) === TRADE_WARM_METHOD;
 }
 
 interface WarmPathArgs {
-  isMint: boolean,
-  isAmbient: boolean,
-  base: string,
-  quote: string,
-  poolIdx: number,
-  lowerTick: number,
-  upperTick: number,
-  liquidity: BigNumber
+  isMint: boolean;
+  isAmbient: boolean;
+  base: string;
+  quote: string;
+  poolIdx: number;
+  lowerTick: number;
+  upperTick: number;
+  liquidity: BigNumber;
 }
 
-export function decodeWarmPathCall (txData: string): WarmPathArgs {
-  const argData = "0x".concat(txData.slice(6 + 4 + 128))
-  const encoder = new ethers.utils.AbiCoder()
-  const result = encoder.decode(WARM_ARG_TYPES, argData)
-  return { isMint: [MINT_AMBIENT, MINT_CONCENTRATED].includes(result[0]),
+export function decodeWarmPathCall(txData: string): WarmPathArgs {
+  const argData = "0x".concat(txData.slice(6 + 4 + 128));
+  const encoder = new ethers.utils.AbiCoder();
+  const result = encoder.decode(WARM_ARG_TYPES, argData);
+  return {
+    isMint: [MINT_AMBIENT, MINT_CONCENTRATED].includes(result[0]),
     isAmbient: [MINT_AMBIENT, BURN_AMBIENT].includes(result[0]),
-    base: result[1], quote: result[2], poolIdx: result[3],
-    lowerTick: result[4], upperTick: result[5], liquidity: result[6] }
+    base: result[1],
+    quote: result[2],
+    poolIdx: result[3],
+    lowerTick: result[4],
+    upperTick: result[5],
+    liquidity: result[6],
+  };
 }
 
 export async function sendAmbientMint(
@@ -395,6 +412,34 @@ export async function sendAmbientMint(
       // gasLimit: 1000000,
     });
   }
+
+  return tx;
+}
+
+export async function burnAmbientAll(
+  baseTokenAddress: string,
+  quoteTokenAddress: string,
+  limitLow: number,
+  limitHigh: number,
+  signer: Signer
+) {
+  const crocContract = new ethers.Contract(
+    contractAddresses["CROC_SWAP_ADDR"],
+    CROC_ABI,
+    signer
+  );
+  const warmPathEncoder = new WarmPathEncoder(
+    baseTokenAddress,
+    quoteTokenAddress,
+    35000
+  );
+
+  const args = warmPathEncoder.encodeBurnAmbientAll(limitLow, limitHigh, false);
+
+  // if baseToken = ETH
+  const tx = await crocContract.tradeWarm(args, {
+    // gasLimit: 1000000,
+  });
 
   return tx;
 }
