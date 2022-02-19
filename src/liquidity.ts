@@ -404,7 +404,7 @@ export async function sendAmbientMint(
   // if baseToken = ETH
   if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
     tx = await crocContract.tradeWarm(args, {
-      value: parseEther(ethValue.toString()),
+      value: parseEther((ethValue * 1.01).toString()),
       // gasLimit: 1000000,
     });
   } else {
