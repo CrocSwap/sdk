@@ -297,6 +297,53 @@ export async function parseSwapEthersTxReceipt(
       conversionRateString: conversionRateString,
     };
     return parsedReceipt;
+  } else if (receipt.logs.length === 0) {
+    // console.log("receipt: " + JSON.stringify(receipt));
+    // console.log("token receipt");
+    const blockNumber = receipt.blockNumber;
+
+    const timestamp = (await provider.getBlock(blockNumber)).timestamp;
+
+    const transactionHash = receipt.transactionHash;
+
+    const gasUsed = receipt.gasUsed.toNumber();
+    const effectiveGasPrice = receipt.effectiveGasPrice.toNumber();
+    const effectiveGasPriceInGwei = ethers.utils.formatUnits(
+      effectiveGasPrice,
+      "gwei"
+    );
+    const gasCostInWei = gasUsed * effectiveGasPrice;
+    const gasCostInEther = ethers.utils.formatEther(gasCostInWei.toString());
+
+    const status = receipt.status === 1 ? true : false;
+
+    let sellQtyUnscaled, buyQtyUnscaled, buySymbol, sellSymbol;
+
+    let lessExpensiveSymbol, moreExpensiveSymbol;
+    let readableConversionRate;
+
+    const conversionRateString = `Swapped ${sellQtyUnscaled} ${sellSymbol} for ${buyQtyUnscaled} ${buySymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
+
+    const parsedReceipt: ParsedSwapReceipt = {
+      blockNumber: blockNumber,
+      timestamp: timestamp,
+      transactionHash: transactionHash,
+      gasUsed: gasUsed,
+      gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
+      gasCostInEther: parseFloat(gasCostInEther),
+      status: status,
+      sellQtyUnscaled: 0,
+      buyQtyUnscaled: 0,
+      sellAddress: "xxx",
+      sellSymbol: "xxx",
+      buyAddress: "xxx",
+      buySymbol: "xxx",
+      moreExpensiveSymbol: "xxx",
+      lessExpensiveSymbol: "xxx",
+      readableConversionRate: 0,
+      conversionRateString: conversionRateString,
+    };
+    return parsedReceipt;
   } else {
     // console.log("receipt: " + JSON.stringify(receipt));
     // console.log("token receipt");
