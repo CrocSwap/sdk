@@ -6,7 +6,7 @@ import {
   getBaseTokenAddress,
 } from "./token";
 import { POOL_PRIMARY, GRID_SIZE_DFLT } from "../constants";
-import { JsonRpcProvider } from '@ethersproject/providers';
+import { JsonRpcProvider } from "@ethersproject/providers";
 
 type Tick = number;
 
@@ -16,8 +16,9 @@ export async function getSpotPrice(
   pool: number = POOL_PRIMARY,
   providerArg?: JsonRpcProvider
 ): Promise<number> {
-  const provider = providerArg ? providerArg : 
-    new ethers.providers.JsonRpcProvider(NODE_URL);
+  const provider = providerArg
+    ? providerArg
+    : new ethers.providers.JsonRpcProvider(NODE_URL);
 
   const queryAddress = contractAddresses["QUERY_ADDR"];
   const queryContract = new Contract(queryAddress, QUERY_ABI, provider);
@@ -34,17 +35,18 @@ export async function getSpotPrice(
 export async function getSpotPriceDisplay(
   baseTokenAddress: string,
   quoteTokenAddress: string,
-  poolIdx: number = POOL_PRIMARY
+  poolIdx: number = POOL_PRIMARY,
+  currentProvider?: JsonRpcProvider
 ): Promise<number> {
   const poolBase = getBaseTokenAddress(baseTokenAddress, quoteTokenAddress);
   const poolQuote = getQuoteTokenAddress(baseTokenAddress, quoteTokenAddress);
   const isInverted = poolQuote === baseTokenAddress;
 
-  const price = getSpotPrice(poolBase, poolQuote, poolIdx);
+  const price = getSpotPrice(poolBase, poolQuote, poolIdx, currentProvider);
   return toDisplayPrice(
     await price,
-    await getTokenDecimals(baseTokenAddress),
-    await getTokenDecimals(quoteTokenAddress),
+    await getTokenDecimals(baseTokenAddress, currentProvider),
+    await getTokenDecimals(quoteTokenAddress, currentProvider),
     isInverted
   );
 }

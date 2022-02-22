@@ -1,4 +1,5 @@
 import { contractAddresses, ERC20_ABI, NODE_URL } from "..";
+import { JsonRpcProvider } from "@ethersproject/providers";
 import { Signer, Contract, ethers, BigNumber } from "ethers";
 
 export async function approveToken(tokenAddress: string, signer: Signer) {
@@ -49,11 +50,20 @@ export async function getTokenAllowance(
   return allowance;
 }
 
-export async function getTokenDecimals(tokenAddress: string): Promise<number> {
+export async function getTokenDecimals(
+  tokenAddress: string,
+  currentProvider?: JsonRpcProvider
+): Promise<number> {
+  let provider;
+  // console.log({ currentProvider });
+  if (currentProvider) {
+    provider = currentProvider;
+  } else {
+    provider = new ethers.providers.JsonRpcProvider(NODE_URL);
+  }
   if (tokenAddress === contractAddresses.ZERO_ADDR) {
     return 18;
   }
-  const provider = new ethers.providers.JsonRpcProvider(NODE_URL);
   const tokenContract = new Contract(tokenAddress, ERC20_ABI, provider);
   const decimals = await tokenContract.decimals();
   return decimals;
