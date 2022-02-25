@@ -486,6 +486,7 @@ export async function sendConcMint(
   tickLower: number,
   tickHigher: number,
   tokenQty: string,
+  qtyIsBase: boolean,
   limitLow: number,
   limitHigh: number,
   ethValue: number,
@@ -512,18 +513,30 @@ export async function sendConcMint(
   // const limitLowWei = fromDisplayQty(limitLow.toString(), 18);
   // const limitHighWei = fromDisplayQty(limitLow.toString(), 18);
 
-  const baseTokenDecimals = await getTokenDecimals(baseTokenAddress);
-
   // console.log({ baseTokenDecimals });
 
-  const tokenQtyWei = fromDisplayQty(tokenQty, baseTokenDecimals);
+  let liqForBaseConc, tokenDecimals, tokenQtyWei;
 
-  const liqForBaseConc = liquidityForBaseConc(
-    poolWeiPrice,
-    tokenQtyWei,
-    tickToPrice(tickLower),
-    tickToPrice(tickHigher)
-  );
+  if (qtyIsBase) {
+    tokenDecimals = await getTokenDecimals(baseTokenAddress);
+    tokenQtyWei = fromDisplayQty(tokenQty, tokenDecimals);
+    liqForBaseConc = liquidityForBaseConc(
+      poolWeiPrice,
+      tokenQtyWei,
+      tickToPrice(tickLower),
+      tickToPrice(tickHigher)
+    );
+  } else {
+    tokenDecimals = await getTokenDecimals(quoteTokenAddress);
+    tokenQtyWei = fromDisplayQty(tokenQty, tokenDecimals);
+    liqForBaseConc = liquidityForQuoteConc(
+      poolWeiPrice,
+      tokenQtyWei,
+      tickToPrice(tickLower),
+      tickToPrice(tickHigher)
+    );
+  }
+
   console.log("liqForBaseConc: " + liqForBaseConc.toString());
 
   const sizedLiq = roundForConcLiq(liqForBaseConc);
@@ -543,7 +556,7 @@ export async function sendConcMint(
 
   let tx;
   // if baseToken = ETH
-  if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
+  if (baseTokenAddress === contractAddresses.ZERO_ADDR && qtyIsBase) {
     const etherToSend = parseEther((ethValue * 1.01).toString());
 
     tx = await crocContract.tradeWarm(args, {
