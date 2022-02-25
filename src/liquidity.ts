@@ -566,7 +566,8 @@ export async function sendConcMint(
   let tx;
   // if baseToken = ETH
   if (baseTokenAddress === contractAddresses.ZERO_ADDR && !positionHigh) {
-    const etherToSend = parseEther((ethValue * 1.01).toString());
+    const fixedEthValue = (ethValue * 1.01).toFixed(18);
+    const etherToSend = parseEther(fixedEthValue.toString());
 
     tx = await crocContract.tradeWarm(args, {
       value: etherToSend,
