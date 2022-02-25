@@ -8,6 +8,8 @@ import {
   tickToPrice,
   truncateRightBits,
   getTokenDecimals,
+  // pinTickLower,
+  pinTickUpper,
   // fromDisplayPrice,
 } from "./utils";
 import { CROC_ABI } from "./abis";
@@ -481,7 +483,7 @@ export async function burnAmbientAll(
 export async function sendConcMint(
   baseTokenAddress: string,
   quoteTokenAddress: string,
-  poolPrice: number,
+  // poolPrice: number,
   poolWeiPrice: number,
   tickLower: number,
   tickHigher: number,
@@ -492,12 +494,19 @@ export async function sendConcMint(
   ethValue: number,
   signer: Signer
 ) {
-  console.log({ poolPrice });
-  console.log({ tickLower });
-  console.log({ tickHigher });
-  console.log({ tokenQty });
-  console.log({ limitLow });
-  console.log({ limitHigh });
+  // console.log({ poolPrice });
+  // console.log({ tickLower });
+  // console.log({ tickHigher });
+  // console.log({ tokenQty });
+  // console.log({ limitLow });
+  // console.log({ limitHigh });
+  // console.log({ qtyIsBase });
+
+  // const poolPriceTickLower = pinTickLower(poolWeiPrice);
+  const poolPriceTickUpper = pinTickUpper(poolWeiPrice);
+
+  // const positionLow = tickHigher < poolPriceTickLower;
+  const positionHigh = tickLower > poolPriceTickUpper;
 
   const crocContract = new ethers.Contract(
     contractAddresses["CROC_SWAP_ADDR"],
@@ -537,7 +546,7 @@ export async function sendConcMint(
     );
   }
 
-  console.log("liqForBaseConc: " + liqForBaseConc.toString());
+  // console.log("liqForBaseConc: " + liqForBaseConc.toString());
 
   const sizedLiq = roundForConcLiq(liqForBaseConc);
 
@@ -556,7 +565,7 @@ export async function sendConcMint(
 
   let tx;
   // if baseToken = ETH
-  if (baseTokenAddress === contractAddresses.ZERO_ADDR && qtyIsBase) {
+  if (baseTokenAddress === contractAddresses.ZERO_ADDR && !positionHigh) {
     const etherToSend = parseEther((ethValue * 1.01).toString());
 
     tx = await crocContract.tradeWarm(args, {
