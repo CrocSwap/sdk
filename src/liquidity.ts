@@ -405,8 +405,10 @@ export async function sendAmbientMint(
   let tx;
   // if baseToken = ETH
   if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
+    const fixedEthValue = (ethValue * 1.01).toFixed(18);
+
     tx = await crocContract.tradeWarm(args, {
-      value: parseEther((ethValue * 1.01).toString()),
+      value: parseEther(fixedEthValue.toString()),
       // gasLimit: 1000000,
     });
   } else {
