@@ -113,6 +113,9 @@ export async function parseSwapWeb3TxReceipt(
   }
 
   const conversionRate = sellQtyUnscaled / buyQtyUnscaled;
+  // console.log({ sellQtyUnscaled });
+  // console.log({ buyQtyUnscaled });
+  // console.log({ conversionRate });
 
   let lessExpensiveSymbol, moreExpensiveSymbol;
   let readableConversionRate;
@@ -120,17 +123,17 @@ export async function parseSwapWeb3TxReceipt(
   if (conversionRate < 1) {
     lessExpensiveSymbol = buySymbol;
     moreExpensiveSymbol = sellSymbol;
-    readableConversionRate = 1 / conversionRate;
+    // readableConversionRate = 1 / conversionRate;
   } else {
     lessExpensiveSymbol = sellSymbol;
     moreExpensiveSymbol = buySymbol;
-    readableConversionRate = conversionRate;
+    // readableConversionRate = conversionRate;
   }
 
-  if (readableConversionRate < 2) {
-    readableConversionRate = toFixedNumber(readableConversionRate, 6);
+  if (conversionRate < 2) {
+    readableConversionRate = toFixedNumber(conversionRate, 6);
   } else {
-    readableConversionRate = toFixedNumber(readableConversionRate, 2);
+    readableConversionRate = toFixedNumber(conversionRate, 2);
   }
 
   const conversionRateString = `Swapped ${sellQtyUnscaled} ${sellSymbol} for ${buyQtyUnscaled} ${buySymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
