@@ -1,4 +1,4 @@
-import { ethers, Signer } from "ethers";
+import { BigNumber, ethers, Signer } from "ethers";
 import { CROC_ABI, ERC20_ABI } from "./abis";
 import {
   Web3Receipt,
@@ -499,7 +499,8 @@ export async function sendSwap(
   sellTokenAddress: string,
   buyTokenAddress: string,
   qtyIsSellToken: boolean,
-  qty: number,
+  qty: BigNumber,
+  ethValue: BigNumber,
   slippageTolerance: number,
   POOL_IDX: number,
   signer: Signer
@@ -559,10 +560,11 @@ export async function sendSwap(
       POOL_IDX,
       sellTokenIsBase, // ?? isBuy (i.e. converting base token for quote token)
       qtyIsBase, // qty is base token -- boolean whether qty represents BASE or QUOTE
-      crocQty, // quantity of token to divest
+      crocQty, // quantity of primary token
       limitPrice, // slippage-adjusted price client will accept
       false, // ?? surplus
-      { value: crocQty }
+      { value: ethValue }
+      // { value: ethValue, gasLimit: 1000000 }
       // { gasLimit: 1000000 }
     );
   } else {
