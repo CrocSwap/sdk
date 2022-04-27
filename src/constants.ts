@@ -22,4 +22,4 @@ export const NODE_URL =
 
 export const POOL_PRIMARY = 36000;
 
-export const GRID_SIZE_DFLT = 30;
+export const GRID_SIZE_DFLT = 64;
