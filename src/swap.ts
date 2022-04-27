@@ -505,6 +505,8 @@ export async function sendSwap(
   POOL_IDX: number,
   signer: Signer
 ) {
+  const minOut = 0;
+
   const crocContract = new ethers.Contract(
     contractAddresses["CROC_SWAP_ADDR"],
     CROC_ABI,
@@ -547,7 +549,7 @@ export async function sendSwap(
     );
   }
 
-  const limitPrice = getLimitPrice(
+  const limitPrice = await getLimitPrice(
     sellTokenAddress,
     buyTokenAddress,
     slippageTolerance
@@ -561,8 +563,10 @@ export async function sendSwap(
       sellTokenIsBase, // ?? isBuy (i.e. converting base token for quote token)
       qtyIsBase, // qty is base token -- boolean whether qty represents BASE or QUOTE
       crocQty, // quantity of primary token
+      BigNumber.from(0), // tip argument - set to 0 
       limitPrice, // slippage-adjusted price client will accept
-      false, // ?? surplus
+      minOut,
+      0, // ?? surplus
       { value: ethValue }
       // { value: ethValue, gasLimit: 1000000 }
       // { gasLimit: 1000000 }
@@ -575,8 +579,10 @@ export async function sendSwap(
       sellTokenIsBase, // ?? isBuy (i.e. converting base token for quote token)
       qtyIsBase, // qty is base token -- boolean whether qty represents BASE or QUOTE
       crocQty, // quantity of token to divest
+      BigNumber.from(0), // tip argument - set to 0 
       limitPrice, // slippage-adjusted price client will accept
-      false // ?? surplus
+      minOut,
+      0 // ?? surplus
       // { gasLimit: 1000000 }
     );
   }

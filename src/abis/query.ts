@@ -1,207 +1,389 @@
 export const QUERY_ABI = [
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "dex",
-        type: "address",
-      },
+        "internalType": "address",
+        "name": "dex",
+        "type": "address"
+      }
     ],
-    stateMutability: "nonpayable",
-    type: "constructor",
+    "stateMutability": "nonpayable",
+    "type": "constructor"
   },
   {
-    inputs: [],
-    name: "dex_",
-    outputs: [
+    "inputs": [],
+    "name": "dex_",
+    "outputs": [
       {
-        internalType: "address",
-        name: "",
-        type: "address",
-      },
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "base",
-        type: "address",
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
       },
       {
-        internalType: "address",
-        name: "quote",
-        type: "address",
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
       },
       {
-        internalType: "uint24",
-        name: "poolIdx",
-        type: "uint24",
-      },
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      }
     ],
-    name: "queryCurve",
-    outputs: [
+    "name": "queryCurve",
+    "outputs": [
       {
-        components: [
+        "components": [
           {
-            internalType: "uint128",
-            name: "priceRoot_",
-            type: "uint128",
+            "internalType": "uint128",
+            "name": "priceRoot_",
+            "type": "uint128"
           },
           {
-            components: [
-              {
-                internalType: "uint128",
-                name: "ambientSeed_",
-                type: "uint128",
-              },
-              {
-                internalType: "uint128",
-                name: "concentrated_",
-                type: "uint128",
-              },
-            ],
-            internalType: "struct CurveMath.CurveLiquidity",
-            name: "liq_",
-            type: "tuple",
+            "internalType": "uint128",
+            "name": "ambientSeeds_",
+            "type": "uint128"
           },
           {
-            components: [
-              {
-                internalType: "uint64",
-                name: "ambientGrowth_",
-                type: "uint64",
-              },
-              {
-                internalType: "uint64",
-                name: "concTokenGrowth_",
-                type: "uint64",
-              },
-            ],
-            internalType: "struct CurveMath.CurveFeeAccum",
-            name: "accum_",
-            type: "tuple",
+            "internalType": "uint128",
+            "name": "concLiq_",
+            "type": "uint128"
           },
+          {
+            "internalType": "uint64",
+            "name": "seedDeflator_",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint64",
+            "name": "concGrowth_",
+            "type": "uint64"
+          }
         ],
-        internalType: "struct CurveMath.CurveState",
-        name: "curve",
-        type: "tuple",
-      },
+        "internalType": "struct CurveMath.CurveState",
+        "name": "curve",
+        "type": "tuple"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "base",
-        type: "address",
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
       },
       {
-        internalType: "address",
-        name: "quote",
-        type: "address",
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
       },
       {
-        internalType: "uint24",
-        name: "poolIdx",
-        type: "uint24",
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
       },
+      {
+        "internalType": "bool",
+        "name": "isBid",
+        "type": "bool"
+      },
+      {
+        "internalType": "int24",
+        "name": "tick",
+        "type": "int24"
+      }
     ],
-    name: "queryLiquidity",
-    outputs: [
+    "name": "queryKnockoutMerkle",
+    "outputs": [
       {
-        internalType: "uint128",
-        name: "",
-        type: "uint128",
+        "internalType": "uint160",
+        "name": "root",
+        "type": "uint160"
       },
+      {
+        "internalType": "uint32",
+        "name": "pivot",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint64",
+        "name": "fee",
+        "type": "uint64"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "base",
-        type: "address",
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
       },
       {
-        internalType: "address",
-        name: "quote",
-        type: "address",
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
       },
       {
-        internalType: "uint24",
-        name: "poolIdx",
-        type: "uint24",
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
       },
+      {
+        "internalType": "bool",
+        "name": "isBid",
+        "type": "bool"
+      },
+      {
+        "internalType": "int24",
+        "name": "tick",
+        "type": "int24"
+      }
     ],
-    name: "queryPrice",
-    outputs: [
+    "name": "queryKnockoutPivot",
+    "outputs": [
       {
-        internalType: "uint128",
-        name: "",
-        type: "uint128",
+        "internalType": "uint96",
+        "name": "lots",
+        "type": "uint96"
       },
+      {
+        "internalType": "uint32",
+        "name": "pivot",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint16",
+        "name": "range",
+        "type": "uint16"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "router",
-        type: "address",
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
       },
       {
-        internalType: "address",
-        name: "origin",
-        type: "address",
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
       },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint32",
+        "name": "pivot",
+        "type": "uint32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isBid",
+        "type": "bool"
+      },
+      {
+        "internalType": "int24",
+        "name": "lowerTick",
+        "type": "int24"
+      },
+      {
+        "internalType": "int24",
+        "name": "upperTick",
+        "type": "int24"
+      }
     ],
-    name: "queryRouterApproved",
-    outputs: [
+    "name": "queryKnockoutPos",
+    "outputs": [
       {
-        internalType: "bool",
-        name: "burn",
-        type: "bool",
+        "internalType": "uint96",
+        "name": "lots",
+        "type": "uint96"
       },
       {
-        internalType: "bool",
-        name: "debit",
-        type: "bool",
+        "internalType": "uint64",
+        "name": "mileage",
+        "type": "uint64"
       },
+      {
+        "internalType": "uint32",
+        "name": "timestamp",
+        "type": "uint32"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    inputs: [
+    "inputs": [
       {
-        internalType: "address",
-        name: "owner",
-        type: "address",
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
       },
       {
-        internalType: "address",
-        name: "token",
-        type: "address",
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
       },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      },
+      {
+        "internalType": "int24",
+        "name": "tick",
+        "type": "int24"
+      }
     ],
-    name: "querySurplus",
-    outputs: [
+    "name": "queryLevel",
+    "outputs": [
       {
-        internalType: "uint128",
-        name: "",
-        type: "uint128",
+        "internalType": "uint96",
+        "name": "bidLots",
+        "type": "uint96"
       },
+      {
+        "internalType": "uint96",
+        "name": "askLots",
+        "type": "uint96"
+      },
+      {
+        "internalType": "uint64",
+        "name": "odometer",
+        "type": "uint64"
+      }
     ],
-    stateMutability: "view",
-    type: "function",
+    "stateMutability": "view",
+    "type": "function"
   },
-];
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      }
+    ],
+    "name": "queryLiquidity",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      }
+    ],
+    "name": "queryPrice",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "queryProtocolAccum",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "querySurplus",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "surplus",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

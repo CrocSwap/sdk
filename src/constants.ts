@@ -2,8 +2,8 @@ import { BigNumber } from "ethers";
 
 export const contractAddresses = {
   ZERO_ADDR: "0x0000000000000000000000000000000000000000",
-  CROC_SWAP_ADDR: "0xB6Ff2e53408f38A5a363586746d1dB306AF5caa4",
-  QUERY_ADDR: "0x3F6B274529dDe713CF7703129f219e38dC0D83b5",
+  CROC_SWAP_ADDR: "0x5d42d6046927dee12b9b4a235be0cecd55d0e0fb",
+  QUERY_ADDR: "0x3a6e9cff691a473d4d0742e1dfc8ea263a99f6d0",
 };
 
 export const MIN_TICK = -665454;
@@ -18,8 +18,8 @@ export const MIN_SQRT_PRICE: BigNumber = BigNumber.from("65538").sub(1);
 export const MAX_LIQ = BigNumber.from(2).pow(128).sub(1);
 
 export const NODE_URL =
-  "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/ropsten";
+  "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/kovan";
 
-export const POOL_PRIMARY = 35000;
+export const POOL_PRIMARY = 36000;
 
 export const GRID_SIZE_DFLT = 30;

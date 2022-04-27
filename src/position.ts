@@ -209,5 +209,5 @@ export function concPosSlot (owner: string,  base: string, quote: string,
 }
 
 // Based on the slots of the current contract layout
-const AMBIENT_POS_SLOT = 14
-const CONC_POS_SLOT = 13
+const AMBIENT_POS_SLOT = 65550
+const CONC_POS_SLOT = 65549
