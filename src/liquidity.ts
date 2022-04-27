@@ -1,9 +1,8 @@
 import { BigNumber, ethers, Signer } from "ethers";
-import { MAX_LIQ, contractAddresses } from "./constants";
+import { MAX_LIQ, contractAddresses, POOL_PRIMARY } from "./constants";
 import {
   bigNumToFloat,
   floatToBigNum,
-  encodeCrocPrice,
   fromDisplayQty,
   tickToPrice,
   truncateRightBits,
@@ -12,11 +11,15 @@ import {
   pinTickUpper,
   // fromDisplayPrice,
 } from "./utils";
+import { encodeCrocPrice } from "./utils/price"
 import { CROC_ABI } from "./abis";
 import { parseEther } from "ethers/lib/utils";
+import { AddressZero } from '@ethersproject/constants';
 
 type Address = string;
 type PoolType = number;
+
+const LIQ_PATH = 2
 
 /* Converts a fixed base token collateral amount to pool liquidity units. This conversion only applies
  * to the current pool price. If price moves the ratio between token collateral and liquidity will also
@@ -305,11 +308,12 @@ export class WarmPathEncoder {
     callCode: number,
     lowerTick: number,
     upperTick: number,
-    liq: BigNumber,
+    qty: BigNumber,
     limitLow: number,
     limitHigh: number,
     useSurplus: boolean
   ): string {
+  
     return this.abiCoder.encode(WARM_ARG_TYPES, [
       callCode,
       this.base,
@@ -317,10 +321,11 @@ export class WarmPathEncoder {
       this.poolIdx,
       lowerTick,
       upperTick,
-      liq,
+      qty,
       encodeCrocPrice(limitLow),
       encodeCrocPrice(limitHigh),
-      useSurplus,
+      (useSurplus ? (2 + 1) : 0),
+      AddressZero
     ]);
   }
 }
@@ -340,23 +345,29 @@ const WARM_ARG_TYPES = [
   "uint128", // Liquidity
   "uint128", // Lower limit
   "uint128", // Upper limit
-  "bool", // Use Surplus
+  "uint8", // reserve flags
+  "address", // deposit vault
 ];
 
 export function isTradeWarmCall(txData: string): boolean {
-  const TRADE_WARM_METHOD = "0xbb15";
-  return txData.slice(0, 6) === TRADE_WARM_METHOD;
+  const USER_CMD_METHOD = "0xa15112f9";
+  const encoder = new ethers.utils.AbiCoder();
+  if (txData.slice(0, 6) === USER_CMD_METHOD) {
+    const result = encoder.decode(["uint16", "bytes"], txData.slice(6))
+    return result[0] == LIQ_PATH
+  }  
+  return false;
 }
 
 interface WarmPathArgs {
-  isMint: boolean;
-  isAmbient: boolean;
+  isMint: boolean,
+  isAmbient: boolean,
   base: string;
   quote: string;
   poolIdx: number;
   lowerTick: number;
   upperTick: number;
-  liquidity: BigNumber;
+  qty: BigNumber;
 }
 
 export function decodeWarmPathCall(txData: string): WarmPathArgs {
@@ -371,7 +382,7 @@ export function decodeWarmPathCall(txData: string): WarmPathArgs {
     poolIdx: result[3],
     lowerTick: result[4],
     upperTick: result[5],
-    liquidity: result[6],
+    qty: result[6],
   };
 }
 
@@ -392,7 +403,7 @@ export async function sendAmbientMint(
   const warmPathEncoder = new WarmPathEncoder(
     baseTokenAddress,
     quoteTokenAddress,
-    35000
+    POOL_PRIMARY
   );
 
   const args = warmPathEncoder.encodeMintAmbient(
@@ -407,14 +418,12 @@ export async function sendAmbientMint(
   if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
     const fixedEthValue = (ethValue * 1.01).toFixed(18);
 
-    tx = await crocContract.tradeWarm(args, {
+    tx = await crocContract.userCmd(LIQ_PATH, args, {
       value: parseEther(fixedEthValue.toString()),
-      // gasLimit: 1000000,
+      gasLimit: 1000000
     });
   } else {
-    tx = await crocContract.tradeWarm(args, {
-      // gasLimit: 1000000,
-    });
+    tx = await crocContract.userCmd(LIQ_PATH, args)
   }
 
   return tx;
@@ -436,7 +445,7 @@ export async function burnAmbientPartial(
   const warmPathEncoder = new WarmPathEncoder(
     baseTokenAddress,
     quoteTokenAddress,
-    35000
+    POOL_PRIMARY
   );
 
   const args = warmPathEncoder.encodeBurnAmbient(
@@ -447,8 +456,8 @@ export async function burnAmbientPartial(
   );
 
   // if baseToken = ETH
-  const tx = await crocContract.tradeWarm(args, {
-    // gasLimit: 1000000,
+  const tx = await crocContract.userCmd(LIQ_PATH, args, {
+     gasLimit: 1000000,
   });
 
   return tx;
@@ -469,13 +478,13 @@ export async function burnAmbientAll(
   const warmPathEncoder = new WarmPathEncoder(
     baseTokenAddress,
     quoteTokenAddress,
-    35000
+    POOL_PRIMARY
   );
 
   const args = warmPathEncoder.encodeBurnAmbientAll(limitLow, limitHigh, false);
 
   // if baseToken = ETH
-  const tx = await crocContract.tradeWarm(args, {
+  const tx = await crocContract.userCmd(LIQ_PATH, args, {
     // gasLimit: 1000000,
   });
 
@@ -518,7 +527,7 @@ export async function sendConcMint(
   const warmPathEncoder = new WarmPathEncoder(
     baseTokenAddress,
     quoteTokenAddress,
-    35000
+    POOL_PRIMARY
   );
 
   // const limitLowWei = fromDisplayQty(limitLow.toString(), 18);
@@ -571,12 +580,12 @@ export async function sendConcMint(
     const fixedEthValue = (ethValue * 1.01).toFixed(18);
     const etherToSend = parseEther(fixedEthValue.toString());
 
-    tx = await crocContract.tradeWarm(args, {
+    tx = await crocContract.userCmd(args, {
       value: etherToSend,
       // gasLimit: 1000000,
     });
   } else {
-    tx = await crocContract.tradeWarm(args, {
+    tx = await crocContract.userCmd(args, {
       // gasLimit: 1000000,
     });
   }
@@ -601,7 +610,7 @@ export async function burnConcAll(
   const warmPathEncoder = new WarmPathEncoder(
     baseTokenAddress,
     quoteTokenAddress,
-    35000
+    POOL_PRIMARY
   );
 
   const args = warmPathEncoder.encodeBurnConcAll(
@@ -613,7 +622,7 @@ export async function burnConcAll(
   );
 
   // if baseToken = ETH
-  const tx = await crocContract.tradeWarm(args, {
+  const tx = await crocContract.userCmd(args, {
     // gasLimit: 1000000,
   });
 
@@ -637,7 +646,7 @@ export async function burnConcPartial(
   const warmPathEncoder = new WarmPathEncoder(
     baseTokenAddress,
     quoteTokenAddress,
-    35000
+    POOL_PRIMARY
   );
 
   const args = warmPathEncoder.encodeBurnConc(
@@ -650,7 +659,7 @@ export async function burnConcPartial(
   );
 
   // if baseToken = ETH
-  const tx = await crocContract.tradeWarm(args, {
+  const tx = await crocContract.userCmd(args, {
     // gasLimit: 1000000,
   });
 
