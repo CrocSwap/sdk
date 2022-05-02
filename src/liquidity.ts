@@ -4,14 +4,11 @@ import {
   bigNumToFloat,
   floatToBigNum,
   fromDisplayQty,
-  tickToPrice,
   truncateRightBits,
   getTokenDecimals,
-  // pinTickLower,
-  pinTickUpper,
   // fromDisplayPrice,
 } from "./utils";
-import { encodeCrocPrice } from "./utils/price"
+import { encodeCrocPrice, pinTickUpper, tickToPrice } from "./utils/price"
 import { CROC_ABI } from "./abis";
 import { parseEther } from "ethers/lib/utils";
 import { AddressZero } from '@ethersproject/constants';

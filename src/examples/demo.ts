@@ -5,7 +5,7 @@ import { POOL_PRIMARY, NODE_URL } from '../constants';
 //import { sendSwap } from '../swap';
 import { ethers, BigNumber } from 'ethers';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { sendAmbientMint, burnAmbientPartial } from '../liquidity';
+import { sendAmbientMint, burnAmbientPartial, sendConcMint } from '../liquidity';
 
 const DAI = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa"
 
@@ -13,7 +13,7 @@ const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
 
 async function demo() {
     let wallet = new ethers.Wallet(KEY, new JsonRpcProvider(NODE_URL))
-    
+    let price = getSpotPrice(AddressZero, DAI)    
 
     /*await sendSwap(AddressZero, DAI, true, BigNumber.from(10).pow(13), BigNumber.from(10).pow(13), 0.03,
         POOL_PRIMARY, wallet)*/
@@ -23,6 +23,9 @@ async function demo() {
 
     await burnAmbientPartial(AddressZero, DAI, BigNumber.from(10).pow(12), 0.0001, 10000, wallet)
         .then(x => x.wait())
+
+    await sendConcMint(AddressZero, DAI,  await price, -100000, 100000, BigNumber.from(10).pow(13).toString(), true, 0.00001, 10000, 
+        0.001, wallet).then(x => x.wait())
 }
 
 async function shortDemo() {
@@ -40,6 +43,6 @@ async function shortDemo() {
 
 shortDemo()
 
-if (false) {
+if (true) {
     demo()
 }

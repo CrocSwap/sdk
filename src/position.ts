@@ -202,7 +202,7 @@ export function concPosSlot (owner: string,  base: string, quote: string,
     const poolHash = ethers.utils.keccak256(encoder.encode
         (["address", "address", "uint256"], [base, quote, poolType]))
 
-    const posKey = ethers.utils.solidityKeccak256(["bytes32", "bytes32", "int24", "int24"], 
+    const posKey = ethers.utils.solidityKeccak256(["address", "bytes32", "int24", "int24"], 
         [owner, poolHash, lowerTick, upperTick])
     return ethers.utils.solidityKeccak256(["bytes32", "uint256"], 
         [posKey, CONC_POS_SLOT])
