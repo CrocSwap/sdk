@@ -3,7 +3,8 @@ import { BytesLike, ethers, BigNumber, Contract } from 'ethers';
 import { JsonRpcProvider } from '@ethersproject/providers';
 import { isTradeWarmCall, decodeWarmPathCall, baseTokenForConcLiq, quoteTokenForConcLiq, baseVirtualReserves, quoteVirtualReserves } from './liquidity';
 import { bigNumToFloat, fromFixedGrowth, floatToBigNum } from './utils/math';
-import { decodeCrocPrice, tickToPrice } from './utils';
+import { tickToPrice } from './utils';
+import { decodeCrocPrice } from './utils/price';
 import { QUERY_ABI } from './abis/query';
 
 export interface AmbientClaim {  
@@ -111,9 +112,9 @@ async function joinConcPos (claim: RangeClaim, provider: JsonRpcProvider): Promi
 
 async function joinAmbientPos (claim: AmbientClaim, provider: JsonRpcProvider): Promise<AmbientLiqPos> {
     let queryContract = new Contract(contractAddresses.QUERY_ADDR, QUERY_ABI, provider)
-    let curve = queryContract.queryCurve(claim.baseToken, claim.quoteToken, claim.poolType);
-    let price = decodeCrocPrice((await curve).priceRoot_)
-    let ambiGrowth = fromFixedGrowth((await curve).accum_.ambientGrowth_)
+    let curve = await queryContract.queryCurve(claim.baseToken, claim.quoteToken, claim.poolType);
+    let price = decodeCrocPrice(curve.priceRoot_)
+    let ambiGrowth = fromFixedGrowth(curve.seedDeflator_)
     let liq = floatToBigNum(bigNumToFloat(claim.ambientSeeds) * ambiGrowth)
     return Object.assign({ poolPrice: price,
         ambientLiq: liq, baseQty: baseVirtualReserves(price, liq), 
@@ -182,7 +183,7 @@ export function ambientPosSlot (owner: string,  base: string, quote: string,
     const poolHash = ethers.utils.keccak256(encoder.encode
         (["address", "address", "uint256"], [base, quote, poolType]))
         
-    const posKey = ethers.utils.keccak256(encoder.encode(["address", "bytes32"], [owner, poolHash]))
+    const posKey = ethers.utils.solidityKeccak256(["address", "bytes32"], [owner, poolHash])
     return ethers.utils.solidityKeccak256(["bytes32", "uint256"], [posKey, AMBIENT_POS_SLOT])
 }
 
@@ -201,9 +202,8 @@ export function concPosSlot (owner: string,  base: string, quote: string,
     const poolHash = ethers.utils.keccak256(encoder.encode
         (["address", "address", "uint256"], [base, quote, poolType]))
 
-    const addrBytes = encoder.encode(["address"], [owner])
     const posKey = ethers.utils.solidityKeccak256(["bytes32", "bytes32", "int24", "int24"], 
-        [addrBytes, poolHash, lowerTick, upperTick])
+        [owner, poolHash, lowerTick, upperTick])
     return ethers.utils.solidityKeccak256(["bytes32", "uint256"], 
         [posKey, CONC_POS_SLOT])
 }

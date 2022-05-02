@@ -352,8 +352,8 @@ const WARM_ARG_TYPES = [
 export function isTradeWarmCall(txData: string): boolean {
   const USER_CMD_METHOD = "0xa15112f9";
   const encoder = new ethers.utils.AbiCoder();
-  if (txData.slice(0, 6) === USER_CMD_METHOD) {
-    const result = encoder.decode(["uint16", "bytes"], txData.slice(6))
+  if (txData.slice(0, 10) === USER_CMD_METHOD) {
+    const result = encoder.decode(["uint16", "bytes"], "0x".concat(txData.slice(10)))
     return result[0] == LIQ_PATH
   }  
   return false;
@@ -371,7 +371,7 @@ interface WarmPathArgs {
 }
 
 export function decodeWarmPathCall(txData: string): WarmPathArgs {
-  const argData = "0x".concat(txData.slice(6 + 4 + 128));
+  const argData = "0x".concat(txData.slice(10 + 192));
   const encoder = new ethers.utils.AbiCoder();
   const result = encoder.decode(WARM_ARG_TYPES, argData);
   return {
