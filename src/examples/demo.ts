@@ -5,7 +5,7 @@ import { POOL_PRIMARY, NODE_URL } from '../constants';
 //import { sendSwap } from '../swap';
 import { ethers, BigNumber } from 'ethers';
 import { JsonRpcProvider } from '@ethersproject/providers';
-import { sendAmbientMint, burnAmbientPartial, sendConcMint } from '../liquidity';
+import { sendAmbientMint, burnAmbientPartial } from '../liquidity';
 
 const DAI = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa"
 
