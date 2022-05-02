@@ -9,7 +9,7 @@ import { sendAmbientMint, burnAmbientPartial } from '../liquidity';
 
 const DAI = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa"
 
-const KEY = ""
+const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
 
 async function demo() {
     let wallet = new ethers.Wallet(KEY, new JsonRpcProvider(NODE_URL))

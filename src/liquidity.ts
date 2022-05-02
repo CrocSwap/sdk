@@ -580,12 +580,12 @@ export async function sendConcMint(
     const fixedEthValue = (ethValue * 1.01).toFixed(18);
     const etherToSend = parseEther(fixedEthValue.toString());
 
-    tx = await crocContract.userCmd(args, {
+    tx = await crocContract.userCmd(LIQ_PATH, args, {
       value: etherToSend,
       // gasLimit: 1000000,
     });
   } else {
-    tx = await crocContract.userCmd(args, {
+    tx = await crocContract.userCmd(LIQ_PATH, args, {
       // gasLimit: 1000000,
     });
   }
@@ -622,7 +622,7 @@ export async function burnConcAll(
   );
 
   // if baseToken = ETH
-  const tx = await crocContract.userCmd(args, {
+  const tx = await crocContract.userCmd(LIQ_PATH, args, {
     // gasLimit: 1000000,
   });
 
@@ -659,7 +659,7 @@ export async function burnConcPartial(
   );
 
   // if baseToken = ETH
-  const tx = await crocContract.userCmd(args, {
+  const tx = await crocContract.userCmd(LIQ_PATH, args, {
     // gasLimit: 1000000,
   });
 
