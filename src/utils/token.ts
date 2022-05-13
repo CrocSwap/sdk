@@ -38,6 +38,16 @@ export function getQuoteTokenAddress(token1: string, token2: string): string {
   return quoteTokenAddress;
 }
 
+export function sortBaseQuoteTokens(
+  token1: string,
+  token2: string
+): [string, string] {
+  return [
+    getBaseTokenAddress(token1, token2),
+    getQuoteTokenAddress(token1, token2),
+  ];
+}
+
 export async function getTokenAllowance(
   tokenAddress: string,
   account: string,
