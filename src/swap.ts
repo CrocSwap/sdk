@@ -500,7 +500,7 @@ export async function sendSwap(
   buyTokenAddress: string,
   qtyIsSellToken: boolean,
   qty: BigNumber | string,
-  ethValue: BigNumber,
+  ethValue: BigNumber | string,
   slippageTolerance: number,
   POOL_IDX: number,
   signer: Signer
@@ -537,16 +537,22 @@ export async function sendSwap(
   }
 
   let crocQty;
-  if (qtyIsSellToken) {
-    crocQty = fromDisplayQty(
-      qty.toString(),
-      await getTokenDecimals(sellTokenAddress)
-    );
+  if (qty instanceof BigNumber) {
+    crocQty = qty;
   } else {
-    crocQty = fromDisplayQty(
-      qty.toString(),
-      await getTokenDecimals(buyTokenAddress)
-    );
+    if (qtyIsSellToken) {
+      crocQty = fromDisplayQty(qty, await getTokenDecimals(sellTokenAddress));
+    } else {
+      crocQty = fromDisplayQty(qty, await getTokenDecimals(buyTokenAddress));
+    }
+  }
+
+  let ethBigNum;
+
+  if (ethValue instanceof BigNumber) {
+    ethBigNum = ethValue;
+  } else {
+    ethBigNum = fromDisplayQty(ethValue, 18);
   }
 
   const limitPrice = await getLimitPrice(
@@ -555,14 +561,14 @@ export async function sendSwap(
     slippageTolerance
   );
 
-  console.log({ baseTokenAddress });
-  console.log({ sellTokenIsBase });
-  console.log({ quoteTokenAddress });
-  console.log({ POOL_IDX });
-  console.log({ qtyIsBase });
-  console.log({ ethValue });
-  console.log({ crocQty });
-  console.log({ limitPrice });
+  // console.log({ baseTokenAddress });
+  // console.log({ sellTokenIsBase });
+  // console.log({ quoteTokenAddress });
+  // console.log({ POOL_IDX });
+  // console.log({ qtyIsBase });
+  // console.log({ ethValue });
+  // console.log({ crocQty });
+  // console.log({ limitPrice });
 
   if (sellTokenAddress === contractAddresses.ZERO_ADDR) {
     tx = await crocContract.swap(
@@ -576,8 +582,8 @@ export async function sendSwap(
       limitPrice, // slippage-adjusted price client will accept
       minOut,
       0, // ?? surplus
-      // { value: ethValue }
-      { value: ethValue, gasLimit: 1000000 }
+      { value: ethBigNum }
+      // { value: ethValue, gasLimit: 1000000 }
       // { gasLimit: 1000000 }
     );
   } else {
