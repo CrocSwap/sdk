@@ -499,7 +499,7 @@ export async function sendSwap(
   sellTokenAddress: string,
   buyTokenAddress: string,
   qtyIsSellToken: boolean,
-  qty: BigNumber,
+  qty: BigNumber | string,
   ethValue: BigNumber,
   slippageTolerance: number,
   POOL_IDX: number,
@@ -555,6 +555,15 @@ export async function sendSwap(
     slippageTolerance
   );
 
+  console.log({ baseTokenAddress });
+  console.log({ sellTokenIsBase });
+  console.log({ quoteTokenAddress });
+  console.log({ POOL_IDX });
+  console.log({ qtyIsBase });
+  console.log({ ethValue });
+  console.log({ crocQty });
+  console.log({ limitPrice });
+
   if (sellTokenAddress === contractAddresses.ZERO_ADDR) {
     tx = await crocContract.swap(
       baseTokenAddress,
@@ -563,12 +572,12 @@ export async function sendSwap(
       sellTokenIsBase, // ?? isBuy (i.e. converting base token for quote token)
       qtyIsBase, // qty is base token -- boolean whether qty represents BASE or QUOTE
       crocQty, // quantity of primary token
-      BigNumber.from(0), // tip argument - set to 0 
+      BigNumber.from(0), // tip argument - set to 0
       limitPrice, // slippage-adjusted price client will accept
       minOut,
       0, // ?? surplus
-      { value: ethValue }
-      // { value: ethValue, gasLimit: 1000000 }
+      // { value: ethValue }
+      { value: ethValue, gasLimit: 1000000 }
       // { gasLimit: 1000000 }
     );
   } else {
@@ -579,7 +588,7 @@ export async function sendSwap(
       sellTokenIsBase, // ?? isBuy (i.e. converting base token for quote token)
       qtyIsBase, // qty is base token -- boolean whether qty represents BASE or QUOTE
       crocQty, // quantity of token to divest
-      BigNumber.from(0), // tip argument - set to 0 
+      BigNumber.from(0), // tip argument - set to 0
       limitPrice, // slippage-adjusted price client will accept
       minOut,
       0 // ?? surplus
