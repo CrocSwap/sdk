@@ -1,6 +1,6 @@
 {
   "name": "@crocswap-libs/sdk",
-  "version": "0.1.27-1",
+  "version": "0.1.27-2",
   "description": "🛠🐊🛠 An SDK for building applications on top of CrocSwap",
   "author": "Ben Wolski <ben@crocodilelabs.io>",
   "repository": "https://github.com/CrocSwap/sdk.git",
@@ -23,7 +23,7 @@
     "docs": "typedoc --entryPoints src/index.ts",
     "build": "tsc -p tsconfig.json",
     "build-all": "yarn clean && yarn build",
-    "copy-local": "cp -r dist ../crocswap-interface/node_modules/@crocswap-libs/sdk/",
+    "copy-local": "cp -r dist ../ambient-ts-app/node_modules/@crocswap-libs/sdk/",
     "build-local": "yarn build-all && yarn copy-local"
   },
   "devDependencies": {
