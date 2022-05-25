@@ -97,7 +97,7 @@ export async function getTokenBalance(
   if (tokenAddress === contractAddresses.ZERO_ADDR) {
     let nativeBalance = BigNumber.from(0);
     try {
-      nativeBalance = await signer.getBalance(account);
+      nativeBalance = await signer.getBalance();
     } catch (error) {
       console.log(error);
     }
