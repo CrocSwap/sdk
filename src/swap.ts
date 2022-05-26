@@ -134,7 +134,10 @@ export async function sendSwap(
       minOut,
       0, // ?? surplus
       // { value: ethBigNum }
-      { value: ethBigNum, gasLimit: 1000000 }
+      {
+        value: ethBigNum,
+        // gasLimit: 1000000
+      }
       // { gasLimit: 1000000 }
     );
   } else {
