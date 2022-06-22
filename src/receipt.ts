@@ -23,17 +23,17 @@ import { ethers } from "ethers";
 export type ParsedSwapReceipt = {
   blockNumber: number;
   timestamp: number;
-  transactionHash: string;
+  txHash: string;
   gasUsed: number;
   gasCostInEther: number;
   gasPriceInGwei: number;
   status: boolean;
-  buyAddress: string;
-  sellAddress: string;
-  sellSymbol: string;
-  buyQtyUnscaled: number;
-  buySymbol: string;
-  sellQtyUnscaled: number;
+  tokenBAddress: string;
+  tokenAAddress: string;
+  tokenASymbol: string;
+  tokenBQtyUnscaled: number;
+  tokenBSymbol: string;
+  tokenAQtyUnscaled: number;
   readableConversionRate: number;
   moreExpensiveSymbol: string;
   lessExpensiveSymbol: string;
@@ -43,7 +43,7 @@ export type ParsedSwapReceipt = {
 export type ParsedMintReceipt = {
   blockNumber: number;
   timestamp: number;
-  transactionHash: string;
+  txHash: string;
   gasUsed: number;
   gasCostInEther: number;
   gasPriceInGwei: number;
@@ -51,9 +51,9 @@ export type ParsedMintReceipt = {
   baseTokenAddress: string;
   quoteTokenAddress: string;
   baseTokenSymbol: string;
-  baseQtyUnscaled: number;
+  tokenAQtyUnscaled: number;
   quoteTokenSymbol: string;
-  quoteQtyUnscaled: number;
+  tokenBQtyUnscaled: number;
 };
 
 export async function parseSwapEthersReceipt(
@@ -70,8 +70,8 @@ export async function parseSwapEthersReceipt(
 
     const timestamp = (await provider.getBlock(blockNumber)).timestamp;
 
-    const transactionHash = receipt.transactionHash;
-    const tx = await provider.getTransaction(transactionHash);
+    const txHash = receipt.transactionHash;
+    const tx = await provider.getTransaction(txHash);
     // console.log({ tx });
     const txValueInWei = tx.value;
     // const txValueInEther = parseInt(txBigValue.toString());
@@ -130,41 +130,41 @@ export async function parseSwapEthersReceipt(
       .toLowerCase();
     // const quoteReceiver = ethers.utils.hexStripZeros(events[1].raw.topics[2]);
 
-    let sellQtyUnscaled,
-      buyQtyUnscaled,
-      sellAddress,
-      buyAddress,
-      buySymbol,
-      sellSymbol;
+    let tokenAQtyUnscaled,
+      tokenBQtyUnscaled,
+      tokenAAddress,
+      tokenBAddress,
+      tokenBSymbol,
+      tokenASymbol;
 
     if (quoteSender === contractAddresses["CROC_SWAP_ADDR"].toLowerCase()) {
-      buyQtyUnscaled = quoteQtyUnscaled;
-      sellQtyUnscaled = baseQtyUnscaled;
-      buyAddress = quoteAddress;
-      sellAddress = baseAddress;
-      buySymbol = quoteSymbol;
-      sellSymbol = baseSymbol;
+      tokenBQtyUnscaled = quoteQtyUnscaled;
+      tokenAQtyUnscaled = baseQtyUnscaled;
+      tokenBAddress = quoteAddress;
+      tokenAAddress = baseAddress;
+      tokenBSymbol = quoteSymbol;
+      tokenASymbol = baseSymbol;
     } else {
-      buyQtyUnscaled = baseQtyUnscaled;
-      sellQtyUnscaled = quoteQtyUnscaled;
-      buyAddress = baseAddress;
-      sellAddress = quoteAddress;
-      buySymbol = baseSymbol;
-      sellSymbol = quoteSymbol;
+      tokenBQtyUnscaled = baseQtyUnscaled;
+      tokenAQtyUnscaled = quoteQtyUnscaled;
+      tokenBAddress = baseAddress;
+      tokenAAddress = quoteAddress;
+      tokenBSymbol = baseSymbol;
+      tokenASymbol = quoteSymbol;
     }
 
-    const conversionRate = sellQtyUnscaled / buyQtyUnscaled;
+    const conversionRate = tokenAQtyUnscaled / tokenBQtyUnscaled;
 
     let lessExpensiveSymbol, moreExpensiveSymbol;
     let readableConversionRate;
 
     if (conversionRate < 1) {
-      lessExpensiveSymbol = buySymbol;
-      moreExpensiveSymbol = sellSymbol;
+      lessExpensiveSymbol = tokenBSymbol;
+      moreExpensiveSymbol = tokenASymbol;
       readableConversionRate = 1 / conversionRate;
     } else {
-      lessExpensiveSymbol = sellSymbol;
-      moreExpensiveSymbol = buySymbol;
+      lessExpensiveSymbol = tokenASymbol;
+      moreExpensiveSymbol = tokenBSymbol;
       readableConversionRate = conversionRate;
     }
 
@@ -174,22 +174,22 @@ export async function parseSwapEthersReceipt(
       readableConversionRate = toFixedNumber(readableConversionRate, 2);
     }
 
-    const conversionRateString = `Swapped ${sellQtyUnscaled} ${sellSymbol} for ${buyQtyUnscaled} ${buySymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
+    const conversionRateString = `Swapped ${tokenAQtyUnscaled} ${tokenASymbol} for ${tokenBQtyUnscaled} ${tokenBSymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
 
     const parsedReceipt: ParsedSwapReceipt = {
       blockNumber: blockNumber,
       timestamp: timestamp,
-      transactionHash: transactionHash,
+      txHash: txHash,
       gasUsed: gasUsed,
       gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
       gasCostInEther: parseFloat(gasCostInEther),
       status: status,
-      sellQtyUnscaled: sellQtyUnscaled,
-      buyQtyUnscaled: buyQtyUnscaled,
-      sellAddress: sellAddress,
-      sellSymbol: sellSymbol,
-      buyAddress: buyAddress,
-      buySymbol: buySymbol,
+      tokenAQtyUnscaled: tokenAQtyUnscaled,
+      tokenBQtyUnscaled: tokenBQtyUnscaled,
+      tokenAAddress: tokenAAddress,
+      tokenASymbol: tokenASymbol,
+      tokenBAddress: tokenBAddress,
+      tokenBSymbol: tokenBSymbol,
       moreExpensiveSymbol: moreExpensiveSymbol,
       lessExpensiveSymbol: lessExpensiveSymbol,
       readableConversionRate: readableConversionRate,
@@ -203,7 +203,7 @@ export async function parseSwapEthersReceipt(
 
     const timestamp = (await provider.getBlock(blockNumber)).timestamp;
 
-    const transactionHash = receipt.transactionHash;
+    const txHash = receipt.transactionHash;
 
     const gasUsed = receipt.gasUsed.toNumber();
     const effectiveGasPrice = receipt.effectiveGasPrice.toNumber();
@@ -216,28 +216,28 @@ export async function parseSwapEthersReceipt(
 
     const status = receipt.status === 1 ? true : false;
 
-    // let buyQtyUnscaled, buySymbol, sellSymbol;
+    // let tokenBQtyUnscaled, tokenBSymbol, tokenASymbol;
 
     // let lessExpensiveSymbol, moreExpensiveSymbol;
     // let readableConversionRate;
 
-    // const conversionRateString = `Swapped ${sellQtyUnscaled} ${sellSymbol} for ${buyQtyUnscaled} ${buySymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
+    // const conversionRateString = `Swapped ${tokenAQtyUnscaled} ${tokenASymbol} for ${tokenBQtyUnscaled} ${tokenBSymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
     const conversionRateString = `log length = 0`;
 
     const parsedReceipt: ParsedSwapReceipt = {
       blockNumber: blockNumber,
       timestamp: timestamp,
-      transactionHash: transactionHash,
+      txHash: txHash,
       gasUsed: gasUsed,
       gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
       gasCostInEther: parseFloat(gasCostInEther),
       status: status,
-      sellQtyUnscaled: 0,
-      buyQtyUnscaled: 0,
-      sellAddress: "xxx",
-      sellSymbol: "xxx",
-      buyAddress: "xxx",
-      buySymbol: "xxx",
+      tokenAQtyUnscaled: 0,
+      tokenBQtyUnscaled: 0,
+      tokenAAddress: "xxx",
+      tokenASymbol: "xxx",
+      tokenBAddress: "xxx",
+      tokenBSymbol: "xxx",
       moreExpensiveSymbol: "xxx",
       lessExpensiveSymbol: "xxx",
       readableConversionRate: 0,
@@ -251,7 +251,7 @@ export async function parseSwapEthersReceipt(
 
     const timestamp = (await provider.getBlock(blockNumber)).timestamp;
 
-    const transactionHash = receipt.transactionHash;
+    const txHash = receipt.transactionHash;
 
     const gasUsed = receipt.gasUsed.toNumber();
     const effectiveGasPrice = receipt.effectiveGasPrice.toNumber();
@@ -295,41 +295,41 @@ export async function parseSwapEthersReceipt(
       .hexStripZeros(logs[1].topics[1])
       .toLowerCase();
 
-    let sellQtyUnscaled,
-      buyQtyUnscaled,
-      sellAddress,
-      buyAddress,
-      buySymbol,
-      sellSymbol;
+    let tokenAQtyUnscaled,
+      tokenBQtyUnscaled,
+      tokenAAddress,
+      tokenBAddress,
+      tokenBSymbol,
+      tokenASymbol;
 
     if (quoteSender === contractAddresses["CROC_SWAP_ADDR"].toLowerCase()) {
-      buyQtyUnscaled = quoteQtyUnscaled;
-      sellQtyUnscaled = baseQtyUnscaled;
-      buyAddress = quoteAddress;
-      sellAddress = baseAddress;
-      buySymbol = quoteSymbol;
-      sellSymbol = baseSymbol;
+      tokenBQtyUnscaled = quoteQtyUnscaled;
+      tokenAQtyUnscaled = baseQtyUnscaled;
+      tokenBAddress = quoteAddress;
+      tokenAAddress = baseAddress;
+      tokenBSymbol = quoteSymbol;
+      tokenASymbol = baseSymbol;
     } else {
-      buyQtyUnscaled = baseQtyUnscaled;
-      sellQtyUnscaled = quoteQtyUnscaled;
-      buyAddress = baseAddress;
-      sellAddress = quoteAddress;
-      buySymbol = baseSymbol;
-      sellSymbol = quoteSymbol;
+      tokenBQtyUnscaled = baseQtyUnscaled;
+      tokenAQtyUnscaled = quoteQtyUnscaled;
+      tokenBAddress = baseAddress;
+      tokenAAddress = quoteAddress;
+      tokenBSymbol = baseSymbol;
+      tokenASymbol = quoteSymbol;
     }
 
-    const conversionRate = sellQtyUnscaled / buyQtyUnscaled;
+    const conversionRate = tokenAQtyUnscaled / tokenBQtyUnscaled;
 
     let lessExpensiveSymbol, moreExpensiveSymbol;
     let readableConversionRate;
 
     if (conversionRate < 1) {
-      lessExpensiveSymbol = buySymbol;
-      moreExpensiveSymbol = sellSymbol;
+      lessExpensiveSymbol = tokenBSymbol;
+      moreExpensiveSymbol = tokenASymbol;
       readableConversionRate = 1 / conversionRate;
     } else {
-      lessExpensiveSymbol = sellSymbol;
-      moreExpensiveSymbol = buySymbol;
+      lessExpensiveSymbol = tokenASymbol;
+      moreExpensiveSymbol = tokenBSymbol;
       readableConversionRate = conversionRate;
     }
 
@@ -339,22 +339,22 @@ export async function parseSwapEthersReceipt(
       readableConversionRate = toFixedNumber(readableConversionRate, 2);
     }
 
-    const conversionRateString = `Swapped ${sellQtyUnscaled} ${sellSymbol} for ${buyQtyUnscaled} ${buySymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
+    const conversionRateString = `Swapped ${tokenAQtyUnscaled} ${tokenASymbol} for ${tokenBQtyUnscaled} ${tokenBSymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
 
     const parsedReceipt: ParsedSwapReceipt = {
       blockNumber: blockNumber,
       timestamp: timestamp,
-      transactionHash: transactionHash,
+      txHash: txHash,
       gasUsed: gasUsed,
       gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
       gasCostInEther: parseFloat(gasCostInEther),
       status: status,
-      sellQtyUnscaled: sellQtyUnscaled,
-      buyQtyUnscaled: buyQtyUnscaled,
-      sellAddress: sellAddress,
-      sellSymbol: sellSymbol,
-      buyAddress: buyAddress,
-      buySymbol: buySymbol,
+      tokenAQtyUnscaled: tokenAQtyUnscaled,
+      tokenBQtyUnscaled: tokenBQtyUnscaled,
+      tokenAAddress: tokenAAddress,
+      tokenASymbol: tokenASymbol,
+      tokenBAddress: tokenBAddress,
+      tokenBSymbol: tokenBSymbol,
       moreExpensiveSymbol: moreExpensiveSymbol,
       lessExpensiveSymbol: lessExpensiveSymbol,
       readableConversionRate: readableConversionRate,
@@ -378,7 +378,7 @@ export async function parseMintEthersReceipt(
 
     const timestamp = (await provider.getBlock(blockNumber)).timestamp;
 
-    const transactionHash = receipt.transactionHash;
+    const txHash = receipt.transactionHash;
     // const tx = await provider.getTransaction(transactionHash);
     // console.log({ tx });
     // const txValueInWei = tx.value;
@@ -442,13 +442,13 @@ export async function parseMintEthersReceipt(
     const parsedReceipt: ParsedMintReceipt = {
       blockNumber: blockNumber,
       timestamp: timestamp,
-      transactionHash: transactionHash,
+      txHash: txHash,
       gasUsed: gasUsed,
       gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
       gasCostInEther: parseFloat(gasCostInEther),
       status: status,
-      baseQtyUnscaled: baseQtyUnscaled,
-      quoteQtyUnscaled: quoteQtyUnscaled,
+      tokenAQtyUnscaled: baseQtyUnscaled,
+      tokenBQtyUnscaled: quoteQtyUnscaled,
       baseTokenAddress: baseAddress,
       baseTokenSymbol: baseSymbol,
       quoteTokenAddress: quoteAddress,
@@ -462,7 +462,7 @@ export async function parseMintEthersReceipt(
 
     const timestamp = (await provider.getBlock(blockNumber)).timestamp;
 
-    const transactionHash = receipt.transactionHash;
+    const txHash = receipt.transactionHash;
 
     const gasUsed = receipt.gasUsed.toNumber();
     const effectiveGasPrice = receipt.effectiveGasPrice.toNumber();
@@ -475,23 +475,23 @@ export async function parseMintEthersReceipt(
 
     const status = receipt.status === 1 ? true : false;
 
-    // let buyQtyUnscaled, buySymbol, sellSymbol;
+    // let tokenBQtyUnscaled, tokenBSymbol, tokenASymbol;
 
     // let lessExpensiveSymbol, moreExpensiveSymbol;
     // let readableConversionRate;
 
-    // const conversionRateString = `Swapped ${sellQtyUnscaled} ${sellSymbol} for ${buyQtyUnscaled} ${buySymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
+    // const conversionRateString = `Swapped ${tokenAQtyUnscaled} ${tokenASymbol} for ${tokenBQtyUnscaled} ${tokenBSymbol} at a rate of ${readableConversionRate} ${lessExpensiveSymbol} per ${moreExpensiveSymbol}`;
 
     const parsedReceipt: ParsedMintReceipt = {
       blockNumber: blockNumber,
       timestamp: timestamp,
-      transactionHash: transactionHash,
+      txHash: txHash,
       gasUsed: gasUsed,
       gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
       gasCostInEther: parseFloat(gasCostInEther),
       status: status,
-      baseQtyUnscaled: 0,
-      quoteQtyUnscaled: 0,
+      tokenAQtyUnscaled: 0,
+      tokenBQtyUnscaled: 0,
       baseTokenAddress: "xxx",
       baseTokenSymbol: "xxx",
       quoteTokenAddress: "xxx",
@@ -505,7 +505,7 @@ export async function parseMintEthersReceipt(
 
     const timestamp = (await provider.getBlock(blockNumber)).timestamp;
 
-    const transactionHash = receipt.transactionHash;
+    const txHash = receipt.transactionHash;
 
     const gasUsed = receipt.gasUsed.toNumber();
     const effectiveGasPrice = receipt.effectiveGasPrice.toNumber();
@@ -549,43 +549,43 @@ export async function parseMintEthersReceipt(
       .hexStripZeros(logs[1].topics[1])
       .toLowerCase();
 
-    let sellQtyUnscaled,
-      buyQtyUnscaled,
-      sellAddress,
-      buyAddress,
-      buySymbol,
-      sellSymbol;
+    let tokenAQtyUnscaled,
+      tokenBQtyUnscaled,
+      tokenAAddress,
+      tokenBAddress,
+      tokenBSymbol,
+      tokenASymbol;
 
     if (quoteSender === contractAddresses["CROC_SWAP_ADDR"].toLowerCase()) {
-      buyQtyUnscaled = quoteQtyUnscaled;
-      sellQtyUnscaled = baseQtyUnscaled;
-      buyAddress = quoteAddress;
-      sellAddress = baseAddress;
-      buySymbol = quoteSymbol;
-      sellSymbol = baseSymbol;
+      tokenBQtyUnscaled = quoteQtyUnscaled;
+      tokenAQtyUnscaled = baseQtyUnscaled;
+      tokenBAddress = quoteAddress;
+      tokenAAddress = baseAddress;
+      tokenBSymbol = quoteSymbol;
+      tokenASymbol = baseSymbol;
     } else {
-      buyQtyUnscaled = baseQtyUnscaled;
-      sellQtyUnscaled = quoteQtyUnscaled;
-      buyAddress = baseAddress;
-      sellAddress = quoteAddress;
-      buySymbol = baseSymbol;
-      sellSymbol = quoteSymbol;
+      tokenBQtyUnscaled = baseQtyUnscaled;
+      tokenAQtyUnscaled = quoteQtyUnscaled;
+      tokenBAddress = baseAddress;
+      tokenAAddress = quoteAddress;
+      tokenBSymbol = baseSymbol;
+      tokenASymbol = quoteSymbol;
     }
 
     const parsedReceipt: ParsedMintReceipt = {
       blockNumber: blockNumber,
       timestamp: timestamp,
-      transactionHash: transactionHash,
+      txHash: txHash,
       gasUsed: gasUsed,
       gasPriceInGwei: parseFloat(effectiveGasPriceInGwei),
       gasCostInEther: parseFloat(gasCostInEther),
       status: status,
-      baseQtyUnscaled: sellQtyUnscaled,
-      quoteQtyUnscaled: buyQtyUnscaled,
-      baseTokenAddress: sellAddress,
-      baseTokenSymbol: sellSymbol,
-      quoteTokenAddress: buyAddress,
-      quoteTokenSymbol: buySymbol,
+      tokenAQtyUnscaled: tokenAQtyUnscaled,
+      tokenBQtyUnscaled: tokenBQtyUnscaled,
+      baseTokenAddress: tokenAAddress,
+      baseTokenSymbol: tokenASymbol,
+      quoteTokenAddress: tokenBAddress,
+      quoteTokenSymbol: tokenBSymbol,
     };
     return parsedReceipt;
   }
