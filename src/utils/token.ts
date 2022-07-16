@@ -38,6 +38,16 @@ export function getQuoteTokenAddress(token1: string, token2: string): string {
   return quoteTokenAddress;
 }
 
+export function sortBaseQuoteTokens(
+  token1: string,
+  token2: string
+): [string, string] {
+  return [
+    getBaseTokenAddress(token1, token2),
+    getQuoteTokenAddress(token1, token2),
+  ];
+}
+
 export async function getTokenAllowance(
   tokenAddress: string,
   account: string,
@@ -87,7 +97,7 @@ export async function getTokenBalance(
   if (tokenAddress === contractAddresses.ZERO_ADDR) {
     let nativeBalance = BigNumber.from(0);
     try {
-      nativeBalance = await signer.getBalance(account);
+      nativeBalance = await signer.getBalance();
     } catch (error) {
       console.log(error);
     }

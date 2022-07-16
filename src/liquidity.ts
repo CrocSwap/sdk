@@ -8,15 +8,15 @@ import {
   getTokenDecimals,
   // fromDisplayPrice,
 } from "./utils";
-import { encodeCrocPrice, pinTickUpper, tickToPrice } from "./utils/price"
+import { encodeCrocPrice, pinTickUpper, tickToPrice } from "./utils/price";
 import { CROC_ABI } from "./abis";
 import { parseEther } from "ethers/lib/utils";
-import { AddressZero } from '@ethersproject/constants';
+import { AddressZero } from "@ethersproject/constants";
 
 type Address = string;
 type PoolType = number;
 
-const LIQ_PATH = 2
+const LIQ_PATH = 2;
 
 /* Converts a fixed base token collateral amount to pool liquidity units. This conversion only applies
  * to the current pool price. If price moves the ratio between token collateral and liquidity will also
@@ -310,7 +310,6 @@ export class WarmPathEncoder {
     limitHigh: number,
     useSurplus: boolean
   ): string {
-  
     return this.abiCoder.encode(WARM_ARG_TYPES, [
       callCode,
       this.base,
@@ -321,8 +320,8 @@ export class WarmPathEncoder {
       qty,
       encodeCrocPrice(limitLow),
       encodeCrocPrice(limitHigh),
-      (useSurplus ? (2 + 1) : 0),
-      AddressZero
+      useSurplus ? 2 + 1 : 0,
+      AddressZero,
     ]);
   }
 }
@@ -350,15 +349,18 @@ export function isTradeWarmCall(txData: string): boolean {
   const USER_CMD_METHOD = "0xa15112f9";
   const encoder = new ethers.utils.AbiCoder();
   if (txData.slice(0, 10) === USER_CMD_METHOD) {
-    const result = encoder.decode(["uint16", "bytes"], "0x".concat(txData.slice(10)))
-    return result[0] == LIQ_PATH
-  }  
+    const result = encoder.decode(
+      ["uint16", "bytes"],
+      "0x".concat(txData.slice(10))
+    );
+    return result[0] == LIQ_PATH;
+  }
   return false;
 }
 
 interface WarmPathArgs {
-  isMint: boolean,
-  isAmbient: boolean,
+  isMint: boolean;
+  isAmbient: boolean;
   base: string;
   quote: string;
   poolIdx: number;
@@ -413,14 +415,14 @@ export async function sendAmbientMint(
   let tx;
   // if baseToken = ETH
   if (baseTokenAddress === contractAddresses.ZERO_ADDR) {
-    const fixedEthValue = (ethValue * 1.01).toFixed(18);
+    const fixedEthValue = (ethValue * 1.03).toFixed(18);
 
     tx = await crocContract.userCmd(LIQ_PATH, args, {
       value: parseEther(fixedEthValue.toString()),
-      gasLimit: 1000000
+      // gasLimit: 1000000,
     });
   } else {
-    tx = await crocContract.userCmd(LIQ_PATH, args)
+    tx = await crocContract.userCmd(LIQ_PATH, args);
   }
 
   return tx;
@@ -454,7 +456,7 @@ export async function burnAmbientPartial(
 
   // if baseToken = ETH
   const tx = await crocContract.userCmd(LIQ_PATH, args, {
-     gasLimit: 1000000,
+    gasLimit: 1000000,
   });
 
   return tx;
@@ -574,7 +576,7 @@ export async function sendConcMint(
   let tx;
   // if baseToken = ETH
   if (baseTokenAddress === contractAddresses.ZERO_ADDR && !positionHigh) {
-    const fixedEthValue = (ethValue * 1.01).toFixed(18);
+    const fixedEthValue = (ethValue * 1.03).toFixed(18);
     const etherToSend = parseEther(fixedEthValue.toString());
 
     tx = await crocContract.userCmd(LIQ_PATH, args, {
