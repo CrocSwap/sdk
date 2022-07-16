@@ -50,8 +50,8 @@ export async function sendSwap(
   sellTokenAddress: string,
   buyTokenAddress: string,
   qtyIsSellToken: boolean,
-  qty: BigNumber | string | number,
-  ethValue: BigNumber | string | number,
+  qty: BigNumber | string,
+  ethValue: BigNumber | string,
   slippageTolerance: number,
   POOL_IDX: number,
   signer: Signer
