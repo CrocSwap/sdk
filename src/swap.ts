@@ -499,8 +499,8 @@ export async function sendSwap(
   sellTokenAddress: string,
   buyTokenAddress: string,
   qtyIsSellToken: boolean,
-  qty: BigNumber,
-  ethValue: BigNumber,
+  qty: BigNumber | number,
+  ethValue: BigNumber | number,
   slippageTolerance: number,
   POOL_IDX: number,
   signer: Signer
