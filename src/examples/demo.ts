@@ -1,47 +1,25 @@
-import { getSpotPrice } from "../utils/price";
-import { AddressZero } from '@ethersproject/constants';
-import { ambientPosSlot, queryPos } from '../position';
-import { POOL_PRIMARY, NODE_URL } from '../constants';
-//import { sendSwap } from '../swap';
-import { ethers, BigNumber } from 'ethers';
-import { JsonRpcProvider } from '@ethersproject/providers';
-import { sendAmbientMint, burnAmbientPartial, sendConcMint } from '../liquidity';
+import { CrocEnv } from '../croc';
+import { ethers } from 'ethers';
 
-const DAI = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa"
+const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
 
 const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
 
 async function demo() {
-    let wallet = new ethers.Wallet(KEY, new JsonRpcProvider(NODE_URL))
-    let price = getSpotPrice(AddressZero, DAI)    
+    let wallet = new ethers.Wallet(KEY)
+    let croc = new CrocEnv(5, wallet)
 
-    /*await sendSwap(AddressZero, DAI, true, BigNumber.from(10).pow(13), BigNumber.from(10).pow(13), 0.03,
-        POOL_PRIMARY, wallet)*/
+    croc.poolEth(DAI).spotPrice().then(console.log);
 
-    await sendAmbientMint(AddressZero, DAI, BigNumber.from(10).pow(13), 0.00001, 10000, 
-        0.001, wallet).then(x => x.wait())
+    //croc.poolEth(DAI).mintAmbientBase(0.0001, [0.0001, 0.001])
+    //croc.poolEth(DAI).mintAmbientQuote(1.0, [0.0001, 0.001])
+    //croc.poolEth(DAI).mintRangeBase(0.0001, [-640000, 640000], [0.0001, 0.001])
 
-    await burnAmbientPartial(AddressZero, DAI, BigNumber.from(10).pow(12), 0.0001, 10000, wallet)
-        .then(x => x.wait())
-
-    await sendConcMint(AddressZero, DAI,  await price, -100000, 100000, BigNumber.from(10).pow(13).toString(), true, 0.00001, 10000, 
-        0.001, wallet).then(x => x.wait())
+    //croc.sell(DAI, 0.0001).forEth().swap()
+    //croc.buy(DAI, 0.0001).withEth().swap()
+    croc.buyEth(0.000001).with(DAI).swap()
+    croc.sellEth(0.000001).for(DAI).swap()
 }
-
-async function shortDemo() {
-    let price = getSpotPrice(AddressZero, DAI)
-
-    let slot = ambientPosSlot("0x01e650ABfc761C6A0Fc60f62A4E4b3832bb1178b", 
-        AddressZero, DAI, POOL_PRIMARY)
-
-    console.log(await price)
-    console.log(slot.toString())
-
-    let pos = queryPos(slot.toString(), "0x474fd1a554d2a6e693fc0241afb8cbdd468b15c6fa9e4a314f60598187295c5e", new JsonRpcProvider(NODE_URL))
-    console.log(await pos)
-}
-
-shortDemo()
 
 if (true) {
     demo()

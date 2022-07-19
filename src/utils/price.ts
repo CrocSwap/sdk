@@ -1,55 +1,7 @@
-import { BigNumber, ethers, Contract } from "ethers";
-import { MIN_TICK, MAX_TICK, NODE_URL, contractAddresses, QUERY_ABI } from "..";
-import {
-  getTokenDecimals,
-  getQuoteTokenAddress,
-  getBaseTokenAddress,
-} from "./token";
-import { POOL_PRIMARY, GRID_SIZE_DFLT } from "../constants";
-import { JsonRpcProvider } from "@ethersproject/providers";
+import { BigNumber } from "ethers";
+import { GRID_SIZE_DFLT, MIN_TICK, MAX_TICK } from "../constants";
 
 type Tick = number;
-
-export async function getSpotPrice(
-  baseTokenAddress: string,
-  quoteTokenAddress: string,
-  pool: number = POOL_PRIMARY,
-  providerArg?: JsonRpcProvider
-): Promise<number> {
-  const provider = providerArg
-    ? providerArg
-    : new ethers.providers.JsonRpcProvider(NODE_URL);
-
-  const queryAddress = contractAddresses["QUERY_ADDR"];
-  const queryContract = new Contract(queryAddress, QUERY_ABI, provider);
-
-  const price = await queryContract.queryPrice(
-    baseTokenAddress,
-    quoteTokenAddress,
-    pool
-  );
-
-  return decodeCrocPrice(price);
-}
-
-export async function getSpotPriceDisplay(
-  baseTokenAddress: string,
-  quoteTokenAddress: string,
-  poolIdx: number = POOL_PRIMARY,
-  currentProvider?: JsonRpcProvider
-): Promise<number> {
-  const poolBase = getBaseTokenAddress(baseTokenAddress, quoteTokenAddress);
-  const poolQuote = getQuoteTokenAddress(baseTokenAddress, quoteTokenAddress);
-  const isInverted = poolQuote === baseTokenAddress;
-
-  const price = getSpotPrice(poolBase, poolQuote, poolIdx, currentProvider);
-  return toDisplayPrice(
-    await price,
-    await getTokenDecimals(baseTokenAddress, currentProvider),
-    await getTokenDecimals(quoteTokenAddress, currentProvider),
-    isInverted
-  );
-}
 
 export function encodeCrocPrice(price: number): BigNumber {
   let floatPrice = Math.sqrt(price) * 2 ** 64;

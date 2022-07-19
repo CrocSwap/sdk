@@ -1,4 +1,4 @@
-import { queryClaim, AmbientClaim, RangeClaim, queryPos, AmbientLiqPos, RangeLiqPos, queryPosAnchors } from "../position";
+/*import { queryClaim, AmbientClaim, RangeClaim, queryPos, AmbientLiqPos, RangeLiqPos, queryPosAnchors } from "../position";
 import { ethers } from "ethers";
 import { NODE_URL } from "..";
 
@@ -53,4 +53,4 @@ test("query anchors", async() => {
         { tx: concMintTx, pos: concPos}]
     let pos = await queryPosAnchors(anchors, ropstenProvider)
     console.log(pos)
-})
+})*/

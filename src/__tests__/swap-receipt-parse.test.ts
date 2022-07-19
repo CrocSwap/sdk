@@ -1,4 +1,4 @@
-import { parseSwapEthersTxReceipt } from "../swap";
+/*import { parseSwapEthersTxReceipt } from "../swap";
 import { parseSwapWeb3TxReceipt } from "../swap";
 
 import { BigNumber } from "ethers";
@@ -335,4 +335,4 @@ test("conversion rate string is correct?", async () => {
   expect(parsedEthersTokenReceipt.conversionRateString).toBe(
     "Swapped 0.00004037 WBTC for 2 USDC at a rate of 49541.74 USDC per WBTC"
   );
-});
+});*/

@@ -1,159 +1,77 @@
-import { BigNumber, ethers, Signer } from "ethers";
-import {
-  CROC_ABI,
-  // ERC20_ABI
-} from "./abis";
+import { BigNumber } from "ethers";
 
 import {
-  getTokenDecimals,
-  fromDisplayQty,
-  // toDisplayQty,
-  getBaseTokenAddress,
-  getQuoteTokenAddress,
+  sortBaseQuoteTokens,
 } from "./utils/token";
-import { encodeCrocPrice, getSpotPrice } from "./utils/price";
-import {
-  // NODE_URL,
-  POOL_PRIMARY,
-  contractAddresses,
-} from "./constants";
+import { TransactionResponse } from '@ethersproject/providers';
+import { CrocContext } from './context';
+import { CrocPoolView } from './pool';
+import { bigNumToFloat, floatToBigNum, encodeCrocPrice } from './utils';
+import { CrocTokenView, TokenQty } from './tokens';
+import { AddressZero } from '@ethersproject/constants';
 
-export async function getLimitPrice(
-  sellTokenAddress: string,
-  buyTokenAddress: string,
-  slippageTolerance: number
-) {
-  const sellTokenIsBase =
-    sellTokenAddress === getBaseTokenAddress(sellTokenAddress, buyTokenAddress);
-  const baseTokenAddress = sellTokenIsBase ? sellTokenAddress : buyTokenAddress;
-  const quoteTokenAddress = sellTokenIsBase
-    ? buyTokenAddress
-    : sellTokenAddress;
+export class CrocSwapPlan {
 
-  let limitPrice;
+  constructor (sellToken: string, buyToken: string, qty: TokenQty, qtyIsBuy: boolean,
+    slippage: number, context: Promise<CrocContext>) {
+    [this.baseToken, this.quoteToken] = sortBaseQuoteTokens(sellToken, buyToken)
+    this.sellBase = (this.baseToken === sellToken)
+    this.qtyInBase = (this.sellBase !== qtyIsBuy)
 
-  if (sellTokenIsBase) {
-    limitPrice = encodeCrocPrice(
-      (await getSpotPrice(baseTokenAddress, quoteTokenAddress, POOL_PRIMARY)) *
-        (1 + slippageTolerance * 0.01)
-    );
-  } else {
-    limitPrice = encodeCrocPrice(
-      (await getSpotPrice(baseTokenAddress, quoteTokenAddress, POOL_PRIMARY)) *
-        (1 - slippageTolerance * 0.01)
-    );
-  }
-  return limitPrice;
-}
-
-export async function sendSwap(
-  sellTokenAddress: string,
-  buyTokenAddress: string,
-  qtyIsSellToken: boolean,
-  qty: BigNumber | string,
-  ethValue: BigNumber | string,
-  slippageTolerance: number,
-  POOL_IDX: number,
-  signer: Signer
-) {
-  const minOut = 0;
-
-  const crocContract = new ethers.Contract(
-    contractAddresses["CROC_SWAP_ADDR"],
-    CROC_ABI,
-    signer
-  );
-
-  let tx;
-
-  const baseTokenAddress = getBaseTokenAddress(
-    buyTokenAddress,
-    sellTokenAddress
-  );
-  const quoteTokenAddress = getQuoteTokenAddress(
-    buyTokenAddress,
-    sellTokenAddress
-  );
-
-  const sellTokenIsBase = sellTokenAddress === baseTokenAddress ? true : false;
-
-  let qtyIsBase;
-
-  if (qtyIsSellToken && sellTokenIsBase) {
-    qtyIsBase = true;
-  } else if (!qtyIsSellToken && !sellTokenIsBase) {
-    qtyIsBase = true;
-  } else {
-    qtyIsBase = false;
+    const tokenView = new CrocTokenView(context,
+      this.qtyInBase ? this.baseToken : this.quoteToken)
+    this.qty = tokenView.normQty(qty)
+    
+    this.slippage = slippage
+    this.context = context
   }
 
-  let crocQty;
-  if (qty instanceof BigNumber) {
-    crocQty = qty;
-  } else {
-    if (qtyIsSellToken) {
-      crocQty = fromDisplayQty(qty, await getTokenDecimals(sellTokenAddress));
+  async swap(): Promise<TransactionResponse> {
+    const TIP = 0
+    const SURPLUS_FLAGS = 0
+    return (await this.context).dex.swap
+      (this.baseToken, this.quoteToken, (await this.context).poolIndex,
+      this.sellBase, this.qtyInBase, await this.qty, TIP, 
+      await this.calcLimitPrice(), await this.calcSlipQty(), SURPLUS_FLAGS,
+      await this.buildTxArgs())
+  }
+
+  private async buildTxArgs() {
+    if (this.baseToken == AddressZero && this.sellBase) {
+      let val = this.qtyInBase ? this.qty : this.calcSlipQty()
+      return await { value: val }
     } else {
-      crocQty = fromDisplayQty(qty, await getTokenDecimals(buyTokenAddress));
+      return { }
     }
   }
 
-  let ethBigNum;
-
-  if (ethValue instanceof BigNumber) {
-    ethBigNum = ethValue;
-  } else {
-    ethBigNum = fromDisplayQty(ethValue, 18);
+  private async calcSlipQty(): Promise<BigNumber> {
+    let qty = bigNumToFloat(await this.qty)
+    let spotPrice = await this.fetchSpotPrice()
+    let priceMult = this.qtyInBase ? 1/spotPrice : spotPrice
+    let qtyIsBuy = (this.sellBase === this.qtyInBase)
+    let slipMult = qtyIsBuy ? (1 - this.slippage) : (1 + this.slippage)
+    return floatToBigNum(qty * priceMult * slipMult)
   }
 
-  const limitPrice = await getLimitPrice(
-    sellTokenAddress,
-    buyTokenAddress,
-    slippageTolerance
-  );
-
-  // console.log({ baseTokenAddress });
-  // console.log({ sellTokenIsBase });
-  // console.log({ quoteTokenAddress });
-  // console.log({ POOL_IDX });
-  // console.log({ qtyIsBase });
-  // console.log({ ethValue });
-  // console.log({ crocQty });
-  // console.log({ limitPrice });
-
-  if (sellTokenAddress === contractAddresses.ZERO_ADDR) {
-    tx = await crocContract.swap(
-      baseTokenAddress,
-      quoteTokenAddress,
-      POOL_IDX,
-      sellTokenIsBase, // ?? isBuy (i.e. converting base token for quote token)
-      qtyIsBase, // qty is base token -- boolean whether qty represents BASE or QUOTE
-      crocQty, // quantity of primary token
-      BigNumber.from(0), // tip argument - set to 0
-      limitPrice, // slippage-adjusted price client will accept
-      minOut,
-      0, // ?? surplus
-      // { value: ethBigNum }
-      {
-        value: ethBigNum,
-        // gasLimit: 1000000
-      }
-      // { gasLimit: 1000000 }
-    );
-  } else {
-    tx = await crocContract.swap(
-      baseTokenAddress,
-      quoteTokenAddress,
-      POOL_IDX,
-      sellTokenIsBase, // ?? isBuy (i.e. converting base token for quote token)
-      qtyIsBase, // qty is base token -- boolean whether qty represents BASE or QUOTE
-      crocQty, // quantity of token to divest
-      BigNumber.from(0), // tip argument - set to 0
-      limitPrice, // slippage-adjusted price client will accept
-      minOut,
-      0 // ?? surplus
-      // { gasLimit: 1000000 }
-    );
+  private async calcLimitPrice(): Promise<BigNumber> {
+    const PREC_ADJ = 1.5
+    let spotPrice = await this.fetchSpotPrice()
+    let slipPrec = this.slippage * PREC_ADJ
+    let limitPrice = spotPrice * (this.sellBase ? (1 + slipPrec) : (1 - slipPrec))
+    return encodeCrocPrice(limitPrice)
   }
-  return tx;
+
+  private async fetchSpotPrice(): Promise<number> {
+    let pool = new CrocPoolView(this.baseToken, this.quoteToken, this.context)
+    return pool.spotPrice()
+  }
+
+  readonly baseToken: string
+  readonly quoteToken: string
+  readonly qty: Promise<BigNumber>
+  readonly sellBase: boolean
+  readonly qtyInBase: boolean
+  readonly slippage: number
+  readonly context: Promise<CrocContext>
 }

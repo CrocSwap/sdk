@@ -8,11 +8,14 @@ import {
   pinTickLower,
   calcRangeTilt,
   truncateRightBits,
+  liquidityForBaseQty,
 } from "../utils";
+import {
+  ambientPosSlot,
+  concPosSlot
+} from "../encoding/slots"
 import { BigNumber } from "ethers";
-import { liquidityForBaseQty} from "../liquidity";
-import { ambientPosSlot, concPosSlot } from "../position";
-import { contractAddresses } from "../constants";
+import { AddressZero } from "@ethersproject/constants";
 
 test("1 is 1?", () => {
   expect(1).toBe(1);
@@ -129,7 +132,7 @@ test("ambient slot", () => {
   const owner = "0x01e650abfc761c6a0fc60f62a4e4b3832bb1178b"
   const token = "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
   const slot = "0x83143c5d6e1dadd337e7d8618d6c0bf50bdfd154f08c7f9310dda845cf77ad53"
-  expect(ambientPosSlot(owner, contractAddresses.ZERO_ADDR, token)).toBe(slot)
+  expect(ambientPosSlot(owner, AddressZero, token, 36000)).toBe(slot)
 });
 
 test("concentrated slot", () => {
@@ -138,7 +141,7 @@ test("concentrated slot", () => {
   const lower = -69090
   const upper = -52980
   const slot = "0xf264f3cd87277c5d536c08d094f4cd23707a7fb7c8da08b44c0dc25bea3b9b54"
-  expect(concPosSlot(owner, contractAddresses.ZERO_ADDR, token, lower, upper)).toBe(slot)
+  expect(concPosSlot(owner, AddressZero, token, lower, upper, 36000)).toBe(slot)
 });
 
 test("truncate right bits", () => {

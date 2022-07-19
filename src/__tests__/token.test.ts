@@ -3,13 +3,12 @@ import {
   getBaseTokenAddress,
   sortBaseQuoteTokens,
 } from "../utils/token";
-import { contractAddresses } from "../constants";
+import { AddressZero } from "@ethersproject/constants";
 
 test("getQuoteTokenAddress returns correct address when ETH compared with Dai on Kovan", () => {
   const daiKovanAddress = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa";
   const quoteAddress = getQuoteTokenAddress(
-    contractAddresses.ZERO_ADDR,
-    daiKovanAddress
+    AddressZero, daiKovanAddress
   );
   expect(quoteAddress).toBe(daiKovanAddress);
 });
@@ -17,20 +16,20 @@ test("getQuoteTokenAddress returns correct address when ETH compared with Dai on
 test("getBaseTokenAddress returns correct address when ETH compared with Dai on Kovan", () => {
   const daiKovanAddress = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa";
   const quoteAddress = getBaseTokenAddress(
-    contractAddresses.ZERO_ADDR,
+    AddressZero, 
     daiKovanAddress
   );
-  expect(quoteAddress).toBe(contractAddresses.ZERO_ADDR);
+  expect(quoteAddress).toBe(AddressZero);
 });
 
 test("sortBaseQuoteTokens returns correct address array when ETH compared with Dai on Kovan when already correctly sorted", () => {
   const daiKovanAddress = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa";
   const addressArray = sortBaseQuoteTokens(
-    contractAddresses.ZERO_ADDR,
+    AddressZero, 
     daiKovanAddress
   );
   expect(addressArray).toStrictEqual([
-    contractAddresses.ZERO_ADDR,
+    AddressZero, 
     daiKovanAddress,
   ]);
 });
@@ -39,10 +38,10 @@ test("sortBaseQuoteTokens returns correct address array when ETH compared with D
   const daiKovanAddress = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa";
   const addressArray = sortBaseQuoteTokens(
     daiKovanAddress,
-    contractAddresses.ZERO_ADDR
+    AddressZero
   );
   expect(addressArray).toStrictEqual([
-    contractAddresses.ZERO_ADDR,
+    AddressZero, 
     daiKovanAddress,
   ]);
 });

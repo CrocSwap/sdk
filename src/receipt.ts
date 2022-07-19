@@ -1,24 +1,15 @@
-import {
-  //   Web3Receipt,
+/*import {
   EthersTokenReceipt,
   EthersNativeReceipt,
 } from "./utils/web3";
 
 import {
-  // CROC_ABI,
   ERC20_ABI,
 } from "./abis";
-import { contractAddresses } from "./constants";
-import {
-  //   getTokenDecimals,
-  //   fromDisplayQty,
-  toDisplayQty,
-  //   getBaseTokenAddress,
-  //   getQuoteTokenAddress,
-} from "./utils/token";
+import { toDisplayQty } from "./utils/token";
 import { toFixedNumber } from "./utils/math";
 import { JsonRpcProvider } from "@ethersproject/providers";
-import { ethers } from "ethers";
+import { ethers } from "ethers";*/
 
 export type ParsedSwapReceipt = {
   blockNumber: number;
@@ -56,7 +47,7 @@ export type ParsedMintReceipt = {
   tokenBQtyUnscaled: number;
 };
 
-export async function parseSwapEthersReceipt(
+/*export async function parseSwapEthersReceipt(
   provider: JsonRpcProvider,
   receipt: EthersTokenReceipt | EthersNativeReceipt
 ): Promise<ParsedSwapReceipt> {
@@ -589,4 +580,4 @@ export async function parseMintEthersReceipt(
     };
     return parsedReceipt;
   }
-}
+}*/
