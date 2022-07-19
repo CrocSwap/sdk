@@ -11,12 +11,12 @@ async function demo() {
 
     croc.poolEth(DAI).spotPrice().then(console.log);
 
-    //croc.poolEth(DAI).mintAmbientBase(0.0001, [0.0001, 0.001])
-    //croc.poolEth(DAI).mintAmbientQuote(1.0, [0.0001, 0.001])
-    //croc.poolEth(DAI).mintRangeBase(0.0001, [-640000, 640000], [0.0001, 0.001])
+    croc.poolEth(DAI).mintAmbientBase(0.0001, [0.0001, 0.001])
+    croc.poolEth(DAI).mintAmbientQuote(1.0, [0.0001, 0.001])
+    croc.poolEth(DAI).mintRangeBase(0.0001, [-640000, 640000], [0.0001, 0.001])
 
-    //croc.sell(DAI, 0.0001).forEth().swap()
-    //croc.buy(DAI, 0.0001).withEth().swap()
+    croc.sell(DAI, 0.0001).forEth().swap()
+    croc.buy(DAI, 0.0001).withEth().swap()
     croc.buyEth(0.000001).with(DAI).swap()
     croc.sellEth(0.000001).for(DAI).swap()
 }
