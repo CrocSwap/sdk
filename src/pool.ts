@@ -12,6 +12,7 @@ type TickRange = [number, number]
 export class CrocPoolView {
 
     constructor (tokenA: string, tokenB: string, context: Promise<CrocContext>) {
+        console.log([tokenA, tokenB]);
         [this.baseToken, this.quoteToken] = 
             sortBaseQuoteTokens(tokenA, tokenB)
         this.context = context
@@ -24,7 +25,10 @@ export class CrocPoolView {
 
     async spotPrice(): Promise<number> {
         let sqrtPrice = (await this.context).query.queryPrice
-            (this.baseToken, this.quoteToken, (await this.context).poolIndex)
+            (this.baseToken, this.quoteToken, (await this.context).chain.chainId)
+        console.log((await this.context).dex.address)
+        console.log(await sqrtPrice)
+        console.log((await this.context).chain.nodeUrl)
         return decodeCrocPrice(await sqrtPrice)
     }
 
@@ -89,7 +93,7 @@ export class CrocPoolView {
     private async ethForAmbientQuote (quoteQty: TokenQty, limits: PriceRange): Promise<TokenQty> {
         const PRECISION_ADJ = 1.001
         let weiQty = await this.normQty(quoteQty, false)
-        let weiEth = bigNumToFloat(weiQty) * limits[1] * PRECISION_ADJ
+        let weiEth = Math.round(bigNumToFloat(weiQty) * limits[1] * PRECISION_ADJ)
         return toDisplayQty(weiEth, await this.baseDecimals)
     }
 
@@ -99,7 +103,7 @@ export class CrocPoolView {
     }
 
     private async makeEncoder(): Promise<WarmPathEncoder> {
-        return new WarmPathEncoder(this.baseToken, this.quoteToken, (await this.context).poolIndex)
+        return new WarmPathEncoder(this.baseToken, this.quoteToken, (await this.context).chain.poolIndex)
     }
 
     private async ethForRangeQuote (_quoteQty: TokenQty, _range: TickRange, _limits: PriceRange): 

@@ -1,6 +1,6 @@
 import { Provider, JsonRpcProvider } from "@ethersproject/providers";
 import { Contract, Signer, Wallet } from 'ethers';
-import { CHAIN_CONTEXTS, ChainContext } from './constants';
+import { ChainSpec, CHAIN_SPECS } from './constants';
 import { CROC_ABI, QUERY_ABI, ERC20_ABI } from './abis';
 import { AddressZero } from '@ethersproject/constants';
 
@@ -9,10 +9,10 @@ export interface CrocContext {
     dex: Contract,
     query: Contract,
     erc20: Contract,
-    poolIndex: number
+    chain: ChainSpec
 }
 
-export type ChainIdentifier = number
+export type ChainIdentifier = number | string
 export type ConnectArg = Provider | Wallet | JsonRpcProvider | ChainIdentifier
 
 export async function connectCroc (providerOrChainId: ConnectArg, signer?: Signer): Promise<CrocContext> {
@@ -21,8 +21,8 @@ export async function connectCroc (providerOrChainId: ConnectArg, signer?: Signe
 }
 
 function buildProvider (arg: ConnectArg): [Provider, Provider | Signer] {
-    if (typeof(arg) === "number") {
-        let context = getContext(arg)
+    if (typeof(arg) === "number" || typeof(arg) == "string") {
+        let context = lookupChain(arg)
         return buildProvider(new JsonRpcProvider(context.nodeUrl))
     } else if ("provider" in arg) {
         return [arg.provider, arg]
@@ -47,17 +47,21 @@ function getChain (provider: Provider): Promise<number> {
 }
 
 function inflateContracts (chainId: number, provider: Provider, actor: Provider | Signer): CrocContext {
-    let context = getContext(chainId)
+    let context = lookupChain(chainId)
     return { provider: provider, 
         dex: new Contract(context.dexAddr, CROC_ABI, actor),
         query: new Contract(context.queryAddr, QUERY_ABI, actor),
         erc20: new Contract(AddressZero, ERC20_ABI, actor),
-        poolIndex: context.poolIndex
+        chain: context
     }
 }
 
-function getContext (chainId: number): ChainContext {
-    let context = CHAIN_CONTEXTS[chainId]
-    if (!context) { throw new Error("Unsupported chain ID: " + chainId) }
-    return context
+export function lookupChain (chainId: number | string): ChainSpec {
+    if (typeof(chainId) === "number") {
+        return lookupChain("0x" + chainId.toString(16))
+    } else {
+        let context = CHAIN_SPECS[chainId]
+        if (!context) { throw new Error("Unsupported chain ID: " + chainId) }
+        return context
+    }
 }

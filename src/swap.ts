@@ -30,7 +30,7 @@ export class CrocSwapPlan {
     const TIP = 0
     const SURPLUS_FLAGS = 0
     return (await this.context).dex.swap
-      (this.baseToken, this.quoteToken, (await this.context).poolIndex,
+      (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP, 
       await this.calcLimitPrice(), await this.calcSlipQty(), SURPLUS_FLAGS,
       await this.buildTxArgs())

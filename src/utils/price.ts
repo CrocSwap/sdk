@@ -1,5 +1,5 @@
 import { BigNumber } from "ethers";
-import { GRID_SIZE_DFLT, MIN_TICK, MAX_TICK } from "../constants";
+import { MIN_TICK, MAX_TICK } from "../constants";
 
 type Tick = number;
 
@@ -55,8 +55,7 @@ export function fromDisplayPrice(
 
 export function pinTickLower(
   price: number,
-  nTicksGrid: number = GRID_SIZE_DFLT
-): Tick {
+  nTicksGrid: number): Tick {
   const priceInTicks = Math.log(price) / Math.log(1.0001);
   const tickGrid = Math.floor(priceInTicks / nTicksGrid) * nTicksGrid;
   const horizon = Math.floor(MIN_TICK / nTicksGrid) * nTicksGrid;
@@ -65,8 +64,7 @@ export function pinTickLower(
 
 export function pinTickUpper(
   price: number,
-  nTicksGrid: number = GRID_SIZE_DFLT
-): Tick {
+  nTicksGrid: number): Tick {
   const priceInTicks = Math.log(price) / Math.log(1.0001);
   const tickGrid = Math.ceil(priceInTicks / nTicksGrid) * nTicksGrid;
   const horizon = Math.ceil(MAX_TICK / nTicksGrid) * nTicksGrid;
