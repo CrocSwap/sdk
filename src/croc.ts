@@ -2,7 +2,7 @@ import { ConnectArg, CrocContext, connectCroc } from './context';
 import { CrocPoolView } from './pool';
 import { AddressZero } from '@ethersproject/constants';
 import { CrocPositionView } from './position';
-import { TokenQty } from './tokens';
+import { TokenQty, CrocTokenView } from './tokens';
 import { CrocSwapPlan } from './swap';
 import { Signer } from 'ethers';
 
@@ -37,6 +37,10 @@ export class CrocEnv {
 
     positions(): CrocPositionView {
         return new CrocPositionView(this.context)
+    }
+
+    token (token: string): CrocTokenView {
+        return new CrocTokenView(this.context, token)
     }
 
     readonly context: Promise<CrocContext>

@@ -12,7 +12,6 @@ type TickRange = [number, number]
 export class CrocPoolView {
 
     constructor (tokenA: string, tokenB: string, context: Promise<CrocContext>) {
-        console.log([tokenA, tokenB]);
         [this.baseToken, this.quoteToken] = 
             sortBaseQuoteTokens(tokenA, tokenB)
         this.context = context
@@ -23,12 +22,14 @@ export class CrocPoolView {
         this.invertedDisplay = this.baseToken === tokenB
     }
 
+    async isInit(): Promise<boolean> {
+        return this.spotPrice()
+            .then(p => p > 0)
+    }
+
     async spotPrice(): Promise<number> {
         let sqrtPrice = (await this.context).query.queryPrice
-            (this.baseToken, this.quoteToken, (await this.context).chain.chainId)
-        console.log((await this.context).dex.address)
-        console.log(await sqrtPrice)
-        console.log((await this.context).chain.nodeUrl)
+            (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex)
         return decodeCrocPrice(await sqrtPrice)
     }
 
