@@ -13,7 +13,7 @@ export interface CrocContext {
 }
 
 export type ChainIdentifier = number | string
-export type ConnectArg = Provider | Wallet | JsonRpcProvider | ChainIdentifier
+export type ConnectArg = Provider | Wallet | ChainIdentifier
 
 export async function connectCroc (providerOrChainId: ConnectArg, signer?: Signer): Promise<CrocContext> {
     let [provider, actor] = buildProvider(providerOrChainId)
@@ -41,9 +41,13 @@ async function setupProvider (provider: Provider, actor: Provider | Signer,
     return inflateContracts(chainId, provider, actor)
 }
 
-function getChain (provider: Provider): Promise<number> {
-    if (!("getNetwork" in provider)) { throw new Error("Invalid provider") }
-    return provider.getNetwork().then(n => n.chainId)
+async function getChain (provider: Provider): Promise<number> {
+    if ("chainId" in provider) { return (provider as any).chainId as number }
+    else if ("getNetwork" in provider) { return provider.getNetwork().then(n => n.chainId) }
+    else {
+        console.dir(provider)
+        throw new Error("Invalid provider")
+    }
 }
 
 function inflateContracts (chainId: number, provider: Provider, actor: Provider | Signer): CrocContext {
