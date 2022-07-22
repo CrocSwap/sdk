@@ -55,6 +55,14 @@ export class CrocTokenView {
         }
     }
 
+    async toDisplay (qty: TokenQty): Promise<string> {
+        if (typeof(qty) === "number" || typeof(qty) === "string") {
+            return qty.toString()
+        } else {
+            return toDisplayQty(qty, await this.decimals)
+        }
+    }
+
     private async resolve(): Promise<Contract> {
         return (await this.context).erc20.attach(this.tokenAddr)
     }

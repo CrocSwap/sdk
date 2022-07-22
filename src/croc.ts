@@ -43,6 +43,10 @@ export class CrocEnv {
         return new CrocTokenView(this.context, token)
     }
 
+    tokenEth(): CrocTokenView {
+        return new CrocTokenView(this.context, AddressZero)
+    }
+
     readonly context: Promise<CrocContext>
 }
 
