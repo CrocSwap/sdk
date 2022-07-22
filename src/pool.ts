@@ -39,6 +39,18 @@ export class CrocPoolView {
             await this.quoteDecimals, this.invertedDisplay)
     }
 
+    async mintAmbientLeft (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
+        return this.invertedDisplay ? 
+            this.mintAmbientQuote(qty, limits) :
+            this.mintAmbientBase(qty, limits)
+    }
+
+    async mintAmbientRight (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
+        return this.invertedDisplay ? 
+            this.mintAmbientBase(qty, limits) :
+            this.mintAmbientQuote(qty, limits)
+    }
+
     async mintAmbientBase (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
         if (this.baseToken === AddressZero) {
             return this.mintAmbient(qty, true, limits, qty)
@@ -54,6 +66,18 @@ export class CrocPoolView {
         } else {
             return this.mintAmbient(qty, false, limits)
         }
+    }
+
+    async mintRangeLeft (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+        return this.invertedDisplay ? 
+            this.mintRangeBase(qty, range, limits) :
+            this.mintRangeQuote(qty, range, limits)
+    }
+
+    async mintRangeRight (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+        return this.invertedDisplay ? 
+            this.mintRangeQuote(qty, range, limits) :
+            this.mintRangeBase(qty, range, limits)
     }
 
     async mintRangeBase (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
