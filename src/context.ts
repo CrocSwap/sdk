@@ -1,5 +1,5 @@
 import { Provider, JsonRpcProvider } from "@ethersproject/providers";
-import { Contract, Signer, Wallet } from 'ethers';
+import { Contract, Signer } from 'ethers';
 import { ChainSpec, CHAIN_SPECS } from './constants';
 import { CROC_ABI, QUERY_ABI, ERC20_ABI } from './abis';
 import { AddressZero } from '@ethersproject/constants';
@@ -13,30 +13,29 @@ export interface CrocContext {
 }
 
 export type ChainIdentifier = number | string
-export type ConnectArg = Provider | Wallet | ChainIdentifier
+export type ConnectArg = Provider | Signer | ChainIdentifier
 
 export async function connectCroc (providerOrChainId: ConnectArg, signer?: Signer): Promise<CrocContext> {
-    let [provider, actor] = buildProvider(providerOrChainId)
-    return setupProvider(provider, actor, signer)
+    let [provider, maybeSigner] = await buildProvider(providerOrChainId, signer)
+    return setupProvider(provider, maybeSigner)
 }
 
-function buildProvider (arg: ConnectArg): [Provider, Provider | Signer] {
+async function buildProvider (arg: ConnectArg, signer?: Signer): 
+    Promise<[Provider, Signer | undefined]> {
+    console.dir({type: "Build Provider", arg: arg})
     if (typeof(arg) === "number" || typeof(arg) == "string") {
         let context = lookupChain(arg)
-        return buildProvider(new JsonRpcProvider(context.nodeUrl))
-    } else if ("provider" in arg) {
-        return [arg.provider, arg]
+        return buildProvider(new JsonRpcProvider(context.nodeUrl), signer)
+    } else if ("getNetwork" in arg) {
+        return [arg, signer]
     } else {
-        return [arg, arg]
+        let chainId = await arg.getChainId()
+        return buildProvider(chainId, signer)
     }
 }
 
-async function setupProvider (provider: Provider, actor: Provider | Signer, 
-    signer?: Signer): Promise<CrocContext> {
-    if (signer) { 
-        actor = signer.connect(provider)
-    }
-    
+async function setupProvider (provider: Provider, signer?: Signer): Promise<CrocContext> {
+    let actor = signer ? signer.connect(provider) : provider
     let chainId = await getChain(provider)
     return inflateContracts(chainId, provider, actor)
 }
@@ -45,7 +44,7 @@ async function getChain (provider: Provider): Promise<number> {
     if ("chainId" in provider) { return (provider as any).chainId as number }
     else if ("getNetwork" in provider) { return provider.getNetwork().then(n => n.chainId) }
     else {
-        console.dir(provider)
+        console.dir({type: "getChainError", provider: provider})
         throw new Error("Invalid provider")
     }
 }

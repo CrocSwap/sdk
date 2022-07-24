@@ -31,6 +31,8 @@ export class CrocTokenView {
 
     async balance (address: string): Promise<BigNumber> {
         if (this.isNativeEth) {
+            console.dir({type: "Balance", providerEnv: (await this.context).provider,
+                balFn: (await this.context).provider.getBalance})
             return (await this.context).provider.getBalance(address)
         } else {
             return (await this.resolve()).balanceOf(address)
