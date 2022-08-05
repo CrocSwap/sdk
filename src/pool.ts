@@ -68,13 +68,13 @@ export class CrocPoolView {
         }
     }
 
-    async mintRangeLeft (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+    async mintRangeRight (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
         return this.invertedDisplay ? 
             this.mintRangeBase(qty, range, limits) :
             this.mintRangeQuote(qty, range, limits)
     }
 
-    async mintRangeRight (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+    async mintRangeLeft (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
         return this.invertedDisplay ? 
             this.mintRangeQuote(qty, range, limits) :
             this.mintRangeBase(qty, range, limits)

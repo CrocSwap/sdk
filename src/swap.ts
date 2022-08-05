@@ -39,7 +39,7 @@ export class CrocSwapPlan {
   private async buildTxArgs() {
     if (this.baseToken == AddressZero && this.sellBase) {
       let val = this.qtyInBase ? this.qty : this.calcSlipQty()
-      return await { value: val }
+      return { value: await val }
     } else {
       return { }
     }

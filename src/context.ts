@@ -1,5 +1,5 @@
 import { Provider, JsonRpcProvider } from "@ethersproject/providers";
-import { Contract, Signer } from 'ethers';
+import { Contract, ethers, Signer } from 'ethers';
 import { ChainSpec, CHAIN_SPECS } from './constants';
 import { CROC_ABI, QUERY_ABI, ERC20_ABI } from './abis';
 import { AddressZero } from '@ethersproject/constants';
@@ -22,7 +22,6 @@ export async function connectCroc (providerOrChainId: ConnectArg, signer?: Signe
 
 async function buildProvider (arg: ConnectArg, signer?: Signer): 
     Promise<[Provider, Signer | undefined]> {
-    console.dir({type: "Build Provider", arg: arg})
     if (typeof(arg) === "number" || typeof(arg) == "string") {
         let context = lookupChain(arg)
         return buildProvider(new JsonRpcProvider(context.nodeUrl), signer)
@@ -35,16 +34,25 @@ async function buildProvider (arg: ConnectArg, signer?: Signer):
 }
 
 async function setupProvider (provider: Provider, signer?: Signer): Promise<CrocContext> {
-    let actor = signer ? signer.connect(provider) : provider
+    let actor = determineActor(provider, signer)
     let chainId = await getChain(provider)
     return inflateContracts(chainId, provider, actor)
+}
+
+function determineActor (provider: Provider, signer?: Signer): (Signer | Provider) {
+    if (signer) {
+        return signer.connect(provider)
+    } else if ("getSigner" in provider) {
+        return (provider as ethers.providers.Web3Provider).getSigner()
+    } else {
+        return provider
+    }
 }
 
 async function getChain (provider: Provider): Promise<number> {
     if ("chainId" in provider) { return (provider as any).chainId as number }
     else if ("getNetwork" in provider) { return provider.getNetwork().then(n => n.chainId) }
     else {
-        console.dir({type: "getChainError", provider: provider})
         throw new Error("Invalid provider")
     }
 }
