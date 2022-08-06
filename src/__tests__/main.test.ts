@@ -9,6 +9,8 @@ import {
   calcRangeTilt,
   truncateRightBits,
   liquidityForBaseQty,
+  toDisplayPrice,
+  fromDisplayPrice,
 } from "../utils";
 import {
   ambientPosSlot,
@@ -56,6 +58,20 @@ test("encode croc price oversized", () => {
   const price = encodeCrocPrice(625 * 2 ** 40);
   expect(price.eq(BigNumber.from(25 * 2 ** 20).mul(BigNumber.from(2).pow(64))));
 });
+
+test("to display price", () => {
+  expect(toDisplayPrice(1500, 18, 18, false)).toBeCloseTo(1500)
+  expect(toDisplayPrice(2000, 18, 18, true)).toBeCloseTo(0.0005)
+  expect(toDisplayPrice(20, 6, 10, false)).toBeCloseTo(200000)
+  expect(toDisplayPrice(20, 6, 10, true)).toBeCloseTo(0.000005)
+})
+
+test("from display price", () => {
+  expect(fromDisplayPrice(toDisplayPrice(1500, 18, 18, false), 18, 18, false)).toBeCloseTo(1500)
+  expect(fromDisplayPrice(toDisplayPrice(2000, 18, 18, true), 18, 18, true)).toBeCloseTo(2000)
+  expect(fromDisplayPrice(toDisplayPrice(20, 10, 6, false), 10, 6, false)).toBeCloseTo(20)
+  expect(fromDisplayPrice(toDisplayPrice(20, 10, 6, true), 10, 6, true)).toBeCloseTo(20)
+})
 
 test("pin tick upper", () => {
   expect(pinTickUpper(5943, 50)).toBe(86950);

@@ -33,11 +33,8 @@ export function toDisplayPrice(
   quoteDecimals: number,
   isInverted = false
 ): number {
-  if (isInverted) {
-    return (1 / price) * Math.pow(10, baseDecimals - quoteDecimals);
-  } else {
-    return price * Math.pow(10, quoteDecimals - baseDecimals);
-  }
+  let scaled = price * Math.pow(10, quoteDecimals - baseDecimals)
+  return isInverted ? 1 / scaled : scaled
 }
 
 export function fromDisplayPrice(
@@ -46,11 +43,8 @@ export function fromDisplayPrice(
   quoteDecimals: number,
   isInverted = false
 ): number {
-  if (isInverted) {
-    return (1 / price) * Math.pow(10, quoteDecimals - baseDecimals);
-  } else {
-    return price * Math.pow(10, baseDecimals - quoteDecimals);
-  }
+  let scaled = isInverted ? 1 / price : price
+  return scaled * Math.pow(10, baseDecimals - quoteDecimals)
 }
 
 export function pinTickLower(

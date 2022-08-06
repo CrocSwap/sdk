@@ -43,6 +43,6 @@ export function toDisplayQty(
   qty: string | number | BigNumber,
   tokenDecimals: number
 ): string {
-  const bigQtyUnscaled = ethers.utils.formatUnits(qty, tokenDecimals);
+  const bigQtyUnscaled = ethers.utils.formatUnits(qty.toString(), tokenDecimals);
   return bigQtyUnscaled;
 }
