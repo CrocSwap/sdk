@@ -1,25 +1,26 @@
 import { CrocContext } from "./context";
-import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty } from './utils';
+import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice } from './utils';
 import { CrocTokenView, TokenQty } from './tokens';
 import { TransactionResponse } from '@ethersproject/providers';
 import { WarmPathEncoder } from './encoding/liquidity';
 import { BigNumber } from 'ethers';
 import { AddressZero } from '@ethersproject/constants';
+import { PoolInitEncoder } from "./encoding/init";
 
 type PriceRange = [number, number]
 type TickRange = [number, number]
 
 export class CrocPoolView {
 
-    constructor (tokenA: string, tokenB: string, context: Promise<CrocContext>) {
+    constructor (tokenTop: string, tokenBottom: string, context: Promise<CrocContext>) {
         [this.baseToken, this.quoteToken] = 
-            sortBaseQuoteTokens(tokenA, tokenB)
+            sortBaseQuoteTokens(tokenTop, tokenBottom)
         this.context = context
 
         this.baseDecimals = new CrocTokenView(context, this.baseToken).decimals
         this.quoteDecimals = new CrocTokenView(context, this.quoteToken).decimals
 
-        this.invertedDisplay = this.baseToken === tokenB
+        this.invertedDisplay = this.baseToken === tokenTop
     }
 
     async isInit(): Promise<boolean> {
@@ -35,20 +36,42 @@ export class CrocPoolView {
 
     async displayPrice(): Promise<number> {
         let spotPrice = this.spotPrice()
-        return toDisplayPrice(await spotPrice, await this.baseDecimals, 
-            await this.quoteDecimals, this.invertedDisplay)
+        return this.toDisplayPrice(await spotPrice)
+    }
+
+    async toDisplayPrice (spotPrice: number): Promise<number> {
+        return toDisplayPrice(spotPrice, await this.baseDecimals, await this.quoteDecimals,
+            this.invertedDisplay)
+    }
+
+    async fromDisplayPrice (dispPrice: number): Promise<number> {
+        return fromDisplayPrice(dispPrice, await this.baseDecimals, await this.quoteDecimals, 
+            this.invertedDisplay)
+    }
+
+    async initPool (initPrice: number): Promise<TransactionResponse> {
+        // Very small amount of ETH in economic terms but more than sufficient for min init burn
+        const ETH_INIT_BURN = BigNumber.from(10).pow(12)
+        let txArgs = this.baseToken === AddressZero ? { value: ETH_INIT_BURN } : { }
+        
+        let encoder = new PoolInitEncoder(this.baseToken, this.quoteToken, 
+            (await this.context).chain.poolIndex)
+        let spotPrice = this.fromDisplayPrice(initPrice)
+        let calldata = encoder.encodeInitialize(await spotPrice)
+        
+        return (await this.context).dex.userCmd(COLD_PATH, calldata, txArgs)       
     }
 
     async mintAmbientLeft (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
         return this.invertedDisplay ? 
-            this.mintAmbientQuote(qty, limits) :
-            this.mintAmbientBase(qty, limits)
+            this.mintAmbientBase(qty, limits) :
+            this.mintAmbientQuote(qty, limits)
     }
 
     async mintAmbientRight (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
         return this.invertedDisplay ? 
-            this.mintAmbientBase(qty, limits) :
-            this.mintAmbientQuote(qty, limits)
+            this.mintAmbientQuote(qty, limits) :
+            this.mintAmbientBase(qty, limits)
     }
 
     async mintAmbientBase (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
@@ -70,14 +93,14 @@ export class CrocPoolView {
 
     async mintRangeRight (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
         return this.invertedDisplay ? 
-            this.mintRangeBase(qty, range, limits) :
-            this.mintRangeQuote(qty, range, limits)
+            this.mintRangeQuote(qty, range, limits) :
+            this.mintRangeBase(qty, range, limits)
     }
 
     async mintRangeLeft (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
         return this.invertedDisplay ? 
-            this.mintRangeQuote(qty, range, limits) :
-            this.mintRangeBase(qty, range, limits)
+            this.mintRangeBase(qty, range, limits) :
+            this.mintRangeQuote(qty, range, limits)
     }
 
     async mintRangeBase (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
@@ -99,27 +122,46 @@ export class CrocPoolView {
 
     private async mintAmbient (qty: TokenQty, isQtyBase: boolean, 
         limits: PriceRange, val?: TokenQty): Promise<TransactionResponse> {
-        let weiQty = await this.normQty(qty, isQtyBase)
-        let txArgs = val ? { value: await this.normQty(val, isQtyBase) } : { }
-        const args = (await this.makeEncoder()).encodeMintAmbient(
-            weiQty, isQtyBase, limits[0], limits[1], false)
-        return (await this.context).dex.userCmd(LIQ_PATH, args, txArgs)
+        let weiQty = this.normQty(qty, isQtyBase)
+        let txArgs = val ? { value: await this.normEth(val) } : { }
+        let [lowerBound, upperBound] = await this.transformLimits(limits)
+
+        const calldata = (await this.makeEncoder()).encodeMintAmbient(
+            await weiQty, isQtyBase, lowerBound, upperBound, false)
+
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata, txArgs)
+    }
+
+    private async transformLimits (limits: PriceRange): Promise<PriceRange> {
+        let left = this.fromDisplayPrice(limits[0])
+        let right = this.fromDisplayPrice(limits[1])
+        return (await left < await right) ?
+            [await left, await right] :
+            [await right, await left]
     }
 
     private async mintRange (qty: TokenQty, isQtyBase: boolean, 
         range: TickRange, limits: PriceRange, val?: TokenQty): Promise<TransactionResponse> {
-        let weiQty = await this.normQty(qty, isQtyBase)
-        let txArgs = val ? { value: await this.normQty(val, isQtyBase) } : { }
-        const args = (await this.makeEncoder()).encodeMintConc(range[0], range[1],
-            weiQty, isQtyBase, limits[0], limits[1], false)
-        return (await this.context).dex.userCmd(LIQ_PATH, args, txArgs)
+        let weiQty = this.normQty(qty, isQtyBase)
+        let txArgs = val ? { value: await this.normEth(val) } : { }
+        let [lowerBound, upperBound] = await this.transformLimits(limits)
+
+        const calldata = (await this.makeEncoder()).encodeMintConc(range[0], range[1],
+            await weiQty, isQtyBase, lowerBound, upperBound, false)
+        
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata, txArgs)
     }
 
     private async ethForAmbientQuote (quoteQty: TokenQty, limits: PriceRange): Promise<TokenQty> {
         const PRECISION_ADJ = 1.001
-        let weiQty = await this.normQty(quoteQty, false)
-        let weiEth = Math.round(bigNumToFloat(weiQty) * limits[1] * PRECISION_ADJ)
+        const weiQty = await this.normQty(quoteQty, false);
+        const [, boundPrice] = await this.transformLimits(limits)
+        const weiEth = Math.round(bigNumToFloat(weiQty) * boundPrice * PRECISION_ADJ)
         return toDisplayQty(weiEth, await this.baseDecimals)
+    }
+
+    private async normEth (ethQty: TokenQty): Promise<BigNumber> {
+        return this.normQty(ethQty, true) // ETH is always on base side
     }
 
     private async normQty (qty: TokenQty, isBase: boolean): Promise<BigNumber> {
@@ -144,5 +186,6 @@ export class CrocPoolView {
     readonly context: Promise<CrocContext>
 }
 
-
+const COLD_PATH = 0;
 const LIQ_PATH = 2;
+
