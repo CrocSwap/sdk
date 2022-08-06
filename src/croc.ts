@@ -32,6 +32,10 @@ export class CrocEnv {
     }
 
     poolEth (token: string): CrocPoolView {
+        return new CrocPoolView(token, AddressZero, this.context)
+    }
+
+    poolEthQuote (token: string): CrocPoolView {
         return new CrocPoolView(AddressZero, token, this.context)
     }
 
