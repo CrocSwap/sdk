@@ -9,7 +9,7 @@ export interface CrocContext {
     dex: Contract,
     query: Contract,
     erc20: Contract,
-    chain: ChainSpec
+    chain: ChainSpec,
 }
 
 export type ChainIdentifier = number | string

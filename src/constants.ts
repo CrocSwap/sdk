@@ -21,7 +21,8 @@ export interface ChainSpec {
   queryAddr: ChainAddress,
   isTestNet: boolean,
   chainId: ChainId,
-  gridSize: number
+  gridSize: number,
+  blockExplorer?: string
 }
 
 const GOERLI_CHAIN: ChainSpec = {
@@ -31,7 +32,8 @@ const GOERLI_CHAIN: ChainSpec = {
   poolIndex: 36000,
   isTestNet: true,
   chainId: "0x5",
-  gridSize: 64
+  gridSize: 64,
+  blockExplorer: "https://goerli.etherscan.io/"
 }
 
 const KOVAN_CHAIN: ChainSpec = {
@@ -41,7 +43,9 @@ const KOVAN_CHAIN: ChainSpec = {
   poolIndex: 36000,
   isTestNet: true,
   chainId: "0x2a",
-  gridSize: 64
+  gridSize: 64,
+  blockExplorer: "https://kovan.etherscan.io/"
+
 }
 
 
