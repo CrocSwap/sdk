@@ -44,9 +44,22 @@ const KOVAN_CHAIN: ChainSpec = {
   gridSize: 64
 }
 
+
+const LOCAL_FORK_CHAIN: ChainSpec = {
+  nodeUrl: "http://127.0.0.1:8545",
+  dexAddr: "0xfafcd1f5530827e7398b6d3c509f450b1b24a209",
+  queryAddr: "0x9ea4b2f9b1572ed3ac46b402d9ba9153821033c6",
+  poolIndex: 36000,
+  isTestNet: true,
+  chainId: "0x7a69",
+  gridSize: 64
+}
+
 export const CHAIN_SPECS: {[chainId: string]: ChainSpec} = { 
   "0x5": GOERLI_CHAIN,
+  "0x7a69": LOCAL_FORK_CHAIN,
   "0x2a": KOVAN_CHAIN,
   "goerli": GOERLI_CHAIN,
   "kovan": KOVAN_CHAIN,
+  "local": LOCAL_FORK_CHAIN
 }
