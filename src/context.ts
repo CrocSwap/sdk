@@ -54,9 +54,16 @@ function determineActor(
   if (signer) {
     return signer.connect(provider);
   } else if ("getSigner" in provider) {
-    return (provider as ethers.providers.Web3Provider).getSigner(
-      "0x946FDB6AF17EC1497975D0BB5C915A5D38BA327A"
-    ); //arbitrary account
+    let signer;
+    if ((provider as JsonRpcProvider).connection?.url === "metamask") {
+      signer = (provider as ethers.providers.Web3Provider).getSigner();
+    } else {
+      signer = (provider as ethers.providers.Web3Provider).getSigner(
+        "0x946FDB6AF17EC1497975D0BB5C915A5D38BA327A"
+      );
+    }
+
+    return signer;
   } else {
     return provider;
   }
