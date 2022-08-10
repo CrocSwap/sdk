@@ -26,7 +26,7 @@ export class CrocTokenView {
     if (this.isNativeEth) {
       return undefined;
     }
-    const weiQty = BigNumber.from(2).pow(96); // Lots of 0 bytes in calldata to save gas
+    const weiQty = BigNumber.from(2).pow(120); // Lots of 0 bytes in calldata to save gas
     return (await this.resolve()).approve(
       (await this.context).dex.address,
       weiQty
