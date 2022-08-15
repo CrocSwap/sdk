@@ -22,8 +22,13 @@ export interface ChainSpec {
   isTestNet: boolean,
   chainId: ChainId,
   gridSize: number,
-  blockExplorer?: string
+  blockExplorer?: string,
+  displayName: string,
+  logoUrl?: string
 }
+
+const ETHERUM_LOGO = 
+  "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg"
 
 const GOERLI_CHAIN: ChainSpec = {
   nodeUrl: "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/goerli",
@@ -33,7 +38,9 @@ const GOERLI_CHAIN: ChainSpec = {
   isTestNet: true,
   chainId: "0x5",
   gridSize: 64,
-  blockExplorer: "https://goerli.etherscan.io/"
+  blockExplorer: "https://goerli.etherscan.io/",
+  displayName: "Goerli",
+  logoUrl: ETHERUM_LOGO
 }
 
 const KOVAN_CHAIN: ChainSpec = {
@@ -44,8 +51,9 @@ const KOVAN_CHAIN: ChainSpec = {
   isTestNet: true,
   chainId: "0x2a",
   gridSize: 64,
-  blockExplorer: "https://kovan.etherscan.io/"
-
+  blockExplorer: "https://kovan.etherscan.io/",
+  displayName: "Kovan",
+  logoUrl: ETHERUM_LOGO
 }
 
 
@@ -56,7 +64,8 @@ const LOCAL_FORK_CHAIN: ChainSpec = {
   poolIndex: 36000,
   isTestNet: true,
   chainId: "0x7a69",
-  gridSize: 64
+  gridSize: 64,
+  displayName: "Local Fork"
 }
 
 export const CHAIN_SPECS: {[chainId: string]: ChainSpec} = { 
