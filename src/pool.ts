@@ -39,6 +39,14 @@ export class CrocPoolView {
         return this.toDisplayPrice(await spotPrice)
     }
 
+    async spotTick(): Promise<number> {
+        console.log((await this.context).query.address)
+        console.log(this.baseToken)
+        console.log(this.quoteToken)
+        return (await this.context).query.queryCurveTick
+            (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex)
+    }
+
     async toDisplayPrice (spotPrice: number): Promise<number> {
         return toDisplayPrice(spotPrice, await this.baseDecimals, await this.quoteDecimals,
             this.invertedDisplay)
