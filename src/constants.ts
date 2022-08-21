@@ -33,7 +33,7 @@ const ETHERUM_LOGO =
 const GOERLI_CHAIN: ChainSpec = {
   nodeUrl: "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/goerli",
   dexAddr: "0xfafcd1f5530827e7398b6d3c509f450b1b24a209",
-  queryAddr: "0x9ea4b2f9b1572ed3ac46b402d9ba9153821033c6",
+  queryAddr: "0x93a4baFDd49dB0e06f3F3f9FddC1A67792F47518",
   poolIndex: 36000,
   isTestNet: true,
   chainId: "0x5",
@@ -60,7 +60,7 @@ const KOVAN_CHAIN: ChainSpec = {
 const LOCAL_FORK_CHAIN: ChainSpec = {
   nodeUrl: "http://127.0.0.1:8545",
   dexAddr: "0xfafcd1f5530827e7398b6d3c509f450b1b24a209",
-  queryAddr: "0x9ea4b2f9b1572ed3ac46b402d9ba9153821033c6",
+  queryAddr: "0x93a4baFDd49dB0e06f3F3f9FddC1A67792F47518",
   poolIndex: 36000,
   isTestNet: true,
   chainId: "0x7a69",

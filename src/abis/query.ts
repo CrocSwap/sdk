@@ -27,6 +27,89 @@ export const QUERY_ABI = [
     "inputs": [
       {
         "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      }
+    ],
+    "name": "queryAmbientPosition",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "seeds",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint32",
+        "name": "timestamp",
+        "type": "uint32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      },
+      {
+        "internalType": "int24",
+        "name": "lowerTick",
+        "type": "int24"
+      },
+      {
+        "internalType": "int24",
+        "name": "upperTick",
+        "type": "int24"
+      }
+    ],
+    "name": "queryConcRewards",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "base",
         "type": "address"
       },
@@ -74,6 +157,35 @@ export const QUERY_ABI = [
         "internalType": "struct CurveMath.CurveState",
         "name": "curve",
         "type": "tuple"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      }
+    ],
+    "name": "queryCurveTick",
+    "outputs": [
+      {
+        "internalType": "int24",
+        "name": "",
+        "type": "int24"
       }
     ],
     "stateMutability": "view",
@@ -371,11 +483,99 @@ export const QUERY_ABI = [
       },
       {
         "internalType": "address",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      },
+      {
+        "internalType": "int24",
+        "name": "lowerTick",
+        "type": "int24"
+      },
+      {
+        "internalType": "int24",
+        "name": "upperTick",
+        "type": "int24"
+      }
+    ],
+    "name": "queryRangePosition",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "liq",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint64",
+        "name": "fee",
+        "type": "uint64"
+      },
+      {
+        "internalType": "uint32",
+        "name": "timestamp",
+        "type": "uint32"
+      },
+      {
+        "internalType": "bool",
+        "name": "atomic",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "token",
         "type": "address"
       }
     ],
     "name": "querySurplus",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "surplus",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "tracker",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "salt",
+        "type": "uint256"
+      }
+    ],
+    "name": "queryVirtual",
     "outputs": [
       {
         "internalType": "uint128",
