@@ -1,5 +1,5 @@
 import { CrocContext } from "./context";
-import { Contract, BigNumber } from "ethers";
+import { Contract, BigNumber, ethers } from "ethers";
 import { TransactionResponse } from "@ethersproject/providers";
 import { AddressZero } from "@ethersproject/constants";
 import { MAX_LIQ } from "./constants";
@@ -33,17 +33,24 @@ export class CrocTokenView {
     );
   }
 
-  async balance(address: string): Promise<BigNumber> {
+  async wallet (address: string): Promise<BigNumber> {
     if (this.isNativeEth) {
-      // console.dir({type: "Balance", providerEnv: (await this.context).provider,
-      //     balFn: (await this.context).provider.getBalance})
       return (await this.context).provider.getBalance(address);
     } else {
       return (await this.resolve()).balanceOf(address);
     }
   }
 
-  async balanceDisplay(address: string): Promise<string> {
+  async walletDisplay (address: string): Promise<string> {
+    let balance = this.balance(address);
+    return toDisplayQty(await balance, await this.decimals);
+  }
+
+  async balance (address: string): Promise<BigNumber> {
+    return (await this.context).query.querySurplus(address, this.tokenAddr)
+  }
+
+  async balanceDisplay (address: string): Promise<string> {
     let balance = this.balance(address);
     return toDisplayQty(await balance, await this.decimals);
   }
@@ -78,8 +85,34 @@ export class CrocTokenView {
     return (await this.context).erc20.attach(this.tokenAddr);
   }
 
+  async deposit (qty: TokenQty, recv: string): Promise<TransactionResponse> {
+    return this.surplusOp(73, qty, recv, this.isNativeEth)
+  }
+
+  async withdraw (qty: TokenQty, recv: string): Promise<TransactionResponse> {
+    return this.surplusOp(74, qty, recv)
+  }
+
+  async transfer (qty: TokenQty, recv: string): Promise<TransactionResponse> {
+    return this.surplusOp(75, qty, recv)
+  }
+
+  private async surplusOp (subCode: number, qty: TokenQty, recv: string, 
+    useMsgVal: boolean = false): Promise<TransactionResponse> {
+      let abiCoder = new ethers.utils.AbiCoder()
+      let weiQty = this.normQty(qty)
+      let cmd = abiCoder.encode(["uint8", "address", "uint128", "address"],
+        [subCode, recv, await weiQty, this.tokenAddr])
+  
+      let txArgs = useMsgVal ? { value: await weiQty } : { }
+      return (await this.context).dex.userCmd(COLD_PROXY_PATH, cmd, txArgs)
+  
+  }
+
   readonly tokenAddr: string;
   readonly context: Promise<CrocContext>;
   readonly decimals: Promise<number>;
   readonly isNativeEth: boolean;
 }
+
+const COLD_PROXY_PATH = 0
