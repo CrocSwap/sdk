@@ -10,12 +10,28 @@ async function demo() {
     let wallet = new ethers.Wallet(KEY)
     let croc = new CrocEnv("goerli", wallet)
 
-    console.log(await croc.poolEth(DAI).spotTick())
+    /*croc.token(DAI).deposit(1, wallet.address)
+    croc.token(DAI).withdraw(0.25, wallet.address)
+    croc.token(DAI).transfer(0.001, "0xd825D73CDD050ecbEBC0B3a8D9C5952d1F64722e")*/
+
+    //croc.tokenEth().deposit(0.001, wallet.address)
+    //croc.tokenEth().withdraw(0.0001, wallet.address)
+    let tx = croc.tokenEth().transfer(0.0001, "0xd825D73CDD050ecbEBC0B3a8D9C5952d1F64722e")
+
+    await (await tx).wait()
+    console.log(await croc.token(DAI).balanceDisplay(wallet.address))
+    console.log(await croc.token(DAI).balanceDisplay("0xd825D73CDD050ecbEBC0B3a8D9C5952d1F64722e"))
+    console.log(await croc.tokenEth().balanceDisplay("0xd825D73CDD050ecbEBC0B3a8D9C5952d1F64722e"))
+    console.log(await croc.token(DAI).walletDisplay(wallet.address))
+
+    /*let ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -78464+512, croc.context)
+    ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -78464+1024, croc.context)
+    ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -78464+2048, croc.context)
+    ko = new CrocKnockoutHandle(AddressZero, DAI, 0.01, -78464-2048, croc.context)
+    ko = new CrocKnockoutHandle(AddressZero, DAI, 0.01, -78464-1024, croc.context)
+    await (await ko.mint()).wait()*/
 
     
-    //let ko = new CrocKnockoutHandle(DAI, AddressZero, 0.0001, -78464, croc.context)
-
-    //await (await ko.mint()).wait()
 
     /*croc.poolEth(DAI).spotPrice().then(console.log);
     croc.pool(DAI, AddressZero).displayPrice().then(console.log);
