@@ -42,7 +42,7 @@ export class CrocTokenView {
   }
 
   async walletDisplay (address: string): Promise<string> {
-    let balance = this.balance(address);
+    let balance = this.wallet(address);
     return toDisplayQty(await balance, await this.decimals);
   }
 
