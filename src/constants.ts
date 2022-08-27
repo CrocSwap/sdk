@@ -31,8 +31,7 @@ const ETHERUM_LOGO =
   "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg";
 
 const GOERLI_CHAIN: ChainSpec = {
-  nodeUrl:
-    "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/goerli",
+  nodeUrl: "https://goerli.infura.io/v3/cbb2856ea8804fc5ba59be0a2e8a9f88",
   dexAddr: "0xfafcd1f5530827e7398b6d3c509f450b1b24a209",
   queryAddr: "0x93a4baFDd49dB0e06f3F3f9FddC1A67792F47518",
   poolIndex: 36000,
@@ -45,8 +44,7 @@ const GOERLI_CHAIN: ChainSpec = {
 };
 
 const KOVAN_CHAIN: ChainSpec = {
-  nodeUrl:
-    "https://speedy-nodes-nyc.moralis.io/015fffb61180886c9708499e/eth/kovan",
+  nodeUrl: "https://kovan.infura.io/v3/cbb2856ea8804fc5ba59be0a2e8a9f88",
   dexAddr: "0x5d42d6046927dee12b9b4a235be0cecd55d0e0fb",
   queryAddr: "0x3a6e9cff691a473d4d0742e1dfc8ea263a99f6d0",
   poolIndex: 36000,
