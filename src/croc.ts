@@ -5,6 +5,7 @@ import { CrocPositionView } from './position';
 import { TokenQty, CrocTokenView } from './tokens';
 import { CrocSwapPlan } from './swap';
 import { Signer } from 'ethers';
+import { CrocKnockoutHandle } from './knockout';
 
 export class CrocEnv {
     constructor (conn: ConnectArg, signer?: Signer) {
@@ -95,6 +96,10 @@ class SellPrefix {
 
     forEth (args: SwapArgs = DFLT_SWAP_ARGS): CrocSwapPlan {
         return this.for(AddressZero, args)
+    }
+
+    atLimit (token: string, tick: number): CrocKnockoutHandle {
+        return new CrocKnockoutHandle(this.token, token, this.qty, tick, this.context)
     }
 
     readonly token: string
