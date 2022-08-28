@@ -34,6 +34,15 @@ export class CrocKnockoutHandle {
     return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd, await this.buildTxArgs())
   }
 
+  async willFail(): Promise<boolean> {
+    let gridSize = this.context.then(c => c.chain.gridSize)
+    let marketTick = this.context.then(c => c.query.queryCurveTick
+      (this.baseToken, this.quoteToken, c.chain.poolIndex))
+    return this.sellBase ?
+      (this.knockoutTick + await gridSize >= await marketTick) :
+      (this.knockoutTick - await gridSize <= await marketTick)
+  }
+
   private async buildTxArgs() {
     if (this.baseToken == AddressZero && this.sellBase) {
       return { value: await this.qty, gasLimit: 6000000 }
