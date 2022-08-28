@@ -8,6 +8,7 @@ const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
 
 async function demo() {
     let wallet = new ethers.Wallet(KEY)
+    
     let croc = new CrocEnv("goerli", wallet)
 
     /*croc.token(DAI).deposit(1, wallet.address)
