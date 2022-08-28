@@ -45,9 +45,9 @@ export class CrocKnockoutHandle {
 
   private async buildTxArgs() {
     if (this.baseToken == AddressZero && this.sellBase) {
-      return { value: await this.qty, gasLimit: 6000000 }
+      return { value: await this.qty }
     } else {
-      return { gasLimit: 6000000 }
+      return { }
     }
   }
 

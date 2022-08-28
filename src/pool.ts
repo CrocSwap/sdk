@@ -40,9 +40,6 @@ export class CrocPoolView {
     }
 
     async spotTick(): Promise<number> {
-        console.log((await this.context).query.address)
-        console.log(this.baseToken)
-        console.log(this.quoteToken)
         return (await this.context).query.queryCurveTick
             (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex)
     }
