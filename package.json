@@ -1,6 +1,6 @@
 {
   "name": "@crocswap-libs/sdk",
-  "version": "0.2.22-1",
+  "version": "0.2.23-1",
   "description": "🛠🐊🛠 An SDK for building applications on top of CrocSwap",
   "author": "Ben Wolski <ben@crocodilelabs.io>",
   "repository": "https://github.com/CrocSwap/sdk.git",
