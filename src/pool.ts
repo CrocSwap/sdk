@@ -128,6 +128,20 @@ export class CrocPoolView {
         }
     }
 
+    async burnAmbientLiq (liq: BigNumber, limits: PriceRange): Promise<TransactionResponse> {
+        let [lowerBound, upperBound] = await this.transformLimits(limits)
+        const calldata = (await this.makeEncoder()).encodeBurnAmbient
+            (liq, lowerBound, upperBound, false)
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata)
+    }
+
+    async burnAmbientAll (limits: PriceRange): Promise<TransactionResponse> {
+        let [lowerBound, upperBound] = await this.transformLimits(limits)
+        const calldata = (await this.makeEncoder()).encodeBurnAmbientAll
+            (lowerBound, upperBound, false)
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata)
+    }
+
     private async mintAmbient (qty: TokenQty, isQtyBase: boolean, 
         limits: PriceRange, val?: TokenQty): Promise<TransactionResponse> {
         let weiQty = this.normQty(qty, isQtyBase)

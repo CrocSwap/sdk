@@ -1,7 +1,7 @@
 import { CrocEnv } from '../croc';
-import { ethers } from 'ethers';
-import { AddressZero } from '@ethersproject/constants';
-import { CrocKnockoutHandle } from '../knockout';
+import { BigNumber, ethers } from 'ethers';
+/*import { AddressZero } from '@ethersproject/constants';
+import { CrocKnockoutHandle } from '../knockout';*/
 
 const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
 //const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
@@ -34,13 +34,16 @@ async function demo() {
     //ko = new CrocKnockoutHandle(AddressZero, DAI, 0.01, -78464-1024, croc.context)
     await (await ko.mint()).wait()*/
 
-    let ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -73152, croc.context)
+    let tx = croc.poolEth(DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001])
+    await (await tx).wait()
+
+    /*let ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -73152, croc.context)
     await (await ko.mint()).wait()
     ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -74432, croc.context)
     await (await ko.mint()).wait()
     
     croc.poolEth(DAI).spotTick().then(console.log)
-    croc.poolEth(DAI).spotPrice().then(console.log)
+    croc.poolEth(DAI).spotPrice().then(console.log)*/
 
     /*croc.poolEth(DAI).spotPrice().then(console.log);
     croc.pool(DAI, AddressZero).displayPrice().then(console.log);
