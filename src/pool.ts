@@ -17,8 +17,11 @@ export class CrocPoolView {
             sortBaseQuoteTokens(tokenTop, tokenBottom)
         this.context = context
 
-        this.baseDecimals = new CrocTokenView(context, this.baseToken).decimals
-        this.quoteDecimals = new CrocTokenView(context, this.quoteToken).decimals
+        this.baseTokenView = new CrocTokenView(context, this.baseToken)
+        this.quoteTokenView = new CrocTokenView(context, this.quoteToken)
+
+        this.baseDecimals = this.baseTokenView.decimals
+        this.quoteDecimals = this.quoteTokenView.decimals
 
         this.invertedDisplay = this.baseToken === tokenTop
     }
@@ -170,7 +173,7 @@ export class CrocPoolView {
     }
 
     private async normQty (qty: TokenQty, isBase: boolean): Promise<BigNumber> {
-        let token = new CrocTokenView(this.context, isBase ? this.baseToken : this.quoteToken)
+        let token = isBase ? this.baseTokenView : this.quoteTokenView
         return token.normQty(qty)
     }
 
@@ -185,6 +188,8 @@ export class CrocPoolView {
 
     readonly baseToken: string
     readonly quoteToken: string
+    readonly baseTokenView: CrocTokenView
+    readonly quoteTokenView: CrocTokenView
     readonly baseDecimals: Promise<number>
     readonly quoteDecimals: Promise<number>
     readonly invertedDisplay: boolean
