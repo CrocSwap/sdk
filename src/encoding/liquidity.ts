@@ -58,6 +58,24 @@ export class WarmPathEncoder {
     );
   }
 
+  encodeHarvestConc(
+    lowerTick: number,
+    upperTick: number,
+    limitLow: number,
+    limitHigh: number,
+    useSurplus: boolean
+  ) {
+    return this.encodeWarmPath(
+      HARVEST_CONCENTRATED,
+      lowerTick,
+      upperTick,
+      BigNumber.from(0),
+      limitLow,
+      limitHigh,
+      useSurplus
+    );
+  }
+
   encodeMintAmbient(
     qty: BigNumber,
     qtyIsBase: boolean,
@@ -142,6 +160,7 @@ const MINT_AMBIENT: number = 3;
 const MINT_AMBIENT_BASE: number = 31;
 const MINT_AMBIENT_QUOTE: number = 32;
 const BURN_AMBIENT: number = 4;
+const HARVEST_CONCENTRATED: number = 5
 
 const WARM_ARG_TYPES = [
   "uint8", // Type call

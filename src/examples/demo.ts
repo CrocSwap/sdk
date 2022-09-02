@@ -1,5 +1,5 @@
 import { CrocEnv } from '../croc';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 /*import { AddressZero } from '@ethersproject/constants';
 import { CrocKnockoutHandle } from '../knockout';*/
 
@@ -37,7 +37,9 @@ async function demo() {
     //let tx = croc.poolEth(DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001])
     //let tx = croc.poolEth(DAI).mintRangeBase(0.0001, [-640000, 640000], [0.0001, 0.001])
     //let tx = croc.poolEth(DAI).mintRangeBase(1.0, [-100000, 0], [0.0001, 0.001])
-    let tx = croc.poolEth(DAI).burnRangeLiq(BigNumber.from(10).pow(7), [-640000, 640000], [0.0001, 0.001])
+
+    //let tx = croc.poolEth(DAI).burnRangeLiq(BigNumber.from(10).pow(7), [-640000, 640000], [0.0001, 0.001])
+    let tx = croc.poolEth(DAI).harvestRange([-640000, 640000], [0.0001, 0.001])
     await (await tx).wait()
 
     /*let ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -73152, croc.context)

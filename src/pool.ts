@@ -151,6 +151,14 @@ export class CrocPoolView {
         return (await this.context).dex.userCmd(LIQ_PATH, calldata)
     }
 
+    async harvestRange (range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+        let [lowerBound, upperBound] = await this.transformLimits(limits)
+        const calldata = (await this.makeEncoder()).encodeHarvestConc
+            (range[0], range[1], lowerBound, upperBound, false)
+
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata, {gasLimit: 1000000})
+    }
+
     private async mintAmbient (qty: TokenQty, isQtyBase: boolean, 
         limits: PriceRange, val?: TokenQty): Promise<TransactionResponse> {
         let weiQty = this.normQty(qty, isQtyBase)
