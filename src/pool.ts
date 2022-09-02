@@ -156,7 +156,7 @@ export class CrocPoolView {
         const calldata = (await this.makeEncoder()).encodeHarvestConc
             (range[0], range[1], lowerBound, upperBound, false)
 
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata, {gasLimit: 1000000})
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata)
     }
 
     private async mintAmbient (qty: TokenQty, isQtyBase: boolean, 
