@@ -58,24 +58,6 @@ export class WarmPathEncoder {
     );
   }
 
-  encodeBurnConcAll(
-    lowerTick: number,
-    upperTick: number,
-    limitLow: number,
-    limitHigh: number,
-    useSurplus: boolean
-  ) {
-    return this.encodeWarmPath(
-      BURN_CONCENTRATED,
-      lowerTick,
-      upperTick,
-      MAX_LIQ,
-      limitLow,
-      limitHigh,
-      useSurplus
-    );
-  }
-
   encodeMintAmbient(
     qty: BigNumber,
     qtyIsBase: boolean,
