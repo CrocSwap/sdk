@@ -1,5 +1,5 @@
 import { CrocContext } from "./context";
-import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice } from './utils';
+import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq } from './utils';
 import { CrocTokenView, TokenQty } from './tokens';
 import { TransactionResponse } from '@ethersproject/providers';
 import { WarmPathEncoder } from './encoding/liquidity';
@@ -139,6 +139,15 @@ export class CrocPoolView {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeBurnAmbientAll
             (lowerBound, upperBound, false)
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata)
+    }
+
+    async burnRangeLiq (liq: BigNumber, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+        let [lowerBound, upperBound] = await this.transformLimits(limits)
+        let roundLotLiq = roundForConcLiq(liq)
+        const calldata = (await this.makeEncoder()).encodeBurnConc
+            (range[0], range[1], roundLotLiq, lowerBound, upperBound, false)
+
         return (await this.context).dex.userCmd(LIQ_PATH, calldata)
     }
 
