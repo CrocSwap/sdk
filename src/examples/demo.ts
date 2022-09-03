@@ -39,8 +39,8 @@ async function demo() {
     //let tx = croc.poolEth(DAI).mintRangeBase(1.0, [-100000, 0], [0.0001, 0.001])
 
     //let tx = croc.poolEth(DAI).burnRangeLiq(BigNumber.from(10).pow(7), [-640000, 640000], [0.0001, 0.001])
-    let tx = croc.poolEth(DAI).harvestRange([-640000, 640000], [0.0001, 0.001])
-    await (await tx).wait()
+    /*let tx = croc.poolEth(DAI).harvestRange([-640000, 640000], [0.0001, 0.001])
+    await (await tx).wait()*/
 
     /*let ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -73152, croc.context)
     await (await ko.mint()).wait()
@@ -73,6 +73,8 @@ async function demo() {
     /*await croc.buy(DAI, 0.0001).withEth().swap()*/
     //await croc.buyEth(0.01).with(DAI).swap()
     //await croc.sellEth(0.01).for(DAI, { slippage: 0.1}).swap()
+
+    console.log(await croc.sellEth(3).for(DAI, { slippage: .05}).calcSlippage())
 }
 
 if (true) {
