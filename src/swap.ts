@@ -10,7 +10,7 @@ import { bigNumToFloat, floatToBigNum, encodeCrocPrice, decodeCrocPrice } from '
 import { TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
 
-interface CrocSlipPredict {
+export interface CrocImpact {
   sellQty: string,
   buyQty: string,
   finalPrice: number,
@@ -45,7 +45,7 @@ export class CrocSwapPlan {
   }
 
 
-  async calcSlippage(): Promise<CrocSlipPredict> {
+  async calcImpact(): Promise<CrocImpact> {
     const TIP = 0
     const impact = await (await this.context).slipQuery.calcSlippage
       (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
