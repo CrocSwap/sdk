@@ -1,5 +1,5 @@
 
-export const SLIPPAGE_ABI = [
+export const IMPACT_ABI = [
   {
     "inputs": [
       {
@@ -54,7 +54,7 @@ export const SLIPPAGE_ABI = [
         "type": "uint128"
       }
     ],
-    "name": "calcSlippage",
+    "name": "calcImpact",
     "outputs": [
       {
         "internalType": "int128",

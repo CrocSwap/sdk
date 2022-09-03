@@ -47,7 +47,7 @@ export class CrocSwapPlan {
 
   async calcImpact(): Promise<CrocImpact> {
     const TIP = 0
-    const impact = await (await this.context).slipQuery.calcSlippage
+    const impact = await (await this.context).slipQuery.calcImpact
       (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP, await this.calcLimitPrice());
 

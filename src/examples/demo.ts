@@ -74,7 +74,7 @@ async function demo() {
     //await croc.buyEth(0.01).with(DAI).swap()
     //await croc.sellEth(0.01).for(DAI, { slippage: 0.1}).swap()
 
-    console.log(await croc.sellEth(3).for(DAI, { slippage: .05}).calcImpact())
+    console.log(await croc.sellEth(20).for(DAI, { slippage: .05}).calcImpact())
 }
 
 if (true) {
