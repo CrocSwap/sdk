@@ -6,9 +6,16 @@ import {
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
 import { CrocPoolView } from './pool';
-import { bigNumToFloat, floatToBigNum, encodeCrocPrice } from './utils';
-import { CrocTokenView, TokenQty } from './tokens';
+import { bigNumToFloat, floatToBigNum, encodeCrocPrice, decodeCrocPrice } from './utils';
+import { TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
+
+interface CrocSlipPredict {
+  sellQty: string,
+  buyQty: string,
+  finalPrice: number,
+  percentChange: number
+}
 
 export class CrocSwapPlan {
 
@@ -18,13 +25,14 @@ export class CrocSwapPlan {
     this.sellBase = (this.baseToken === sellToken)
     this.qtyInBase = (this.sellBase !== qtyIsBuy)
 
-    const tokenView = new CrocTokenView(context,
-      this.qtyInBase ? this.baseToken : this.quoteToken)
+    this.poolView = new CrocPoolView(this.baseToken, this.quoteToken, context)
+    const tokenView = this.qtyInBase ? this.poolView.baseTokenView : this.poolView.quoteTokenView
     this.qty = tokenView.normQty(qty)
     
     this.slippage = slippage
     this.context = context
   }
+
 
   async swap(): Promise<TransactionResponse> {
     const TIP = 0
@@ -35,6 +43,29 @@ export class CrocSwapPlan {
       await this.calcLimitPrice(), await this.calcSlipQty(), SURPLUS_FLAGS,
       await this.buildTxArgs())
   }
+
+
+  async calcSlippage(): Promise<CrocSlipPredict> {
+    const TIP = 0
+    const impact = await (await this.context).slipQuery.calcSlippage
+      (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
+      this.sellBase, this.qtyInBase, await this.qty, TIP, await this.calcLimitPrice());
+
+    const baseQty = this.poolView.baseTokenView.toDisplay(impact.baseFlow.abs())
+    const quoteQty = this.poolView.quoteTokenView.toDisplay(impact.quoteFlow.abs())
+    const spotPrice = decodeCrocPrice(impact.finalPrice)
+
+    const startPrice = this.poolView.displayPrice()
+    const finalPrice = this.poolView.toDisplayPrice(spotPrice)
+
+    return {
+      sellQty: this.sellBase ? await baseQty : await quoteQty,
+      buyQty: this.sellBase ? await quoteQty : await baseQty,
+      finalPrice: await finalPrice,
+      percentChange: (await finalPrice - await startPrice) / await startPrice
+    }
+  }
+
 
   private async buildTxArgs() {
     if (this.baseToken == AddressZero && this.sellBase) {
@@ -63,8 +94,7 @@ export class CrocSwapPlan {
   }
 
   private async fetchSpotPrice(): Promise<number> {
-    let pool = new CrocPoolView(this.baseToken, this.quoteToken, this.context)
-    return pool.spotPrice()
+    return this.poolView.spotPrice()
   }
 
   readonly baseToken: string
@@ -73,5 +103,6 @@ export class CrocSwapPlan {
   readonly sellBase: boolean
   readonly qtyInBase: boolean
   readonly slippage: number
+  readonly poolView: CrocPoolView
   readonly context: Promise<CrocContext>
 }
