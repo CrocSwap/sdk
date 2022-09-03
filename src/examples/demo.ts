@@ -74,7 +74,31 @@ async function demo() {
     //await croc.buyEth(0.01).with(DAI).swap()
     //await croc.sellEth(0.01).for(DAI, { slippage: 0.1}).swap()
 
-    console.log(await croc.sellEth(20).for(DAI, { slippage: .05}).calcImpact())
+    //console.log(await croc.sellEth(20).for(DAI, { slippage: .05}).calcImpact())
+
+    // Pay ETH from wallet, receive DAI to exchange balance
+    /*await croc.sellEth(0.01).for(DAI).swap({surplus: [false, true]})
+
+    // Pay ETH from exchange balance, receive DAI to wallet
+    await croc.sellEth(0.01).for(DAI).swap({surplus: [false, true]})
+
+    // Pay DAI from exchange balance, receive ETH to wallet 
+    await croc.buyEth(0.01).with(DAI).swap({surplus: [true, false]})
+
+    // Pay DAI from wallet, receive ETH to exchange balance
+    await croc.buyEth(0.01).with(DAI).swap({surplus: [false, true]})    
+
+    // Pay ETH to receive DAI, both to/from exchange balance 
+    await croc.buy(DAI, 100).withEth().swap({surplus: true})
+
+    // Pay ETH to receive DAI, both to/from wallet 
+    await croc.buy(DAI, 10).withEth().swap({surplus: false})
+
+    // Pay ETH to receive DAI, both to/from wallet 
+    await croc.buy(DAI, 10).withEth().swap()*/
+
+    console.log(await (await croc.token(DAI).balance(wallet.address)).toString())
+    console.log(await (await croc.tokenEth().balance(wallet.address)).toString())
 }
 
 if (true) {

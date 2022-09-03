@@ -9,6 +9,7 @@ import { CrocPoolView } from './pool';
 import { bigNumToFloat, floatToBigNum, encodeCrocPrice, decodeCrocPrice } from './utils';
 import { TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
+import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 
 export interface CrocImpact {
   sellQty: string,
@@ -16,6 +17,11 @@ export interface CrocImpact {
   finalPrice: number,
   percentChange: number
 }
+
+export interface CrocSwapOpts {
+  surplus?: CrocSurplusFlags
+}
+
 
 export class CrocSwapPlan {
 
@@ -34,14 +40,14 @@ export class CrocSwapPlan {
   }
 
 
-  async swap(): Promise<TransactionResponse> {
+  async swap (args: CrocSwapOpts = { }): Promise<TransactionResponse> {
     const TIP = 0
-    const SURPLUS_FLAGS = 0
+    const surplusFlags = this.maskSurplusArgs(args.surplus)
     return (await this.context).dex.swap
       (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP, 
-      await this.calcLimitPrice(), await this.calcSlipQty(), SURPLUS_FLAGS,
-      await this.buildTxArgs())
+      await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
+      await this.buildTxArgs(surplusFlags))
   }
 
 
@@ -67,13 +73,24 @@ export class CrocSwapPlan {
   }
 
 
-  private async buildTxArgs() {
-    if (this.baseToken == AddressZero && this.sellBase) {
+  private maskSurplusArgs (args?: CrocSurplusFlags): number {
+    if (!args) { return this.maskSurplusArgs(false); }
+    return encodeSurplusArg(args, !this.sellBase)
+  }
+
+  private async buildTxArgs (surplusArg: number) {
+    if (this.needsAttachedEth(surplusArg)) {
       let val = this.qtyInBase ? this.qty : this.calcSlipQty()
       return { value: await val }
     } else {
       return { }
     }
+  }
+
+  private needsAttachedEth (surplusEncoded: number): boolean {
+    return this.sellBase &&
+    (this.baseToken === AddressZero) &&
+    !(decodeSurplusFlag(surplusEncoded)[0])
   }
 
   private async calcSlipQty(): Promise<BigNumber> {
