@@ -6,6 +6,7 @@ import { WarmPathEncoder } from './encoding/liquidity';
 import { BigNumber } from 'ethers';
 import { AddressZero } from '@ethersproject/constants';
 import { PoolInitEncoder } from "./encoding/init";
+import { CrocSurplusFlags, encodeSurplusArg } from "./encoding/flags";
 
 type PriceRange = [number, number]
 type TickRange = [number, number]
@@ -70,19 +71,22 @@ export class CrocPoolView {
         return (await this.context).dex.userCmd(COLD_PATH, calldata, txArgs)       
     }
 
-    async mintAmbientLeft (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
+    async mintAmbientLeft (qty: TokenQty, limits: PriceRange, opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         return this.invertedDisplay ? 
-            this.mintAmbientBase(qty, limits) :
-            this.mintAmbientQuote(qty, limits)
+            this.mintAmbientBase(qty, limits, opts) :
+            this.mintAmbientQuote(qty, limits, opts)
     }
 
-    async mintAmbientRight (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
+    async mintAmbientRight (qty: TokenQty, limits: PriceRange, opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         return this.invertedDisplay ? 
-            this.mintAmbientQuote(qty, limits) :
-            this.mintAmbientBase(qty, limits)
+            this.mintAmbientQuote(qty, limits, opts) :
+            this.mintAmbientBase(qty, limits, opts)
     }
 
-    async mintAmbientBase (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
+    async mintAmbientBase (qty: TokenQty, limits: PriceRange, _opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         if (this.baseToken === AddressZero) {
             return this.mintAmbient(qty, true, limits, qty)
         } else {
@@ -90,7 +94,8 @@ export class CrocPoolView {
         }
     }
 
-    async mintAmbientQuote (qty: TokenQty, limits: PriceRange): Promise<TransactionResponse> {
+    async mintAmbientQuote (qty: TokenQty, limits: PriceRange, _opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         if (this.baseToken === AddressZero) {
             let etherQty = this.ethForAmbientQuote(qty, limits)
             return this.mintAmbient(qty, false, limits, await etherQty)
@@ -99,19 +104,22 @@ export class CrocPoolView {
         }
     }
 
-    async mintRangeRight (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+    async mintRangeRight (qty: TokenQty, range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         return this.invertedDisplay ? 
-            this.mintRangeQuote(qty, range, limits) :
-            this.mintRangeBase(qty, range, limits)
+            this.mintRangeQuote(qty, range, limits, opts) :
+            this.mintRangeBase(qty, range, limits, opts)
     }
 
-    async mintRangeLeft (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+    async mintRangeLeft (qty: TokenQty, range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         return this.invertedDisplay ? 
-            this.mintRangeBase(qty, range, limits) :
-            this.mintRangeQuote(qty, range, limits)
+            this.mintRangeBase(qty, range, limits, opts) :
+            this.mintRangeQuote(qty, range, limits, opts)
     }
 
-    async mintRangeBase (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+    async mintRangeBase (qty: TokenQty, range: TickRange, limits: PriceRange, _opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         if (this.baseToken === AddressZero) {
             return this.mintRange(qty, true, range, limits, qty)
         } else {
@@ -119,7 +127,8 @@ export class CrocPoolView {
         }
     }
 
-    async mintRangeQuote (qty: TokenQty, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+    async mintRangeQuote (qty: TokenQty, range: TickRange, limits: PriceRange, _opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         if (this.baseToken === AddressZero) {
             let etherQty = this.ethForRangeQuote(qty, range, limits)
             return this.mintRange(qty, false, range, limits, await etherQty)
@@ -128,33 +137,36 @@ export class CrocPoolView {
         }
     }
 
-    async burnAmbientLiq (liq: BigNumber, limits: PriceRange): Promise<TransactionResponse> {
+    async burnAmbientLiq (liq: BigNumber, limits: PriceRange, opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeBurnAmbient
-            (liq, lowerBound, upperBound, false)
+            (liq, lowerBound, upperBound, this.maskSurplusFlag(opts))
         return (await this.context).dex.userCmd(LIQ_PATH, calldata)
     }
 
-    async burnAmbientAll (limits: PriceRange): Promise<TransactionResponse> {
+    async burnAmbientAll (limits: PriceRange, opts?: CrocLpOpts): Promise<TransactionResponse> {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeBurnAmbientAll
-            (lowerBound, upperBound, false)
+            (lowerBound, upperBound, this.maskSurplusFlag(opts))
         return (await this.context).dex.userCmd(LIQ_PATH, calldata)
     }
 
-    async burnRangeLiq (liq: BigNumber, range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+    async burnRangeLiq (liq: BigNumber, range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         let roundLotLiq = roundForConcLiq(liq)
         const calldata = (await this.makeEncoder()).encodeBurnConc
-            (range[0], range[1], roundLotLiq, lowerBound, upperBound, false)
+            (range[0], range[1], roundLotLiq, lowerBound, upperBound, this.maskSurplusFlag(opts))
 
         return (await this.context).dex.userCmd(LIQ_PATH, calldata)
     }
 
-    async harvestRange (range: TickRange, limits: PriceRange): Promise<TransactionResponse> {
+    async harvestRange (range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
+        Promise<TransactionResponse> {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeHarvestConc
-            (range[0], range[1], lowerBound, upperBound, false)
+            (range[0], range[1], lowerBound, upperBound, this.maskSurplusFlag(opts))
 
         return (await this.context).dex.userCmd(LIQ_PATH, calldata)
     }
@@ -166,7 +178,7 @@ export class CrocPoolView {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
 
         const calldata = (await this.makeEncoder()).encodeMintAmbient(
-            await weiQty, isQtyBase, lowerBound, upperBound, false)
+            await weiQty, isQtyBase, lowerBound, upperBound, 0x0)
 
         return (await this.context).dex.userCmd(LIQ_PATH, calldata, txArgs)
     }
@@ -186,9 +198,14 @@ export class CrocPoolView {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
 
         const calldata = (await this.makeEncoder()).encodeMintConc(range[0], range[1],
-            await weiQty, isQtyBase, lowerBound, upperBound, false)
+            await weiQty, isQtyBase, lowerBound, upperBound, 0x0)
         
         return (await this.context).dex.userCmd(LIQ_PATH, calldata, txArgs)
+    }
+
+    private maskSurplusFlag (opts?: CrocLpOpts): number {
+        if (!opts || opts.surplus === undefined) { return this.maskSurplusFlag({surplus: false})}
+        return encodeSurplusArg(opts.surplus, !this.invertedDisplay)
     }
 
     private async ethForAmbientQuote (quoteQty: TokenQty, limits: PriceRange): Promise<TokenQty> {
@@ -225,6 +242,10 @@ export class CrocPoolView {
     readonly quoteDecimals: Promise<number>
     readonly invertedDisplay: boolean
     readonly context: Promise<CrocContext>
+}
+
+export interface CrocLpOpts {
+    surplus?: CrocSurplusFlags
 }
 
 const COLD_PATH = 0;

@@ -26,7 +26,7 @@ export class WarmPathEncoder {
     qtyIsBase: boolean,
     limitLow: number,
     limitHigh: number,
-    useSurplus: boolean
+    useSurplus: number
   ) {
     return this.encodeWarmPath(
       qtyIsBase ? MINT_CONC_BASE : MINT_CONC_QUOTE,
@@ -45,7 +45,7 @@ export class WarmPathEncoder {
     liq: BigNumber,
     limitLow: number,
     limitHigh: number,
-    useSurplus: boolean
+    useSurplus: number
   ) {
     return this.encodeWarmPath(
       BURN_CONCENTRATED,
@@ -63,7 +63,7 @@ export class WarmPathEncoder {
     upperTick: number,
     limitLow: number,
     limitHigh: number,
-    useSurplus: boolean
+    useSurplus: number
   ) {
     return this.encodeWarmPath(
       HARVEST_CONCENTRATED,
@@ -81,7 +81,7 @@ export class WarmPathEncoder {
     qtyIsBase: boolean,
     limitLow: number,
     limitHigh: number,
-    useSurplus: boolean
+    useSurplus: number
   ) {
     return this.encodeWarmPath(
       qtyIsBase ? MINT_AMBIENT_BASE : MINT_AMBIENT_QUOTE,
@@ -98,7 +98,7 @@ export class WarmPathEncoder {
     liq: BigNumber,
     limitLow: number,
     limitHigh: number,
-    useSurplus: boolean
+    useSurplus: number
   ) {
     return this.encodeWarmPath(
       BURN_AMBIENT,
@@ -114,7 +114,7 @@ export class WarmPathEncoder {
   encodeBurnAmbientAll(
     limitLow: number,
     limitHigh: number,
-    useSurplus: boolean
+    useSurplus: number
   ) {
     return this.encodeWarmPath(
       BURN_AMBIENT,
@@ -134,7 +134,7 @@ export class WarmPathEncoder {
     qty: BigNumber,
     limitLow: number,
     limitHigh: number,
-    useSurplus: boolean
+    useSurplus: number
   ): string {
     return this.abiCoder.encode(WARM_ARG_TYPES, [
       callCode,
@@ -146,7 +146,7 @@ export class WarmPathEncoder {
       qty,
       encodeCrocPrice(limitLow),
       encodeCrocPrice(limitHigh),
-      useSurplus ? 2 + 1 : 0,
+      useSurplus,
       AddressZero,
     ]);
   }

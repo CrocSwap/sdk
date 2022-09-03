@@ -1,8 +1,9 @@
 import { CrocEnv } from '../croc';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 /*import { AddressZero } from '@ethersproject/constants';
 import { CrocKnockoutHandle } from '../knockout';*/
 
+const ETH = ethers.constants.AddressZero
 const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
 //const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
 
@@ -96,6 +97,18 @@ async function demo() {
 
     // Pay ETH to receive DAI, both to/from wallet 
     await croc.buy(DAI, 10).withEth().swap()*/
+
+    // Pays DAI to wallet and ETH to exchange balance
+    await croc.pool(DAI, ETH).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001], {surplus: [false, true]})
+
+    // Pays DAI to exchange balance and ETH to wallet
+    await croc.pool(DAI, ETH).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001], {surplus: [true, false]})
+
+    // Pays ETH to exchange balance and DAI to wallet
+    await croc.pool(ETH, DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [1000, 10000], {surplus: [true, false]})
+
+    // Pays ETH to wallet and DAI to exchange balance
+    await croc.pool(ETH, DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [1000, 10000], {surplus: [false, true]})
 
     console.log(await (await croc.token(DAI).balance(wallet.address)).toString())
     console.log(await (await croc.tokenEth().balance(wallet.address)).toString())
