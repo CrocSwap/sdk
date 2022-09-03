@@ -3,11 +3,13 @@ import { Contract, ethers, Signer } from "ethers";
 import { ChainSpec, CHAIN_SPECS } from "./constants";
 import { CROC_ABI, QUERY_ABI, ERC20_ABI } from "./abis";
 import { AddressZero } from "@ethersproject/constants";
+import { SLIPPAGE_ABI } from "./abis/slippage";
 
 export interface CrocContext {
   provider: Provider;
   dex: Contract;
   query: Contract;
+  slipQuery: Contract;
   erc20: Contract;
   chain: ChainSpec;
 }
@@ -89,6 +91,7 @@ function inflateContracts(
     provider: provider,
     dex: new Contract(context.dexAddr, CROC_ABI, actor),
     query: new Contract(context.queryAddr, QUERY_ABI, actor),
+    slipQuery: new Contract(context.slipAddr, SLIPPAGE_ABI, actor),
     erc20: new Contract(AddressZero, ERC20_ABI, actor),
     chain: context,
   };
