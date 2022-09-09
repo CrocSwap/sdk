@@ -39,10 +39,22 @@ export function fromDisplayQty(qty: string, tokenDecimals: number): BigNumber {
   return bigQtyScaled;
 }
 
+// Above this, Javascript string will use scientific notation, which BigNumber
+// can't parse
+const MAX_SAFE_BIGNUM = 1e20
+
 export function toDisplayQty(
   qty: string | number | BigNumber,
   tokenDecimals: number
 ): string {
-  const bigQtyUnscaled = ethers.utils.formatUnits(qty.toString(), tokenDecimals);
-  return bigQtyUnscaled;
+  if (typeof(qty) === "number" && qty > MAX_SAFE_BIGNUM) {
+    return toDisplayQty(qty / Math.pow(10, tokenDecimals), 1)
+    
+  } else if (typeof(qty) === "string" && parseFloat(qty) > MAX_SAFE_BIGNUM) {
+    return toDisplayQty(parseFloat(qty), tokenDecimals)
+  
+  } else {
+    const bigQtyUnscaled = ethers.utils.formatUnits(qty.toString(), tokenDecimals);
+    return bigQtyUnscaled;
+  }
 }
