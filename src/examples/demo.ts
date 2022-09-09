@@ -1,9 +1,9 @@
 import { CrocEnv } from '../croc';
-import { BigNumber, ethers } from 'ethers';
+import { ethers } from 'ethers';
 /*import { AddressZero } from '@ethersproject/constants';
 import { CrocKnockoutHandle } from '../knockout';*/
 
-const ETH = ethers.constants.AddressZero
+//const ETH = ethers.constants.AddressZero
 const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
 //const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
 
@@ -65,9 +65,19 @@ async function demo() {
 
     //croc.poolEth(DAI).initPool()
 
-    //await croc.poolEth(DAI).mintAmbientBase(0.5, [0.0001, 0.001])
-    //await croc.poolEth(DAI).mintAmbientQuote(1.0, [0.0001, 0.001])
-    //await croc.poolEth(DAI).mintRangeBase(0.0001, [-640000, 640000], [0.0001, 0.001])*/
+    /*await croc.poolEth(DAI).mintAmbientQuote(50, [0.0005, 0.000625])
+    await croc.poolEthQuote(DAI).mintAmbientBase(50, [1600, 1700])*/
+    //await croc.poolEthQuote(DAI).mintRangeBase(50, [-80000, -64000], [1600, 1700])
+
+    /*await croc.poolEthQuote(DAI).mintRangeBase(5, [-80000, -64000], [1600, 1700], { surplus: [true, false]})
+    await croc.poolEthQuote(DAI).mintRangeBase(5, [-80000, -64000], [1600, 1700], { surplus: [false, true]})*/
+
+    //await croc.poolEth(DAI).mintAmbientBase(0.0001, [0.0001, 0.001])
+    //await croc.poolEth(DAI).mintAmbientQuote(50, [0.0001, 0.001])
+    //await croc.poolEth(DAI).mintRangeBase(0.03, [-640000, 640000], [0.0001, 0.001])
+    //await croc.poolEth(DAI).mintRangeQuote(50, [-640000, 640000], [0.0001, 0.001])
+
+    //await croc.poolEth(DAI).burnAmbientAll([0.0001, 0.001])
 
     //await croc.sellEth(0.0001).for(DAI).swap()
     //await croc.sell(DAI, 0.0001).forEth().swap()
@@ -99,16 +109,16 @@ async function demo() {
     await croc.buy(DAI, 10).withEth().swap()*/
 
     // Pays DAI to wallet and ETH to exchange balance
-    await croc.pool(DAI, ETH).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001], {surplus: [false, true]})
+    //await croc.pool(DAI, ETH).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001], {surplus: [false, true]})
 
     // Pays DAI to exchange balance and ETH to wallet
-    await croc.pool(DAI, ETH).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001], {surplus: [true, false]})
+    /*await croc.pool(DAI, ETH).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001], {surplus: [true, false]})
 
     // Pays ETH to exchange balance and DAI to wallet
     await croc.pool(ETH, DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [1000, 10000], {surplus: [true, false]})
 
     // Pays ETH to wallet and DAI to exchange balance
-    await croc.pool(ETH, DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [1000, 10000], {surplus: [false, true]})
+    await croc.pool(ETH, DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [1000, 10000], {surplus: [false, true]})*/
 
     console.log(await (await croc.token(DAI).balance(wallet.address)).toString())
     console.log(await (await croc.tokenEth().balance(wallet.address)).toString())
