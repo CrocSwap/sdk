@@ -48,8 +48,8 @@ export function toDisplayQty(
   tokenDecimals: number
 ): string {
   if (typeof(qty) === "number" && qty > MAX_SAFE_BIGNUM) {
-    return toDisplayQty(qty / Math.pow(10, tokenDecimals), 1)
-    
+    return (qty / Math.pow(10, tokenDecimals)).toString()
+
   } else if (typeof(qty) === "string" && parseFloat(qty) > MAX_SAFE_BIGNUM) {
     return toDisplayQty(parseFloat(qty), tokenDecimals)
   

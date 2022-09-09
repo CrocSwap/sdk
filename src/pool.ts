@@ -154,7 +154,7 @@ export class CrocPoolView {
         const calldata = (await this.makeEncoder()).encodeMintConc(range[0], range[1],
             await weiQty, isQtyBase, lowerBound, upperBound, this.maskSurplusFlag(opts))
         
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata, { value: await msgVal})
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata, { value: await msgVal, gasLimit: 1000000})
     }
 
     private maskSurplusFlag (opts?: CrocLpOpts): number {
