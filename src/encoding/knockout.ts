@@ -14,18 +14,32 @@ export class KnockoutEncoder {
     private abiCoder: ethers.utils.AbiCoder;
 
     encodeKnockoutMint (qty: BigNumberish, lowerTick:number, upperTick: number,
-        isBid: boolean, useSurplus: boolean): string {
+        isBid: boolean, useSurplusFlags: number): string {
         const MINT_SUBCMD = 91
         let suppArgs = this.abiCoder.encode(["uint128", "bool"], [qty, false])
-        return this.encodeCommonArgs(MINT_SUBCMD, lowerTick, upperTick, isBid, useSurplus, suppArgs)
+        return this.encodeCommonArgs(MINT_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
+    }
+
+    encodeKnockoutBurnQty (qty: BigNumberish, lowerTick:number, upperTick: number,
+        isBid: boolean, useSurplusFlags: number): string {
+        const BURN_SUBCMD = 92
+        let suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [qty, false, false])
+        return this.encodeCommonArgs(BURN_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
+    }
+
+    encodeKnockoutBurnLiq (liq: BigNumberish, lowerTick:number, upperTick: number,
+        isBid: boolean, useSurplusFlags: number): string {
+        const BURN_SUBCMD = 92
+        let suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [liq, true, false])
+        return this.encodeCommonArgs(BURN_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
     }
 
     private encodeCommonArgs (subcmd: number, lowerTick:number, upperTick: number,
-        isBid: boolean, useSurplus: boolean, suppArgs: string): string {
+        isBid: boolean, useSurplusFlags: number, suppArgs: string): string {
         return this.abiCoder.encode(KNOCKOUT_ARG_TYPES, 
             [subcmd, this.base, this.quote, this.poolIdx, 
                 lowerTick, upperTick, isBid, 
-                useSurplus ? 2 + 1 : 0, suppArgs])
+                useSurplusFlags, suppArgs])
     }
 }
 

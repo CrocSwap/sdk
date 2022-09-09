@@ -120,6 +120,10 @@ async function demo() {
     // Pays ETH to wallet and DAI to exchange balance
     await croc.pool(ETH, DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [1000, 10000], {surplus: [false, true]})*/
 
+    //croc.sell(DAI, 2500).atLimit(ETH, -64000).burn({surplus: true})
+    //croc.sell(DAI, 10).atLimit(ETH, -64000).mint({surplus: false})
+    //croc.sell(DAI, 2).atLimit(ETH, -64000).burnLiq(BigNumber.from(1000000000))
+
     console.log(await (await croc.token(DAI).balance(wallet.address)).toString())
     console.log(await (await croc.tokenEth().balance(wallet.address)).toString())
 }
