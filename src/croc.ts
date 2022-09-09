@@ -78,6 +78,10 @@ class BuyPrefix {
         return this.with(AddressZero, args)
     }
 
+    atLimit (token: string, tick: number): CrocKnockoutHandle {
+        return new CrocKnockoutHandle(token, this.token, this.qty, false, tick, this.context)
+    }
+
     readonly token: string
     readonly qty: TokenQty
     readonly context: Promise<CrocContext>
@@ -99,7 +103,7 @@ class SellPrefix {
     }
 
     atLimit (token: string, tick: number): CrocKnockoutHandle {
-        return new CrocKnockoutHandle(this.token, token, this.qty, tick, this.context)
+        return new CrocKnockoutHandle(this.token, token, this.qty, true, tick, this.context)
     }
 
     readonly token: string

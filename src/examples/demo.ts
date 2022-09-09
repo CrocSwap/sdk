@@ -1,9 +1,7 @@
 import { CrocEnv } from '../croc';
 import { ethers } from 'ethers';
-/*import { AddressZero } from '@ethersproject/constants';
-import { CrocKnockoutHandle } from '../knockout';*/
 
-//const ETH = ethers.constants.AddressZero
+const ETH = ethers.constants.AddressZero
 const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
 //const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
 
@@ -120,12 +118,21 @@ async function demo() {
     // Pays ETH to wallet and DAI to exchange balance
     await croc.pool(ETH, DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [1000, 10000], {surplus: [false, true]})*/
 
-    //croc.sell(DAI, 2500).atLimit(ETH, -64000).burn({surplus: true})
-    //croc.sell(DAI, 10).atLimit(ETH, -64000).mint({surplus: false})
-    //croc.sell(DAI, 2).atLimit(ETH, -64000).burnLiq(BigNumber.from(1000000000))
+    // Mint new limit order for $25. Pay from exchange balance
+    /*croc.sell(DAI, 200).atLimit(ETH, -64000).burn({surplus: true})
+
+    // Burn $10 worth of existing limit order. Receive to wallet
+    croc.sell(DAI, 10).atLimit(ETH, -64000).mint({surplus: false})
+
+    // Burn 1 billion units of concentrated liquidity for the limit order
+    croc.sell(DAI, 2).atLimit(ETH, -64000).burnLiq(BigNumber.from(1000000000))*/
 
     console.log(await (await croc.token(DAI).balance(wallet.address)).toString())
     console.log(await (await croc.tokenEth().balance(wallet.address)).toString())
+
+    //console.log(baseTokenForQuoteConc(100, 1600, 1700))
+
+    croc.buy(DAI, 10).atLimit(ETH, -80000).mint({surplus: false})
 }
 
 if (true) {

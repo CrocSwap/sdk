@@ -109,6 +109,19 @@ export function quoteTokenForConcLiq(
   return quoteVirtualReserves(price, liq, 1 / concFactor);
 }
 
+export function baseTokenForQuoteConc (baseQty: number, 
+  lower: number, upper: number): number {
+  const growth = Math.sqrt(upper/lower) - 1
+  const virtBase = baseQty / growth;
+  const virtQuote = virtBase / lower
+  return virtQuote * (1 / (1 - growth) - 1)
+}
+
+export function quoteTokenForBaseConc (quoteQty: number, 
+  lower: number, upper: number): number {
+  return baseTokenForQuoteConc(quoteQty, 1/upper, 1/lower)
+}
+
 /* Calculates the concentration leverage factor for the base token given the range relative to
  * the current price in the pool.
  *
@@ -164,6 +177,7 @@ export function concDepositSkew(
   return base / quote;
 }
 
+/* Rounds a liquidity magnitude to a multiple that can be used inside the protocol. */
 export function roundForConcLiq(liq: BigNumber): BigNumber {
   const CONC_LOTS_BITS = 11;
   return truncateRightBits(liq, CONC_LOTS_BITS);
