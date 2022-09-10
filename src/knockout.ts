@@ -62,6 +62,17 @@ export class CrocKnockoutHandle {
     return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd)
   }
 
+  async recoverPost (pivotTime: number, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
+    let chain = (await this.context).chain
+    let encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
+    let [lowerTick, upperTick] = this.tickRange(chain)
+    let surplus = this.maskSurplusFlags(opts)
+
+    let cmd = encoder.encodeKnockoutRecover(pivotTime, lowerTick, upperTick, 
+      this.sellBase, surplus);
+    return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd)
+  }
+
   async willMintFail(): Promise<boolean> {
     let gridSize = this.context.then(c => c.chain.gridSize)
     let marketTick = this.context.then(c => c.query.queryCurveTick

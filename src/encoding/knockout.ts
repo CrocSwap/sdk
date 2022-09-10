@@ -34,6 +34,13 @@ export class KnockoutEncoder {
         return this.encodeCommonArgs(BURN_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
     }
 
+    encodeKnockoutRecover (pivotTime: number, lowerTick:number, upperTick: number,
+        isBid: boolean, useSurplusFlags: number): string {
+        const BURN_SUBCMD = 94
+        let suppArgs = this.abiCoder.encode(["uint32"], [pivotTime])
+        return this.encodeCommonArgs(BURN_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
+    }
+
     private encodeCommonArgs (subcmd: number, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number, suppArgs: string): string {
         return this.abiCoder.encode(KNOCKOUT_ARG_TYPES, 
