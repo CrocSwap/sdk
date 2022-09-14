@@ -103,10 +103,11 @@ export class CrocSwapPlan {
   }
 
   private async calcLimitPrice(): Promise<BigNumber> {
-    const PREC_ADJ = 1.5
+    const PREC_ADJ = 1.01
     const spotPrice = await this.fetchSpotPrice()
     const slipPrec = this.slippage * PREC_ADJ
     const limitPrice = spotPrice * (this.sellBase ? (1 + slipPrec) : (1 - slipPrec))
+    console.log({limitPrice})
     return encodeCrocPrice(limitPrice)
   }
 
