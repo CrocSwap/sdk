@@ -42,7 +42,7 @@ export class CrocTokenView {
   }
 
   async walletDisplay (address: string): Promise<string> {
-    let balance = this.wallet(address);
+    const balance = this.wallet(address);
     return toDisplayQty(await balance, await this.decimals);
   }
 
@@ -51,7 +51,7 @@ export class CrocTokenView {
   }
 
   async balanceDisplay (address: string): Promise<string> {
-    let balance = this.balance(address);
+    const balance = this.balance(address);
     return toDisplayQty(await balance, await this.decimals);
   }
 
@@ -99,12 +99,12 @@ export class CrocTokenView {
 
   private async surplusOp (subCode: number, qty: TokenQty, recv: string, 
     useMsgVal: boolean = false): Promise<TransactionResponse> {
-      let abiCoder = new ethers.utils.AbiCoder()
-      let weiQty = this.normQty(qty)
-      let cmd = abiCoder.encode(["uint8", "address", "uint128", "address"],
+      const abiCoder = new ethers.utils.AbiCoder()
+      const weiQty = this.normQty(qty)
+      const cmd = abiCoder.encode(["uint8", "address", "uint128", "address"],
         [subCode, recv, await weiQty, this.tokenAddr])
   
-      let txArgs = useMsgVal ? { value: await weiQty } : { }
+      const txArgs = useMsgVal ? { value: await weiQty } : { }
       return (await this.context).dex.userCmd(COLD_PROXY_PATH, cmd, txArgs)
   
   }

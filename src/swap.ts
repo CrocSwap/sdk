@@ -80,7 +80,7 @@ export class CrocSwapPlan {
 
   private async buildTxArgs (surplusArg: number) {
     if (this.needsAttachedEth(surplusArg)) {
-      let val = this.qtyInBase ? this.qty : this.calcSlipQty()
+      const val = this.qtyInBase ? this.qty : this.calcSlipQty()
       return { value: await val }
     } else {
       return { }
@@ -94,19 +94,19 @@ export class CrocSwapPlan {
   }
 
   private async calcSlipQty(): Promise<BigNumber> {
-    let qty = bigNumToFloat(await this.qty)
-    let spotPrice = await this.fetchSpotPrice()
-    let priceMult = this.qtyInBase ? 1/spotPrice : spotPrice
-    let qtyIsBuy = (this.sellBase === this.qtyInBase)
-    let slipMult = qtyIsBuy ? (1 - this.slippage) : (1 + this.slippage)
+    const qty = bigNumToFloat(await this.qty)
+    const spotPrice = await this.fetchSpotPrice()
+    const priceMult = this.qtyInBase ? 1/spotPrice : spotPrice
+    const qtyIsBuy = (this.sellBase === this.qtyInBase)
+    const slipMult = qtyIsBuy ? (1 - this.slippage) : (1 + this.slippage)
     return floatToBigNum(qty * priceMult * slipMult)
   }
 
   private async calcLimitPrice(): Promise<BigNumber> {
     const PREC_ADJ = 1.5
-    let spotPrice = await this.fetchSpotPrice()
-    let slipPrec = this.slippage * PREC_ADJ
-    let limitPrice = spotPrice * (this.sellBase ? (1 + slipPrec) : (1 - slipPrec))
+    const spotPrice = await this.fetchSpotPrice()
+    const slipPrec = this.slippage * PREC_ADJ
+    const limitPrice = spotPrice * (this.sellBase ? (1 + slipPrec) : (1 - slipPrec))
     return encodeCrocPrice(limitPrice)
   }
 

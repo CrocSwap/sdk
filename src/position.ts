@@ -65,20 +65,20 @@ export class CrocPositionView {
     readonly context: Promise<CrocContext>
 
     async queryPosAnchors (anchors: LPAnchor[]): Promise<LiqPos[]> {
-        let posCandMap: Map<string, string[]> = new Map()
+        const posCandMap: Map<string, string[]> = new Map()
     
         anchors.forEach(a => { 
             let entry = posCandMap.get(a.pos)
             if (entry === undefined) {
-                entry = new Array()
+                entry = []
                 posCandMap.set(a.pos, entry)
             }
         entry.push(a.tx)
         })
 
-        let lps = Array.from(posCandMap.entries()).map(async ([pos, txs],) => {
+        const lps = Array.from(posCandMap.entries()).map(async ([pos, txs],) => {
             for (let i = 0; i < txs.length; ++i) {
-                let lp = this.queryPos(pos, txs[i])
+                const lp = this.queryPos(pos, txs[i])
                 if ((await lp) !== undefined) { return lp }
             }
             return undefined
@@ -89,7 +89,7 @@ export class CrocPositionView {
     }
 
     async queryPos (posHash: Hash, txHash: Hash): Promise<AmbientLiqPos | RangeLiqPos | undefined> {
-        let claim = await this.queryClaim(posHash, txHash)
+        const claim = await this.queryClaim(posHash, txHash)
         if (claim === undefined) { 
             return undefined 
         } else if (claim.lpType === "ambient") {
@@ -100,12 +100,12 @@ export class CrocPositionView {
     }
 
     private async joinConcPos (claim: RangeClaim): Promise<RangeLiqPos> {
-        let curve = (await this.context).query.queryCurve
+        const curve = (await this.context).query.queryCurve
             (claim.baseToken, claim.quoteToken, claim.poolType);
-        let price = decodeCrocPrice((await curve).priceRoot_)
+        const price = decodeCrocPrice((await curve).priceRoot_)
 
-        let lowerPrice = tickToPrice(claim.lowerTick)
-        let upperPrice = tickToPrice(claim.upperTick)
+        const lowerPrice = tickToPrice(claim.lowerTick)
+        const upperPrice = tickToPrice(claim.upperTick)
         const baseQty = baseTokenForConcLiq(price, claim.concLiq, lowerPrice, upperPrice)
         const quoteQty = quoteTokenForConcLiq(price, claim.concLiq, lowerPrice, upperPrice)
 
@@ -116,11 +116,11 @@ export class CrocPositionView {
     }
 
     private async joinAmbientPos (claim: AmbientClaim): Promise<AmbientLiqPos> {
-        let curve = (await this.context).query.queryCurve
+        const curve = (await this.context).query.queryCurve
             (claim.baseToken, claim.quoteToken, claim.poolType);
-        let price = decodeCrocPrice(curve.priceRoot_)
-        let ambiGrowth = fromFixedGrowth(curve.seedDeflator_)
-        let liq = floatToBigNum(bigNumToFloat(claim.ambientSeeds) * ambiGrowth)
+        const price = decodeCrocPrice(curve.priceRoot_)
+        const ambiGrowth = fromFixedGrowth(curve.seedDeflator_)
+        const liq = floatToBigNum(bigNumToFloat(claim.ambientSeeds) * ambiGrowth)
         return Object.assign({ poolPrice: price,
             ambientLiq: liq, baseQty: baseVirtualReserves(price, liq), 
             quoteQty: quoteVirtualReserves(price, liq),
@@ -135,8 +135,8 @@ export class CrocPositionView {
 
         const callData = txn.data
         if (!isTradeWarmCall(callData)) { return undefined }
-        let args = decodeWarmPathCall(callData)
-        let slot = (await this.context).provider.getStorageAt(
+        const args = decodeWarmPathCall(callData)
+        const slot = (await this.context).provider.getStorageAt(
             (await this.context).dex.address, posHash)
 
         if (args.isAmbient) {
@@ -156,19 +156,19 @@ export class CrocPositionView {
     }
 
     private extractAmbientSeeds (stored: BytesLike): BigNumber {
-        let val = BigNumber.from(stored)
+        const val = BigNumber.from(stored)
         const bitmask = BigNumber.from(2).pow(128).sub(1)
         return val.and(bitmask)
     }
 
     private extractConcLiq (stored: BytesLike): BigNumber {
-        let val = BigNumber.from(stored)
+        const val = BigNumber.from(stored)
         const bitmask = BigNumber.from(2).pow(128).sub(1)
         return val.and(bitmask)
     }
 
     private extractFeeMileage (stored: BytesLike): number {
-        let val = BigNumber.from(stored)
+        const val = BigNumber.from(stored)
         const constPoint = val.shr(128)
         const bitmask = BigNumber.from(2).pow(64).sub(1)
         return bigNumToFloat(constPoint.and(bitmask)) / (2 ** 48)

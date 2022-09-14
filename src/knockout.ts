@@ -30,52 +30,52 @@ export class CrocKnockoutHandle {
   }
 
   async mint (opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
-    let chain = (await this.context).chain
-    let encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
-    let [lowerTick, upperTick] = this.tickRange(chain)
-    let surplus = this.maskSurplusFlags(opts)
+    const chain = (await this.context).chain
+    const encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
+    const [lowerTick, upperTick] = this.tickRange(chain)
+    const surplus = this.maskSurplusFlags(opts)
 
-    let cmd = encoder.encodeKnockoutMint(await this.qty, lowerTick, upperTick, 
+    const cmd = encoder.encodeKnockoutMint(await this.qty, lowerTick, upperTick, 
       this.sellBase, surplus);
     return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd, { value: this.msgVal(surplus), gasLimit: 1000000 })
   }
 
   async burn (opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
-    let chain = (await this.context).chain
-    let encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
-    let [lowerTick, upperTick] = this.tickRange(chain)
-    let surplus = this.maskSurplusFlags(opts)
+    const chain = (await this.context).chain
+    const encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
+    const [lowerTick, upperTick] = this.tickRange(chain)
+    const surplus = this.maskSurplusFlags(opts)
 
-    let cmd = encoder.encodeKnockoutBurnQty(await this.qty, lowerTick, upperTick, 
+    const cmd = encoder.encodeKnockoutBurnQty(await this.qty, lowerTick, upperTick, 
       this.sellBase, surplus);
     return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd)
   }
 
   async burnLiq (liq: BigNumber, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
-    let chain = (await this.context).chain
-    let encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
-    let [lowerTick, upperTick] = this.tickRange(chain)
-    let surplus = this.maskSurplusFlags(opts)
+    const chain = (await this.context).chain
+    const encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
+    const [lowerTick, upperTick] = this.tickRange(chain)
+    const surplus = this.maskSurplusFlags(opts)
 
-    let cmd = encoder.encodeKnockoutBurnLiq(roundForConcLiq(liq), lowerTick, upperTick, 
+    const cmd = encoder.encodeKnockoutBurnLiq(roundForConcLiq(liq), lowerTick, upperTick, 
       this.sellBase, surplus);
     return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd)
   }
 
   async recoverPost (pivotTime: number, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
-    let chain = (await this.context).chain
-    let encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
-    let [lowerTick, upperTick] = this.tickRange(chain)
-    let surplus = this.maskSurplusFlags(opts)
+    const chain = (await this.context).chain
+    const encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
+    const [lowerTick, upperTick] = this.tickRange(chain)
+    const surplus = this.maskSurplusFlags(opts)
 
-    let cmd = encoder.encodeKnockoutRecover(pivotTime, lowerTick, upperTick, 
+    const cmd = encoder.encodeKnockoutRecover(pivotTime, lowerTick, upperTick, 
       this.sellBase, surplus);
     return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd)
   }
 
   async willMintFail(): Promise<boolean> {
-    let gridSize = this.context.then(c => c.chain.gridSize)
-    let marketTick = this.context.then(c => c.query.queryCurveTick
+    const gridSize = this.context.then(c => c.chain.gridSize)
+    const marketTick = this.context.then(c => c.query.queryCurveTick
       (this.baseToken, this.quoteToken, c.chain.poolIndex))
     return this.sellBase ?
       (this.knockoutTick + await gridSize >= await marketTick) :
@@ -119,7 +119,7 @@ const KNOCKOUT_PATH = 7
 
 async function calcSellQty (buyQty: Promise<BigNumber>, isQtyInBase: boolean, knockoutTick: number,
   context: Promise<CrocContext>): Promise<BigNumber> {
-  let sellQty = calcSellFloat(bigNumToFloat(await buyQty), isQtyInBase, knockoutTick, context)
+  const sellQty = calcSellFloat(bigNumToFloat(await buyQty), isQtyInBase, knockoutTick, context)
   return sellQty.then(floatToBigNum)
 }
 

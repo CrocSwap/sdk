@@ -16,28 +16,28 @@ export class KnockoutEncoder {
     encodeKnockoutMint (qty: BigNumberish, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number): string {
         const MINT_SUBCMD = 91
-        let suppArgs = this.abiCoder.encode(["uint128", "bool"], [qty, false])
+        const suppArgs = this.abiCoder.encode(["uint128", "bool"], [qty, false])
         return this.encodeCommonArgs(MINT_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
     }
 
     encodeKnockoutBurnQty (qty: BigNumberish, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number): string {
         const BURN_SUBCMD = 92
-        let suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [qty, false, false])
+        const suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [qty, false, false])
         return this.encodeCommonArgs(BURN_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
     }
 
     encodeKnockoutBurnLiq (liq: BigNumberish, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number): string {
         const BURN_SUBCMD = 92
-        let suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [liq, true, false])
+        const suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [liq, true, false])
         return this.encodeCommonArgs(BURN_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
     }
 
     encodeKnockoutRecover (pivotTime: number, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number): string {
         const BURN_SUBCMD = 94
-        let suppArgs = this.abiCoder.encode(["uint32"], [pivotTime])
+        const suppArgs = this.abiCoder.encode(["uint32"], [pivotTime])
         return this.encodeCommonArgs(BURN_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
     }
 

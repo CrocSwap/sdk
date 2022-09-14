@@ -8,4 +8,8 @@ module.exports = {
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
   ],
+  "rules": {
+      "no-unexpected-multiline": "off",
+      "@typescript-eslint/no-inferrable-types": "off"
+    }
 };

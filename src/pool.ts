@@ -1,3 +1,4 @@
+/* eslint-disable prefer-const */
 import { CrocContext } from "./context";
 import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew } from './utils';
 import { CrocTokenView, TokenQty } from './tokens';

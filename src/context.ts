@@ -21,7 +21,7 @@ export async function connectCroc(
   providerOrChainId: ConnectArg,
   signer?: Signer
 ): Promise<CrocContext> {
-  let [provider, maybeSigner] = await buildProvider(providerOrChainId, signer);
+  const [provider, maybeSigner] = await buildProvider(providerOrChainId, signer);
   return setupProvider(provider, maybeSigner);
 }
 
@@ -30,12 +30,12 @@ async function buildProvider(
   signer?: Signer
 ): Promise<[Provider, Signer | undefined]> {
   if (typeof arg === "number" || typeof arg == "string") {
-    let context = lookupChain(arg);
+    const context = lookupChain(arg);
     return buildProvider(new JsonRpcProvider(context.nodeUrl), signer);
   } else if ("getNetwork" in arg) {
     return [arg, signer];
   } else {
-    let chainId = await arg.getChainId();
+    const chainId = await arg.getChainId();
     return buildProvider(chainId, signer);
   }
 }
@@ -44,8 +44,8 @@ async function setupProvider(
   provider: Provider,
   signer?: Signer
 ): Promise<CrocContext> {
-  let actor = determineActor(provider, signer);
-  let chainId = await getChain(provider);
+  const actor = determineActor(provider, signer);
+  const chainId = await getChain(provider);
   return inflateContracts(chainId, provider, actor);
 }
 
@@ -86,7 +86,7 @@ function inflateContracts(
   provider: Provider,
   actor: Provider | Signer
 ): CrocContext {
-  let context = lookupChain(chainId);
+  const context = lookupChain(chainId);
   return {
     provider: provider,
     dex: new Contract(context.dexAddr, CROC_ABI, actor),
@@ -101,7 +101,7 @@ export function lookupChain(chainId: number | string): ChainSpec {
   if (typeof chainId === "number") {
     return lookupChain("0x" + chainId.toString(16));
   } else {
-    let context = CHAIN_SPECS[chainId];
+    const context = CHAIN_SPECS[chainId];
     if (!context) {
       throw new Error("Unsupported chain ID: " + chainId);
     }
