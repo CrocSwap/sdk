@@ -33,7 +33,7 @@ export function toDisplayPrice(
   quoteDecimals: number,
   isInverted = false
 ): number {
-  let scaled = price * Math.pow(10, quoteDecimals - baseDecimals)
+  const scaled = price * Math.pow(10, quoteDecimals - baseDecimals)
   return isInverted ? 1 / scaled : scaled
 }
 
@@ -43,7 +43,7 @@ export function fromDisplayPrice(
   quoteDecimals: number,
   isInverted = false
 ): number {
-  let scaled = isInverted ? 1 / price : price
+  const scaled = isInverted ? 1 / price : price
   return scaled * Math.pow(10, baseDecimals - quoteDecimals)
 }
 
