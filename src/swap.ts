@@ -107,7 +107,6 @@ export class CrocSwapPlan {
     const spotPrice = await this.fetchSpotPrice()
     const slipPrec = this.slippage * PREC_ADJ
     const limitPrice = spotPrice * (this.sellBase ? (1 + slipPrec) : (1 - slipPrec))
-    console.log({limitPrice})
     return encodeCrocPrice(limitPrice)
   }
 
