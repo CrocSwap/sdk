@@ -16,7 +16,7 @@ export class CrocKnockoutHandle {
     knockoutTick: number, context: Promise<CrocContext>) {
     [this.baseToken, this.quoteToken] = sortBaseQuoteTokens(sellToken, buyToken)
     this.sellBase = (this.baseToken === sellToken)
-    this.qtyInBase = this.sellBase
+    this.qtyInBase = inSellQty ? this.sellBase : !this.sellBase
 
     const tokenView = new CrocTokenView(context,
       this.qtyInBase ? this.baseToken : this.quoteToken)
