@@ -56,6 +56,13 @@ export function pinTickLower(
   return Math.max(tickGrid, horizon);
 }
 
+export function priceHalfBelowTick(
+  tick: number,
+  nTicksGrid: number): Tick {
+  const halfTickBelow = (tick - (.5 * nTicksGrid))
+  return Math.pow(1.0001, halfTickBelow);
+  }
+
 export function pinTickUpper(
   price: number,
   nTicksGrid: number): Tick {
@@ -64,6 +71,13 @@ export function pinTickUpper(
   const horizon = Math.ceil(MAX_TICK / nTicksGrid) * nTicksGrid;
   return Math.min(tickGrid, horizon);
 }
+
+export function priceHalfAboveTick(
+  tick: number,
+  nTicksGrid: number): Tick {
+  const halfTickAbove = (tick + (.5 * nTicksGrid))
+  return Math.pow(1.0001, halfTickAbove);
+  }
 
 export function tickToPrice(tick: Tick): number {
   return Math.pow(1.0001, tick);
