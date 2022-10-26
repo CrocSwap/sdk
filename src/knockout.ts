@@ -37,7 +37,8 @@ export class CrocKnockoutHandle {
 
     const cmd = encoder.encodeKnockoutMint(await this.qty, lowerTick, upperTick, 
       this.sellBase, surplus);
-    return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd, { value: this.msgVal(surplus), gasLimit: 1000000 })
+    return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd, { value: this.msgVal(surplus) })
+    // return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd, { value: this.msgVal(surplus), gasLimit: 1000000 })
   }
 
   async burn (opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
