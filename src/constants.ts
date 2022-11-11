@@ -16,6 +16,7 @@ type ChainId = string;
 
 export interface ChainSpec {
   nodeUrl: string;
+  nodeUrl2: string;
   wsUrl?: string,
   poolIndex: number;
   dexAddr: ChainAddress;
@@ -34,11 +35,12 @@ const ETHERUM_LOGO =
 
 const GOERLI_CHAIN: ChainSpec = {
   nodeUrl: "https://goerli.infura.io/v3/cbb2856ea8804fc5ba59be0a2e8a9f88", // croc
+  // nodeUrl2: "https://goerli.infura.io/v3/4a162c75bd514925890174ca13cdb6a2",  // benwolski@gmail.com
   // nodeUrl: "https://goerli.infura.io/v3/4a162c75bd514925890174ca13cdb6a2",  // benwolski@gmail.com
-  // nodeUrl: "https://goerli.infura.io/v3/170b7b65781c422d82a94b8b289ca605",
-  // nodeUrl: "https://goerli.infura.io/v3/e0aa879e36fc4c9e91b826ad961a36fd",
-  wsUrl: "wss://goerli.infura.io/ws/v3/cbb2856ea8804fc5ba59be0a2e8a9f88", // croc
-  // wsUrl: "wss://goerli.infura.io/ws/v3/4a162c75bd514925890174ca13cdb6a2", // benwolski@gmail.com
+  // nodeUrl2: "https://goerli.infura.io/v3/170b7b65781c422d82a94b8b289ca605",
+  nodeUrl2: "https://goerli.infura.io/v3/e0aa879e36fc4c9e91b826ad961a36fd", // handoff
+  // wsUrl: "wss://goerli.infura.io/ws/v3/cbb2856ea8804fc5ba59be0a2e8a9f88", // croc
+  wsUrl: "wss://goerli.infura.io/ws/v3/4a162c75bd514925890174ca13cdb6a2", // benwolski@gmail.com
   // wsUrl: "wss://goerli.infura.io/ws/v3/170b7b65781c422d82a94b8b289ca605",
   // wsUrl: "wss://goerli.infura.io/ws/v3/e0aa879e36fc4c9e91b826ad961a36fd",
   dexAddr: "0xfafcd1f5530827e7398b6d3c509f450b1b24a209",
@@ -55,6 +57,7 @@ const GOERLI_CHAIN: ChainSpec = {
 
 const LOCAL_FORK_CHAIN: ChainSpec = {
   nodeUrl: "http://127.0.0.1:8545",
+  nodeUrl2: "http://127.0.0.1:8545",
   dexAddr: "0xfafcd1f5530827e7398b6d3c509f450b1b24a209",
   queryAddr: "0x93a4baFDd49dB0e06f3F3f9FddC1A67792F47518",
   impactAddr: "0x2979EeEcf2FE0D1ad2E7f3D9E84a6Ee92d23Ee68",
