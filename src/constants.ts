@@ -34,7 +34,7 @@ const ETHERUM_LOGO =
   "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg";
 
 const GOERLI_CHAIN: ChainSpec = {
-  nodeUrl: "https://goerli.infura.io/v3/cbb2856ea8804fc5ba59be0a2e8a9f88", // croc
+  nodeUrl: "https://goerli.infura.io/v3/" + (process.env.REACT_APP_INFURA_KEY  ? process.env.REACT_APP_INFURA_KEY : '4a162c75bd514925890174ca13cdb6a2'), // croc
   // nodeUrl2: "https://goerli.infura.io/v3/4a162c75bd514925890174ca13cdb6a2",  // benwolski@gmail.com
   // nodeUrl: "https://goerli.infura.io/v3/4a162c75bd514925890174ca13cdb6a2",  // benwolski@gmail.com
   // nodeUrl2: "https://goerli.infura.io/v3/170b7b65781c422d82a94b8b289ca605",
