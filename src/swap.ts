@@ -6,10 +6,11 @@ import {
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
 import { CrocPoolView } from './pool';
-import { bigNumToFloat, floatToBigNum, encodeCrocPrice, decodeCrocPrice } from './utils';
+import { encodeCrocPrice, decodeCrocPrice } from './utils';
 import { TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
+import { MAX_SQRT_PRICE, MIN_SQRT_PRICE } from "./constants";
 
 export interface CrocImpact {
   sellQty: string,
@@ -36,7 +37,10 @@ export class CrocSwapPlan {
     this.qty = tokenView.normQty(qty)
     
     this.slippage = slippage
+    this.priceSlippage = slippage * PRICE_SLIP_MULT
     this.context = context
+
+    this.impact = this.calcImpact()
   }
 
 
@@ -51,11 +55,12 @@ export class CrocSwapPlan {
   }
 
 
-  async calcImpact(): Promise<CrocImpact> {
+  private async calcImpact(): Promise<CrocImpact> {
     const TIP = 0
+    const limitPrice = this.sellBase ? MAX_SQRT_PRICE : MIN_SQRT_PRICE
     const impact = await (await this.context).slipQuery.calcImpact
       (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
-      this.sellBase, this.qtyInBase, await this.qty, TIP, await this.calcLimitPrice());
+      this.sellBase, this.qtyInBase, await this.qty, TIP, limitPrice);
 
     const baseQty = this.poolView.baseTokenView.toDisplay(impact.baseFlow.abs())
     const quoteQty = this.poolView.quoteTokenView.toDisplay(impact.quoteFlow.abs())
@@ -93,25 +98,23 @@ export class CrocSwapPlan {
     !(decodeSurplusFlag(surplusEncoded)[0])
   }
 
-  private async calcSlipQty(): Promise<BigNumber> {
-    const qty = bigNumToFloat(await this.qty)
-    const spotPrice = await this.fetchSpotPrice()
-    const priceMult = this.qtyInBase ? 1/spotPrice : spotPrice
-    const qtyIsBuy = (this.sellBase === this.qtyInBase)
-    const slipMult = qtyIsBuy ? (1 - this.slippage) : (1 + this.slippage)
-    return floatToBigNum(qty * priceMult * slipMult)
+  async calcSlipQty(): Promise<BigNumber> {
+    const floatQtyIsBuy = (this.sellBase === this.qtyInBase)
+
+    const slipQty = floatQtyIsBuy ?
+      parseFloat((await this.impact).sellQty) * (1 + this.slippage) :
+      parseFloat((await this.impact).buyQty) * (1 - this.slippage)
+
+    return this.qtyInBase ? 
+      this.poolView.baseTokenView.normQty(slipQty) : 
+      this.poolView.quoteTokenView.normQty(slipQty)
   }
 
-  private async calcLimitPrice(): Promise<BigNumber> {
-    const PREC_ADJ = 1.01
-    const spotPrice = await this.fetchSpotPrice()
-    const slipPrec = this.slippage * PREC_ADJ
-    const limitPrice = spotPrice * (this.sellBase ? (1 + slipPrec) : (1 - slipPrec))
+  async calcLimitPrice(): Promise<BigNumber> {
+    const slipPrec = this.priceSlippage
+    const limitPrice = (await this.impact).finalPrice * 
+      (this.sellBase ? (1 + slipPrec) : (1 - slipPrec))
     return encodeCrocPrice(limitPrice)
-  }
-
-  private async fetchSpotPrice(): Promise<number> {
-    return this.poolView.spotPrice()
   }
 
   readonly baseToken: string
@@ -120,6 +123,12 @@ export class CrocSwapPlan {
   readonly sellBase: boolean
   readonly qtyInBase: boolean
   readonly slippage: number
+  readonly priceSlippage: number
   readonly poolView: CrocPoolView
   readonly context: Promise<CrocContext>
+  readonly impact: Promise<CrocImpact>
 }
+
+// Price slippage limit multiplies normal slippage tolerance by amount that should
+// be reasonable (300%)
+const PRICE_SLIP_MULT = 3.0
