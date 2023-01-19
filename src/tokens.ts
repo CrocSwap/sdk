@@ -65,6 +65,23 @@ export class CrocTokenView {
     );
   }
 
+  async roundQty (qty: TokenQty): Promise<BigNumber> {
+    if (typeof qty === "number" || typeof qty === "string") {
+      return this.normQty(this.truncFraction(qty, await this.decimals))
+    } else {
+      return qty;
+    }
+  }
+
+  private truncFraction (qty: string | number, decimals: number): number {
+    if (typeof(qty) === "number") {
+      let exp = Math.pow(10, decimals)
+      return Math.floor(qty * exp) / exp
+    } else {
+      return this.truncFraction(parseFloat(qty), decimals)
+    }
+  }
+
   async normQty(qty: TokenQty): Promise<BigNumber> {
     if (typeof qty === "number" || typeof qty === "string") {
       return fromDisplayQty(qty.toString(), await this.decimals);

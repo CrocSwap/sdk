@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 
 const ETH = ethers.constants.AddressZero
 const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
-//const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
+const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
 
 // deepcode ignore HardcodedSecret: <please specify a reason of ignoring this>
 const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
@@ -135,7 +135,7 @@ async function demo() {
 
     //croc.buy(DAI, 10).atLimit(ETH, -80000).mint({surplus: false})
 
-    let plan = croc.buy(DAI, 100000).with(ETH)
+    let plan = croc.buy(USDC, 1).with(ETH)
     console.log((await plan.impact))
     console.log((await plan.calcSlipQty()).toString())
 }
