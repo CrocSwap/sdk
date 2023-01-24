@@ -84,12 +84,14 @@ export class CrocPoolView {
 
     async mintRangeBase (qty: TokenQty, range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
         Promise<TransactionResponse> {
-        return this.mintRange(qty, this.useTrueBase, range, limits, opts)
+        const safeLimits = this.boundLimits(range, limits)
+        return this.mintRange(qty, this.useTrueBase, range, await safeLimits, opts)
     }
 
     async mintRangeQuote (qty: TokenQty, range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
         Promise<TransactionResponse> {
-        return this.mintRange(qty, !this.useTrueBase, range, limits, opts)
+        const safeLimits = this.boundLimits(range, limits)
+        return this.mintRange(qty, !this.useTrueBase, range, await safeLimits, opts)
     }
 
     async burnAmbientLiq (liq: BigNumber, limits: PriceRange, opts?: CrocLpOpts): 
@@ -138,9 +140,40 @@ export class CrocPoolView {
         return (await this.context).dex.userCmd(LIQ_PATH, calldata, { value: await msgVal })
     }
 
+    private async boundLimits (range: TickRange, limits: PriceRange): Promise<PriceRange> {
+        let spotPrice = this.spotPrice()
+        const [lowerPrice, upperPrice] = this.rangeToPrice(range)
+        const [boundLower, boundUpper] = await this.transformLimits(limits)
+        
+        // Generally assume we don't want to send more than 5X the floating side token implied
+        // by current price
+        const MAX_AMPLICATION = 10.0
+        const slippageCap = 1 - Math.pow(1 - 1/MAX_AMPLICATION, 2)
+
+        const amplifyLower = ((await spotPrice) - lowerPrice) * slippageCap + lowerPrice
+        const amplifyUpper = upperPrice - (upperPrice - (await spotPrice)) * slippageCap
+
+        return this.untransformLimits(
+            [Math.max(amplifyLower, boundLower), Math.min(amplifyUpper, boundUpper)])
+    }
+
+    private rangeToPrice (range: TickRange): PriceRange {
+        const lowerPrice = Math.pow(1.0001, range[0])
+        const upperPrice = Math.pow(1.0001, range[1])
+        return [lowerPrice, upperPrice]
+    }
+
     private async transformLimits (limits: PriceRange): Promise<PriceRange> {
         let left = this.fromDisplayPrice(limits[0])
         let right = this.fromDisplayPrice(limits[1])
+        return (await left < await right) ?
+            [await left, await right] :
+            [await right, await left]
+    }
+
+    private async untransformLimits (limits: PriceRange): Promise<PriceRange> {
+        let left = this.toDisplayPrice(limits[0])
+        let right = this.toDisplayPrice(limits[1])
         return (await left < await right) ?
             [await left, await right] :
             [await right, await left]
@@ -163,7 +196,7 @@ export class CrocPoolView {
         return encodeSurplusArg(opts.surplus, this.useTrueBase)
     }
 
-    private async msgValAmbient (qty: TokenQty, isQtyBase: boolean, limits: PriceRange,
+    private async msgValAmbient (qty: TokenQty, isQtyBase: boolean, limits: PriceRange, 
         opts?: CrocLpOpts): Promise<BigNumber> {
         if (!this.needsAttachedVal(opts)) { return BigNumber.from(0) }
         let ethQty = isQtyBase ? qty :
@@ -199,15 +232,15 @@ export class CrocPoolView {
         return Math.round(bigNumToFloat(weiQty) * boundPrice * precAdj)            
     }
 
-    private async ethForRangeQuote (quoteQty: TokenQty, range: TickRange, limits: PriceRange): 
-        Promise<TokenQty> {        
+    private async ethForRangeQuote (quoteQty: TokenQty, range: TickRange, 
+        limits: PriceRange): Promise<TokenQty> {        
         const [, boundPrice] = await this.transformLimits(limits)
-        const lowerPrice = Math.pow(1.0001, range[0])
-        const upperPrice = Math.pow(1.0001, range[1])
+        const [lowerPrice, upperPrice] = this.rangeToPrice(range)
 
-        let ambiQty = this.calcEthInQuote(quoteQty, limits)
         let skew = concDepositSkew(boundPrice, lowerPrice, upperPrice)
+        let ambiQty = this.calcEthInQuote(quoteQty, limits)
         let concQty = ambiQty.then(aq => Math.ceil(aq / skew))
+
         return toDisplayQty(await concQty, await this.baseDecimals)
     }
 
