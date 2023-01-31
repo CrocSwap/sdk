@@ -84,14 +84,12 @@ export class CrocPoolView {
 
     async mintRangeBase (qty: TokenQty, range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
         Promise<TransactionResponse> {
-        const safeLimits = this.boundLimits(range, limits)
-        return this.mintRange(qty, this.useTrueBase, range, await safeLimits, opts)
+        return this.mintRange(qty, this.useTrueBase, range, await limits, opts)
     }
 
     async mintRangeQuote (qty: TokenQty, range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
         Promise<TransactionResponse> {
-        const safeLimits = this.boundLimits(range, limits)
-        return this.mintRange(qty, !this.useTrueBase, range, await safeLimits, opts)
+        return this.mintRange(qty, !this.useTrueBase, range, await limits, opts)
     }
 
     async burnAmbientLiq (liq: BigNumber, limits: PriceRange, opts?: CrocLpOpts): 
@@ -144,17 +142,27 @@ export class CrocPoolView {
         let spotPrice = this.spotPrice()
         const [lowerPrice, upperPrice] = this.rangeToPrice(range)
         const [boundLower, boundUpper] = await this.transformLimits(limits)
-        
-        // Generally assume we don't want to send more than 5X the floating side token implied
-        // by current price
-        const MAX_AMPLICATION = 10.0
-        const slippageCap = 1 - Math.pow(1 - 1/MAX_AMPLICATION, 2)
+        const BOUND_PREC = 1.0001
 
-        const amplifyLower = ((await spotPrice) - lowerPrice) * slippageCap + lowerPrice
-        const amplifyUpper = upperPrice - (upperPrice - (await spotPrice)) * slippageCap
+        let [amplifyLower, amplifyUpper] = [boundLower, boundUpper]
+
+        if (upperPrice < await spotPrice) {
+            amplifyUpper = (await spotPrice)*BOUND_PREC
+        } else if (lowerPrice > await spotPrice) {
+            amplifyLower = (await spotPrice)/BOUND_PREC
+
+        } else {
+            // Generally assume we don't want to send more than 5X the floating side token implied
+            // by current price
+            const MAX_AMPLICATION = 10.0
+            const slippageCap = 1 - Math.pow(1 - 1/MAX_AMPLICATION, 2)
+
+            amplifyLower = ((await spotPrice) - lowerPrice) * slippageCap + lowerPrice
+            amplifyUpper = upperPrice - (upperPrice - (await spotPrice)) * slippageCap
+        }
 
         return this.untransformLimits(
-            [Math.max(amplifyLower, boundLower), Math.min(amplifyUpper, boundUpper)])
+                [Math.max(amplifyLower, boundLower), Math.min(amplifyUpper, boundUpper)])
     }
 
     private rangeToPrice (range: TickRange): PriceRange {
@@ -181,14 +189,18 @@ export class CrocPoolView {
 
     private async mintRange (qty: TokenQty, isQtyBase: boolean, 
         range: TickRange, limits: PriceRange, opts?: CrocLpOpts): Promise<TransactionResponse> {
-        let msgVal = this.msgValRange(qty, isQtyBase, range, limits, opts)
+        const saneLimits = this.boundLimits(range, limits)
+
+        console.log(await saneLimits)
+
+        let msgVal = this.msgValRange(qty, isQtyBase, range, await saneLimits, opts)
         let weiQty = this.normQty(qty, isQtyBase)
-        let [lowerBound, upperBound] = await this.transformLimits(limits)
+        let [lowerBound, upperBound] = await this.transformLimits(await saneLimits)
         
         const calldata = (await this.makeEncoder()).encodeMintConc(range[0], range[1],
             await weiQty, isQtyBase, lowerBound, upperBound, this.maskSurplusFlag(opts))
         
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata, { value: await msgVal})
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata, { value: await msgVal, gasLimit: 1000000})
     }
 
     private maskSurplusFlag (opts?: CrocLpOpts): number {

@@ -174,7 +174,9 @@ export function concDepositSkew(
 ): number {
   const base = baseConcFactor(price, lower, upper);
   const quote = quoteConcFactor(price, lower, upper);
-  return base / quote;
+
+  console.log([base, quote])
+  return quote / base;
 }
 
 /* Rounds a liquidity magnitude to a multiple that can be used inside the protocol. */
