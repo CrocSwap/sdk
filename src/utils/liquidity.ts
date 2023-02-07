@@ -175,7 +175,6 @@ export function concDepositSkew(
   const base = baseConcFactor(price, lower, upper);
   const quote = quoteConcFactor(price, lower, upper);
 
-  console.log([base, quote])
   return quote / base;
 }
 

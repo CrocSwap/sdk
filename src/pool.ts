@@ -191,8 +191,6 @@ export class CrocPoolView {
         range: TickRange, limits: PriceRange, opts?: CrocLpOpts): Promise<TransactionResponse> {
         const saneLimits = this.boundLimits(range, limits)
 
-        console.log(await saneLimits)
-
         let msgVal = this.msgValRange(qty, isQtyBase, range, await saneLimits, opts)
         let weiQty = this.normQty(qty, isQtyBase)
         let [lowerBound, upperBound] = await this.transformLimits(await saneLimits)
@@ -200,7 +198,7 @@ export class CrocPoolView {
         const calldata = (await this.makeEncoder()).encodeMintConc(range[0], range[1],
             await weiQty, isQtyBase, lowerBound, upperBound, this.maskSurplusFlag(opts))
         
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata, { value: await msgVal, gasLimit: 1000000})
+        return (await this.context).dex.userCmd(LIQ_PATH, calldata, { value: await msgVal })
     }
 
     private maskSurplusFlag (opts?: CrocLpOpts): number {
@@ -251,7 +249,7 @@ export class CrocPoolView {
 
         let skew = concDepositSkew(boundPrice, lowerPrice, upperPrice)
         let ambiQty = this.calcEthInQuote(quoteQty, limits)
-        let concQty = ambiQty.then(aq => Math.ceil(aq / skew))
+        let concQty = ambiQty.then(aq => Math.ceil(aq * skew))
 
         return toDisplayQty(await concQty, await this.baseDecimals)
     }
