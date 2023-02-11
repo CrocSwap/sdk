@@ -162,7 +162,8 @@ async function demo() {
     /*console.log((await rebal.currentCollateral()).toString())
     console.log((await rebal.balancePercent()))*/
 
-    console.log(await rebal.rebal())
+    console.log((await (await rebal.mintInput())))
+    console.log((await (await rebal.swapOutput())))
     /*const burnRange: [number, number] = [-64000 - 3200, -64000]
     const mintRange: [number, number] = [-76032, -72000]
     console.log(await rebal.rebal(burnRange, mintRange))*/

@@ -2,6 +2,7 @@ import { TransactionResponse } from "@ethersproject/abstract-provider";
 import { BigNumber, BigNumberish } from "ethers";
 import { OrderDirective, PoolDirective } from "../encoding/longform";
 import { CrocPoolView } from "../pool";
+import { CrocSwapPlan } from "../swap";
 import { encodeCrocPrice, tickToPrice } from "../utils";
 import { baseTokenForConcLiq, concDepositBalance, quoteTokenForConcLiq } from "../utils/liquidity";
 
@@ -50,6 +51,29 @@ export class Rebalance {
         return tokenFn(await this.spotPrice, this.liquidity, 
             tickToPrice(this.burnRange[0]),
             tickToPrice(this.burnRange[1]))
+    }
+
+    async convertCollateral(): Promise<BigNumber> {
+        let balance = await this.swapFraction()
+        let collat = await this.currentCollateral()
+        return collat.mul(balance).div(10000)
+    }
+
+    async mintInput(): Promise<string> {
+        let collat = (await this.currentCollateral()).sub(await this.convertCollateral())
+        let pool = (await this.pool)
+        return await this.isBaseOutOfRange ?
+            (await pool.baseTokenView).toDisplay(collat) :
+            (await pool.quoteTokenView).toDisplay(collat)
+    }
+
+    async swapOutput(): Promise<string> {
+        const [sellToken, buyToken] = await this.pivotTokens()
+        
+        let swap = new CrocSwapPlan(sellToken, buyToken, await this.convertCollateral(), 
+            false, this.impact, (await this.pool).context)
+        let impact = await swap.calcImpact()
+        return impact.buyQty
     }
 
     private async isBaseOutOfRange(): Promise<boolean> {

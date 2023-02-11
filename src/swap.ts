@@ -55,7 +55,7 @@ export class CrocSwapPlan {
   }
 
 
-  private async calcImpact(): Promise<CrocImpact> {
+  async calcImpact(): Promise<CrocImpact> {
     const TIP = 0
     const limitPrice = this.sellBase ? MAX_SQRT_PRICE : MIN_SQRT_PRICE
     const impact = await (await this.context).slipQuery.calcImpact
@@ -105,7 +105,6 @@ export class CrocSwapPlan {
       parseFloat((await this.impact).sellQty) * (1 + this.slippage) :
       parseFloat((await this.impact).buyQty) * (1 - this.slippage)
 
-    console.log(slipQty)
     return !this.qtyInBase ? 
       this.poolView.baseTokenView.roundQty(slipQty) : 
       this.poolView.quoteTokenView.roundQty(slipQty)
