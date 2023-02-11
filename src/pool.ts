@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { CrocContext } from "./context";
-import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew } from './utils';
+import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew, pinTickLower, pinTickUpper } from './utils';
 import { CrocTokenView, TokenQty } from './tokens';
 import { TransactionResponse } from '@ethersproject/providers';
 import { WarmPathEncoder } from './encoding/liquidity';
@@ -57,6 +57,12 @@ export class CrocPoolView {
     async fromDisplayPrice (dispPrice: number): Promise<number> {
         return fromDisplayPrice(dispPrice, await this.baseDecimals, await this.quoteDecimals, 
             !this.useTrueBase)
+    }
+
+    async displayToPinTick (dispPrice: number): Promise<[number, number]> {
+        const spotPrice = await this.fromDisplayPrice(dispPrice)
+        const gridSize = (await this.context).chain.gridSize
+        return [pinTickLower(spotPrice, gridSize), pinTickUpper(spotPrice, gridSize)]
     }
 
     async initPool (initPrice: number): Promise<TransactionResponse> {
@@ -147,9 +153,9 @@ export class CrocPoolView {
         let [amplifyLower, amplifyUpper] = [boundLower, boundUpper]
 
         if (upperPrice < await spotPrice) {
-            amplifyUpper = (await spotPrice)*BOUND_PREC
+            amplifyLower = upperPrice*BOUND_PREC
         } else if (lowerPrice > await spotPrice) {
-            amplifyLower = (await spotPrice)/BOUND_PREC
+            amplifyUpper = lowerPrice/BOUND_PREC
 
         } else {
             // Generally assume we don't want to send more than 5X the floating side token implied
@@ -189,7 +195,7 @@ export class CrocPoolView {
 
     private async mintRange (qty: TokenQty, isQtyBase: boolean, 
         range: TickRange, limits: PriceRange, opts?: CrocLpOpts): Promise<TransactionResponse> {
-        const saneLimits = this.boundLimits(range, limits)
+        const saneLimits = await this.boundLimits(range, limits)
 
         let msgVal = this.msgValRange(qty, isQtyBase, range, await saneLimits, opts)
         let weiQty = this.normQty(qty, isQtyBase)

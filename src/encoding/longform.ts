@@ -88,13 +88,13 @@ interface ChainingDirective {
     offsetSurplus: boolean
 }
 
-interface HopDirective {
+export interface HopDirective {
     pools: PoolDirective[]
     settlement: SettlementDirective
     improve: ImproveDirective
 }
 
-interface PoolDirective {
+export interface PoolDirective {
     poolIdx: BigNumberish
     passive: PassiveDirective,
     swap: SwapDirective

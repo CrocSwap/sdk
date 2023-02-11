@@ -178,6 +178,19 @@ export function concDepositSkew(
   return quote / base;
 }
 
+export function concDepositBalance(
+  price: number,
+  lower: number,
+  upper: number
+): number {
+const base = baseConcFactor(price, lower, upper);
+const quote = quoteConcFactor(price, lower, upper);
+
+return quote / (base + quote);
+}
+
+
+
 /* Rounds a liquidity magnitude to a multiple that can be used inside the protocol. */
 export function roundForConcLiq(liq: BigNumber): BigNumber {
   const CONC_LOTS_BITS = 11;

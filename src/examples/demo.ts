@@ -1,9 +1,10 @@
 import { CrocEnv } from '../croc';
-import { ethers } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
+import { Rebalance } from '../recipes/rebalance';
 
 //const ETH = ethers.constants.AddressZero
-//const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
-const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
+const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
+//const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
 
 // deepcode ignore HardcodedSecret: <please specify a reason of ignoring this>
 const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
@@ -139,21 +140,36 @@ async function demo() {
     console.log((await plan.impact))
     console.log((await plan.calcSlipQty()).toString())*/
 
-    console.log(await croc.poolEthQuote(USDC).spotTick())
-    console.log(await croc.poolEthQuote(USDC).displayPrice())
+    console.log(await croc.poolEthQuote(DAI).spotTick())
+    console.log(await croc.poolEthQuote(DAI).displayPrice())
 
     //console.log(await croc.poolEth(DAI).mintAmbientQuote(50, [0.0001, 0.001]))
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(50, [-64000 - 3200, -64000,], [0.00000001, 100000.0]))
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(0.001, [-80000 - 3200, -80000,], [0.00000001, 100000.0]))
 
-    console.log(await croc.poolEthQuote(USDC).mintRangeBase(50, [208000 - 3200, 208000,], [0.00000001, 100000.0]))
+    //console.log(await croc.poolEthQuote(USDC).mintRangeBase(50, [208000 - 3200, 208000,], [0.00000001, 100000.0]))
 
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(0.001, [3180*64, 3182*64], [1600, 1700]))
 
-    //let rebal = (new Rebalance(croc.poolEthQuote(DAI)))
-    //const burnRange: [number, number] = [-64000 - 3200, -64000]
-    //const mintRange: [number, number] = [-73024, -74368]
-    //console.log(await rebal.rebal(burnRange, mintRange))
+    const pool = croc.poolEthQuote(DAI)
+    console.log(await pool.displayToPinTick(1500))
+    console.log(await pool.displayToPinTick(1600))
+
+
+    let rebal = new Rebalance(pool, { burn: [-64000 - 3200, -64000], mint: [-73792, -73088], 
+        liquidity: BigNumber.from(10).pow(18) })
+    
+    /*console.log((await rebal.currentCollateral()).toString())
+    console.log((await rebal.balancePercent()))*/
+
+    console.log(await rebal.rebal())
+    /*const burnRange: [number, number] = [-64000 - 3200, -64000]
+    const mintRange: [number, number] = [-76032, -72000]
+    console.log(await rebal.rebal(burnRange, mintRange))*/
+    
+    //console.log(await croc.poolEthQuote(DAI).mintRangeBase(5, [-72000 - 3200, -64000,], [0.00000001, 100000.0]))
+    //console.log(await croc.poolEthQuote(DAI).mintRangeBase(5, [-76032, -72000,], [1600, 1700]))
+    //console.log(await croc.poolEth(DAI).mintRangeQuote(50, [-64000 - 3200, -64000,], [0.00000001, 100000.0]))
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(50, [-64000 - 3200, -64000,], [0.00000001, 100000.0]))
 }
 
