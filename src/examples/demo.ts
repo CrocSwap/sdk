@@ -1,6 +1,7 @@
 import { CrocEnv } from '../croc';
 import { BigNumber, ethers } from 'ethers';
 import { CrocReposition } from '../recipes/reposition';
+import { capitalConcFactor } from '../utils';
 
 //const ETH = ethers.constants.AddressZero
 const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
@@ -164,7 +165,7 @@ async function demo() {
 
     console.log((await (await rebal.mintInput())))
     console.log((await (await rebal.swapOutput())))
-    console.log(await rebal.rebal())
+    //console.log(await rebal.rebal())
     /*const burnRange: [number, number] = [-64000 - 3200, -64000]
     const mintRange: [number, number] = [-76032, -72000]
     console.log(await rebal.rebal(burnRange, mintRange))*/
@@ -173,6 +174,8 @@ async function demo() {
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(5, [-76032, -72000,], [1600, 1700]))
     //console.log(await croc.poolEth(DAI).mintRangeQuote(50, [-64000 - 3200, -64000,], [0.00000001, 100000.0]))
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(50, [-64000 - 3200, -64000,], [0.00000001, 100000.0]))
+
+    console.log(capitalConcFactor(1000, 250, 4000))
 }
 
 demo()

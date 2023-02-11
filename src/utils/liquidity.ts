@@ -189,6 +189,17 @@ const quote = quoteConcFactor(price, lower, upper);
 return quote / (base + quote);
 }
 
+export function capitalConcFactor(
+  price: number,
+  lower: number,
+  upper: number
+): number {
+  const base = 1 / baseConcFactor(price, lower, upper);
+  const quote = 1 / quoteConcFactor(price, lower, upper);
+  return 1 / ((base + quote) / 2.0)
+}
+
+
 
 
 /* Rounds a liquidity magnitude to a multiple that can be used inside the protocol. */
