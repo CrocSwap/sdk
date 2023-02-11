@@ -70,7 +70,7 @@ export class CrocReposition {
     async mintInput(): Promise<string> {
         let collat = (await this.currentCollateral()).sub(await this.convertCollateral())
         let pool = (await this.pool)
-        return await this.isBaseOutOfRange ?
+        return await this.isBaseOutOfRange() ?
             (await pool.baseTokenView).toDisplay(collat) :
             (await pool.quoteTokenView).toDisplay(collat)
     }
