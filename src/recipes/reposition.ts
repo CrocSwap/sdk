@@ -17,7 +17,7 @@ interface RepositionOpts {
     slippage?: number
 }
 
-export class Reposition {
+export class CrocReposition {
 
     constructor (pool: CrocPoolView, target: RepositionTarget, opts: RepositionOpts = { }) {
         this.pool = pool
@@ -57,6 +57,14 @@ export class Reposition {
         let balance = await this.swapFraction()
         let collat = await this.currentCollateral()
         return collat.mul(balance).div(10000)
+    }
+
+    async postBalance(): Promise<[number, number]> {
+        let outside = this.mintInput().then(parseFloat)
+        let inside = this.swapOutput().then(parseFloat)
+        return await this.isBaseOutOfRange() ?
+            [await outside, await inside] :
+            [await inside, await outside]
     }
 
     async mintInput(): Promise<string> {
