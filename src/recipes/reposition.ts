@@ -7,19 +7,19 @@ import { encodeCrocPrice, tickToPrice } from "../utils";
 import { baseTokenForConcLiq, concDepositBalance, quoteTokenForConcLiq } from "../utils/liquidity";
 
 
-interface RebalanceTarget {
+interface RepositionTarget {
     mint: TickRange
     burn: TickRange
     liquidity: BigNumberish
 }
 
-interface RebalanceOpts {
+interface RepositionOpts {
     slippage?: number
 }
 
-export class Rebalance {
+export class Reposition {
 
-    constructor (pool: CrocPoolView, target: RebalanceTarget, opts: RebalanceOpts = { }) {
+    constructor (pool: CrocPoolView, target: RepositionTarget, opts: RepositionOpts = { }) {
         this.pool = pool
         this.burnRange = target.burn
         this.mintRange = target.mint

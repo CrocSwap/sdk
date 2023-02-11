@@ -1,6 +1,6 @@
 import { CrocEnv } from '../croc';
 import { BigNumber, ethers } from 'ethers';
-import { Rebalance } from '../recipes/rebalance';
+import { Reposition } from '../recipes/reposition';
 
 //const ETH = ethers.constants.AddressZero
 const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
@@ -156,7 +156,7 @@ async function demo() {
     console.log(await pool.displayToPinTick(1600))
 
 
-    let rebal = new Rebalance(pool, { burn: [-64000 - 3200, -64000], mint: [-73792, -73088], 
+    let rebal = new Reposition(pool, { burn: [-64000 - 3200, -64000], mint: [-73792, -73088], 
         liquidity: BigNumber.from(10).pow(18) })
     
     /*console.log((await rebal.currentCollateral()).toString())
