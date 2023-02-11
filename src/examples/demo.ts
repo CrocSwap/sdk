@@ -157,13 +157,14 @@ async function demo() {
 
 
     let rebal = new CrocReposition(pool, { burn: [-64000 - 3200, -64000], mint: [-73792, -73088], 
-        liquidity: BigNumber.from(10).pow(18) })
-    
+        liquidity: BigNumber.from(10).pow(14) })
+
     /*console.log((await rebal.currentCollateral()).toString())
     console.log((await rebal.balancePercent()))*/
 
     console.log((await (await rebal.mintInput())))
     console.log((await (await rebal.swapOutput())))
+    console.log(await rebal.rebal())
     /*const burnRange: [number, number] = [-64000 - 3200, -64000]
     const mintRange: [number, number] = [-76032, -72000]
     console.log(await rebal.rebal(burnRange, mintRange))*/

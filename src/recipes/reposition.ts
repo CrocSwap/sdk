@@ -115,8 +115,8 @@ export class CrocReposition {
         let mint = directive.appendRangeMint(this.mintRange[0], this.mintRange[1], 0)
         mint.rollType = 5
 
-        directive.open.limitQty = BigNumber.from(-1000000000000)
-        directive.hops[0].settlement.limitQty = BigNumber.from(-10000000000)
+        directive.open.limitQty = BigNumber.from(0)
+        directive.hops[0].settlement.limitQty = BigNumber.from(0)
         return directive
     }
 
