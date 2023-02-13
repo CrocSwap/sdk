@@ -36,14 +36,14 @@ const ETHERUM_LOGO =
 const infuraKey1 = process.env.INFURA_KEY 
                   ? process.env.INFURA_KEY 
                   : process.env.REACT_APP_INFURA_KEY 
-                  || 'e0aa879e36fc4c9e91b826ad961a36fd' 
+                  || '360ea5fda45b4a22883de8522ebd639e' // croc labs #2
 
 const nodeUrl = process.env.NODE_URL
                   ?  process.env.NODE_URL
                   :  process.env.REACT_APP_NODE_URL
                   || "https://goerli.infura.io/v3/" + infuraKey1
                   
-const infuraKey2 = '170b7b65781c422d82a94b8b289ca605' // also used for deploy previews
+const infuraKey2 = '360ea5fda45b4a22883de8522ebd639e' // croc labs #2
                   
 const GOERLI_CHAIN: ChainSpec = {
   nodeUrl: nodeUrl,
