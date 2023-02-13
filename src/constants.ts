@@ -33,17 +33,17 @@ export interface ChainSpec {
 const ETHERUM_LOGO =
   "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg";
 
-const infuraKey1 = process.env.INFURA_KEY 
-                  ? process.env.INFURA_KEY 
-                  : process.env.REACT_APP_INFURA_KEY 
-                  || '360ea5fda45b4a22883de8522ebd639e' // croc labs #2
+const infuraKey1 = process.env.REACT_APP_INFURA_KEY ? 
+                      process.env.REACT_APP_INFURA_KEY
+                      : '360ea5fda45b4a22883de8522ebd639e' // croc labs #2
 
-const nodeUrl = process.env.NODE_URL
-                  ?  process.env.NODE_URL
-                  :  process.env.REACT_APP_NODE_URL
-                  || "https://goerli.infura.io/v3/" + infuraKey1
+const nodeUrl =  process.env.REACT_APP_NODE_URL ? 
+                    process.env.REACT_APP_NODE_URL 
+                    : "https://goerli.infura.io/v3/" + infuraKey1
                   
-const infuraKey2 = '360ea5fda45b4a22883de8522ebd639e' // croc labs #2
+const infuraKey2 =process.env.REACT_APP_INFURA_KEY_2 ? 
+                    process.env.REACT_APP_INFURA_KEY_2 
+                    : '360ea5fda45b4a22883de8522ebd639e' // croc labs #2
                   
 const GOERLI_CHAIN: ChainSpec = {
   nodeUrl: nodeUrl,
