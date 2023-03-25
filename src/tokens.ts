@@ -27,9 +27,19 @@ export class CrocTokenView {
       return undefined;
     }
     const weiQty = BigNumber.from(2).pow(120); // Lots of 0 bytes in calldata to save gas
-    return (await this.resolve()).approve(
+
+    // We want to hardcode the gas limit, so we can manually pad it from the estimated
+    // transaction. The default value is low gas calldata, but Metamask and other wallets
+    // will often ask users to change the approval amount. Without the padding, approval
+    // transactions can run out of gas.
+    const gasEst = (await this.resolve()).estimateGas.approve(
       (await this.context).dex.address,
       weiQty
+    );
+
+    return (await this.resolve()).approve(
+      (await this.context).dex.address,
+      weiQty, { gasLimit: (await gasEst).add(2000)}
     );
   }
 
