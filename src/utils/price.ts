@@ -61,27 +61,57 @@ export function priceHalfBelowTick(
   nTicksGrid: number): Tick {
   const halfTickBelow = (tick - (.5 * nTicksGrid))
   return Math.pow(1.0001, halfTickBelow);
-  }
-
+}
+  
 export function pinTickUpper(
   price: number,
   nTicksGrid: number): Tick {
-  const priceInTicks = Math.log(price) / Math.log(1.0001);
+  const priceInTicks = priceToTick(price)
   const tickGrid = Math.ceil(priceInTicks / nTicksGrid) * nTicksGrid;
   const horizon = Math.ceil(MAX_TICK / nTicksGrid) * nTicksGrid;
   return Math.min(tickGrid, horizon);
 }
 
+export function pinTickOutside(
+  price: number,
+  poolPrice: number,
+  nTicksGrid: number): { tick: Tick, isBidTick: boolean } {
+
+  const priceInTicks = priceToTick(price)
+  const poolInTicks = priceToTick(poolPrice)
+  const [poolLower, poolUpper] = 
+    [pinTickLower(poolPrice, nTicksGrid), pinTickUpper(poolPrice, nTicksGrid)]
+
+  if (priceInTicks < poolInTicks) {
+    if (priceInTicks >= poolLower) {
+      return { tick: poolLower - nTicksGrid, isBidTick: true }
+    } else {
+      return { tick: pinTickLower(price, nTicksGrid), isBidTick: true }
+    }
+    
+  } else {
+    if (priceInTicks <= poolUpper) {
+      return { tick: poolUpper + nTicksGrid, isBidTick: false }
+    } else {
+      return { tick: pinTickUpper(price, nTicksGrid), isBidTick: false }
+    }
+  }
+}
+
+export function priceToTick (price: number): Tick {
+  return Math.log(price) / Math.log(1.0001);
+}
+  
+export function tickToPrice(tick: Tick): number {
+  return Math.pow(1.0001, tick);
+}
+  
 export function priceHalfAboveTick(
   tick: number,
   nTicksGrid: number): Tick {
   const halfTickAbove = (tick + (.5 * nTicksGrid))
   return Math.pow(1.0001, halfTickAbove);
   }
-
-export function tickToPrice(tick: Tick): number {
-  return Math.pow(1.0001, tick);
-}
 
 /* Returns the ratio of quote to base tokens necessary to support the collateral for a given
  * range order over the specified ticks. If no quote token collateral is required returns 0
