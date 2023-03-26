@@ -1,7 +1,6 @@
 import { CrocEnv } from '../croc';
-import { BigNumber, ethers } from 'ethers';
-import { CrocReposition } from '../recipes/reposition';
-import { capitalConcFactor } from '../utils';
+import { ethers } from 'ethers';
+import { CrocPositionView } from '../position';
 
 //const ETH = ethers.constants.AddressZero
 const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
@@ -141,8 +140,8 @@ async function demo() {
     console.log((await plan.impact))
     console.log((await plan.calcSlipQty()).toString())*/
 
-    console.log(await croc.poolEthQuote(DAI).spotTick())
-    console.log(await croc.poolEthQuote(DAI).displayPrice())
+    /*console.log(await croc.poolEthQuote(DAI).spotTick())
+    console.log(await croc.poolEthQuote(DAI).displayPrice())*/
 
     //console.log(await croc.poolEth(DAI).mintAmbientQuote(50, [0.0001, 0.001]))
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(50, [-64000 - 3200, -64000,], [0.00000001, 100000.0]))
@@ -152,7 +151,7 @@ async function demo() {
 
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(0.001, [3180*64, 3182*64], [1600, 1700]))
 
-    const pool = croc.poolEthQuote(DAI)
+    /*const pool = croc.poolEthQuote(DAI)
     console.log(await pool.displayToPinTick(1500))
     console.log(await pool.displayToPinTick(1600))
 
@@ -163,8 +162,8 @@ async function demo() {
     /*console.log((await rebal.currentCollateral()).toString())
     console.log((await rebal.balancePercent()))*/
 
-    console.log((await (await rebal.mintInput())))
-    console.log((await (await rebal.swapOutput())))
+    //console.log((await (await rebal.mintInput())))
+    //console.log((await (await rebal.swapOutput())))
     //console.log(await rebal.rebal())
     /*const burnRange: [number, number] = [-64000 - 3200, -64000]
     const mintRange: [number, number] = [-76032, -72000]
@@ -175,7 +174,14 @@ async function demo() {
     //console.log(await croc.poolEth(DAI).mintRangeQuote(50, [-64000 - 3200, -64000,], [0.00000001, 100000.0]))
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(50, [-64000 - 3200, -64000,], [0.00000001, 100000.0]))
 
-    console.log(capitalConcFactor(1000, 250, 4000))
+    //console.log(capitalConcFactor(1000, 250, 4000))*/
+
+    const pool = croc.poolEthQuote(DAI)
+    /*console.log(await pool.displayToPinTick(1378.62))
+    console.log(await pool.displayToPinTick(1691.94))*/
+    
+    const pos = new CrocPositionView(pool, "0xa86dabFBb529a4C8186BdD52bd226aC81757E090")
+    console.log((await pos.queryRangePos(-74240, -73792)).liq.toString())
 }
 
 demo()

@@ -1,7 +1,6 @@
 import { ConnectArg, CrocContext, connectCroc } from './context';
 import { CrocPoolView } from './pool';
 import { AddressZero } from '@ethersproject/constants';
-import { CrocPositionView } from './position';
 import { TokenQty, CrocTokenView } from './tokens';
 import { CrocSwapPlan } from './swap';
 import { Signer } from 'ethers';
@@ -38,10 +37,6 @@ export class CrocEnv {
 
     poolEthQuote (token: string): CrocPoolView {
         return new CrocPoolView(AddressZero, token, this.context)
-    }
-
-    positions(): CrocPositionView {
-        return new CrocPositionView(this.context)
     }
 
     token (token: string): CrocTokenView {
