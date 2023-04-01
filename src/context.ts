@@ -89,9 +89,9 @@ function inflateContracts(
   const context = lookupChain(chainId);
   return {
     provider: provider,
-    dex: new Contract(context.dexAddr, CROC_ABI, actor),
-    query: new Contract(context.queryAddr, QUERY_ABI, actor),
-    slipQuery: new Contract(context.impactAddr, IMPACT_ABI, actor),
+    dex: new Contract(context.addrs.dex, CROC_ABI, actor),
+    query: new Contract(context.addrs.query, QUERY_ABI, actor),
+    slipQuery: new Contract(context.addrs.impact, IMPACT_ABI, actor),
     erc20: new Contract(AddressZero, ERC20_ABI, actor),
     chain: context,
   };

@@ -4,7 +4,7 @@ import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, to
 import { CrocTokenView, TokenQty } from './tokens';
 import { TransactionResponse } from '@ethersproject/providers';
 import { WarmPathEncoder } from './encoding/liquidity';
-import { BigNumber, ethers } from 'ethers';
+import { BigNumber, BigNumberish, ethers } from 'ethers';
 import { AddressZero } from '@ethersproject/constants';
 import { PoolInitEncoder } from "./encoding/init";
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
@@ -73,9 +73,8 @@ export class CrocPoolView {
         let encoder = new PoolInitEncoder(this.baseToken, this.quoteToken, 
             (await this.context).chain.poolIndex)
         let spotPrice = this.fromDisplayPrice(initPrice)
-        let calldata = encoder.encodeInitialize(await spotPrice)
-        
-        return (await this.context).dex.userCmd(COLD_PATH, calldata, txArgs)       
+        let calldata = encoder.encodeInitialize(await spotPrice)        
+        return this.sendCmd(calldata, txArgs)
     }
 
     async mintAmbientBase (qty: TokenQty, limits: PriceRange, opts?: CrocLpOpts): 
@@ -103,14 +102,14 @@ export class CrocPoolView {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeBurnAmbient
             (liq, lowerBound, upperBound, this.maskSurplusFlag(opts))
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata)
+        return this.sendCmd(calldata)
     }
 
     async burnAmbientAll (limits: PriceRange, opts?: CrocLpOpts): Promise<TransactionResponse> {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeBurnAmbientAll
             (lowerBound, upperBound, this.maskSurplusFlag(opts))
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata)
+        return this.sendCmd(calldata)
     }
 
     async burnRangeLiq (liq: BigNumber, range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
@@ -119,8 +118,7 @@ export class CrocPoolView {
         let roundLotLiq = roundForConcLiq(liq)
         const calldata = (await this.makeEncoder()).encodeBurnConc
             (range[0], range[1], roundLotLiq, lowerBound, upperBound, this.maskSurplusFlag(opts))
-
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata)
+        return this.sendCmd(calldata)
     }
 
     async harvestRange (range: TickRange, limits: PriceRange, opts?: CrocLpOpts): 
@@ -128,8 +126,13 @@ export class CrocPoolView {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeHarvestConc
             (range[0], range[1], lowerBound, upperBound, this.maskSurplusFlag(opts))
+        return this.sendCmd(calldata)
+    }
 
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata)
+    private async sendCmd (calldata: string, txArgs?: { value?: BigNumberish}): 
+        Promise<TransactionResponse> {
+        let cntx = await this.context
+        return cntx.dex.userCmd(cntx.chain.proxyPaths.liq, calldata, txArgs)
     }
 
     private async mintAmbient (qty: TokenQty, isQtyBase: boolean, 
@@ -140,8 +143,7 @@ export class CrocPoolView {
 
         const calldata = (await this.makeEncoder()).encodeMintAmbient(
             await weiQty, isQtyBase, lowerBound, upperBound, this.maskSurplusFlag(opts))
-
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata, { value: await msgVal })
+        return this.sendCmd(calldata, {value: await msgVal})
     }
 
     private async boundLimits (range: TickRange, limits: PriceRange): Promise<PriceRange> {
@@ -203,8 +205,7 @@ export class CrocPoolView {
         
         const calldata = (await this.makeEncoder()).encodeMintConc(range[0], range[1],
             await weiQty, isQtyBase, lowerBound, upperBound, this.maskSurplusFlag(opts))
-        
-        return (await this.context).dex.userCmd(LIQ_PATH, calldata, { value: await msgVal })
+        return this.sendCmd(calldata, { value: await msgVal })
     }
 
     private maskSurplusFlag (opts?: CrocLpOpts): number {
@@ -286,7 +287,3 @@ export class CrocPoolView {
 export interface CrocLpOpts {
     surplus?: CrocSurplusFlags
 }
-
-const COLD_PATH = 0;
-const LIQ_PATH = 2;
-

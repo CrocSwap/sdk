@@ -31,12 +31,14 @@ export class CrocReposition {
 
     async rebal(): Promise<TransactionResponse> {        
         const directive = await this.formatDirective()
-        return (await this.pool.context).dex.userCmd(LONG_PATH, directive.encodeBytes())
+        const path = (await this.pool.context).chain.proxyPaths.long
+        return (await this.pool.context).dex.userCmd(path, directive.encodeBytes())
     }
 
     async simStatic() {
         const directive = await this.formatDirective()
-        return (await this.pool.context).dex.callStatic.userCmd(LONG_PATH, directive.encodeBytes())
+        const path = (await this.pool.context).chain.proxyPaths.long
+        return (await this.pool.context).dex.callStatic.userCmd(path, directive.encodeBytes())
     }
     
     async balancePercent(): Promise<number> {
@@ -150,5 +152,4 @@ export class CrocReposition {
 
 type TickRange = [number, number]
 
-const LONG_PATH = 4;
 const DEFAULT_REBAL_SLIPPAGE = .02

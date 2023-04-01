@@ -132,7 +132,8 @@ export class CrocTokenView {
         [subCode, recv, await weiQty, this.tokenAddr])
   
       const txArgs = useMsgVal ? { value: await weiQty } : { }
-      return (await this.context).dex.userCmd(COLD_PROXY_PATH, cmd, txArgs)
+      let cntx = await this.context
+      return cntx.dex.userCmd(cntx.chain.proxyPaths.cold, cmd, txArgs)
   
   }
 
@@ -141,5 +142,3 @@ export class CrocTokenView {
   readonly decimals: Promise<number>;
   readonly isNativeEth: boolean;
 }
-
-const COLD_PROXY_PATH = 0
