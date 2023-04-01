@@ -35,7 +35,8 @@ export function sortBaseQuoteTokens(
 }
 
 export function fromDisplayQty(qty: string, tokenDecimals: number): BigNumber {
-  const bigQtyScaled = ethers.utils.parseUnits(qty, tokenDecimals);
+  const sanitQty = parseFloat(qty).toFixed(tokenDecimals)
+  const bigQtyScaled = ethers.utils.parseUnits(sanitQty, tokenDecimals);
   return bigQtyScaled;
 }
 
