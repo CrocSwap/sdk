@@ -11,6 +11,7 @@ import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encodin
 
 type PriceRange = [number, number]
 type TickRange = [number, number]
+type BlockTag = number | string
 
 export class CrocPoolView {
 
@@ -33,20 +34,24 @@ export class CrocPoolView {
             .then(p => p > 0)
     }
 
-    async spotPrice(): Promise<number> {
+    async spotPrice (block?: BlockTag): Promise<number> {
+        let txArgs = block ? { blockTag: block } : {} 
         let sqrtPrice = (await this.context).query.queryPrice
-            (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex)
+            (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex, 
+            txArgs)
         return decodeCrocPrice(await sqrtPrice)
     }
 
-    async displayPrice(): Promise<number> {
-        let spotPrice = this.spotPrice()
+    async displayPrice (block?: BlockTag): Promise<number> {
+        let spotPrice = this.spotPrice(block)
         return this.toDisplayPrice(await spotPrice)
     }
 
-    async spotTick(): Promise<number> {
+    async spotTick (block?: BlockTag): Promise<number> {
+        let txArgs = block ? {} : { blockTag: block }
         return (await this.context).query.queryCurveTick
-            (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex)
+            (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
+            txArgs)
     }
 
     async toDisplayPrice (spotPrice: number): Promise<number> {

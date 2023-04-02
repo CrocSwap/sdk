@@ -47,11 +47,18 @@ export class CrocSwapPlan {
   async swap (args: CrocSwapOpts = { }): Promise<TransactionResponse> {
     const TIP = 0
     const surplusFlags = this.maskSurplusArgs(args.surplus)
-    return (await this.context).dex.swap
+
+    const gasEst = (await this.context).dex.estimateGas.swap
       (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP, 
       await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
       await this.buildTxArgs(surplusFlags))
+
+    return (await this.context).dex.swap
+      (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
+      this.sellBase, this.qtyInBase, await this.qty, TIP, 
+      await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
+      await this.buildTxArgs(surplusFlags, await gasEst))
   }
 
 
@@ -83,13 +90,20 @@ export class CrocSwapPlan {
     return encodeSurplusArg(args, !this.sellBase)
   }
 
-  private async buildTxArgs (surplusArg: number) {
+  private async buildTxArgs (surplusArg: number, gasEst?: BigNumber) {
+    let txArgs = {}
+
     if (this.needsAttachedEth(surplusArg)) {
       const val = this.qtyInBase ? this.qty : this.calcSlipQty()
-      return { value: await val }
-    } else {
-      return { }
+      Object.assign(txArgs, {value: await val})
     }
+
+    if (gasEst) {
+      const GAS_PADDING = 15000
+      Object.assign(txArgs, { gasLimit: gasEst.add(GAS_PADDING)})
+    }
+
+    return txArgs
   }
 
   private needsAttachedEth (surplusEncoded: number): boolean {
