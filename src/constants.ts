@@ -61,7 +61,7 @@ const ARB_GOERLI_CHAIN: ChainSpec = {
   },
   poolIndex: 36000,
   isTestNet: true,
-  chainId: "0x6eed",
+  chainId: "0x66EED",
   gridSize: 16,
   proxyPaths: {
     cold: 3,
