@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { CrocContext } from "./context";
-import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew, pinTickLower, pinTickUpper } from './utils';
+import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew, pinTickLower, pinTickUpper, neighborTicks, pinTickOutside, tickToPrice } from './utils';
 import { CrocTokenView, TokenQty } from './tokens';
 import { TransactionResponse } from '@ethersproject/providers';
 import { WarmPathEncoder } from './encoding/liquidity';
@@ -68,6 +68,38 @@ export class CrocPoolView {
         const spotPrice = await this.fromDisplayPrice(dispPrice)
         const gridSize = (await this.context).chain.gridSize
         return [pinTickLower(spotPrice, gridSize), pinTickUpper(spotPrice, gridSize)]
+    }
+
+    async displayToNeighborTicks (dispPrice: number, nNeighbors: number = 3): 
+        Promise<{below: number[], above: number[]}> {
+        const spotPrice = await this.fromDisplayPrice(dispPrice)
+        const gridSize = (await this.context).chain.gridSize
+        return neighborTicks(spotPrice, gridSize, nNeighbors)
+    }
+
+    async displayToNeighborTickPrices (dispPrice: number, nNeighbors: number = 3): 
+        Promise<{below: number[], above: number[]}> {
+        const ticks = await this.displayToNeighborTicks(dispPrice, nNeighbors)
+        const toPriceFn = (tick: number) => this.toDisplayPrice(tickToPrice(tick))
+
+        const belowPrices = Promise.all(ticks.below.map(toPriceFn))
+        const abovePrices = Promise.all(ticks.above.map(toPriceFn))
+
+        return this.useTrueBase ?
+            { below: await belowPrices, above: await abovePrices } :
+            { below: await abovePrices, above: await belowPrices }
+    }
+
+    async displayToOutsidePin (dispPrice: number): 
+        Promise<{ tick: number, price: number, isTickBelow: boolean, isPriceBelow: boolean }> {
+        const spotPrice = this.fromDisplayPrice(dispPrice)
+        const gridSize = (await this.context).chain.gridSize
+
+        const pinTick = pinTickOutside(await spotPrice, await this.spotPrice(), gridSize)
+        const pinPrice = this.toDisplayPrice(tickToPrice(pinTick.tick))
+
+        return Object.assign(pinTick, { price: await pinPrice, 
+            isPriceBelow: (await pinPrice) < dispPrice })
     }
 
     async initPool (initPrice: number): Promise<TransactionResponse> {

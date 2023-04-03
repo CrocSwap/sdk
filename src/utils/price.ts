@@ -72,10 +72,13 @@ export function pinTickUpper(
   return Math.min(tickGrid, horizon);
 }
 
+
+/* Returns the closest on-grid tick tick that's to the outside of a given price
+ * relative to a pool price. */
 export function pinTickOutside(
   price: number,
   poolPrice: number,
-  nTicksGrid: number): { tick: Tick, isBidTick: boolean } {
+  nTicksGrid: number): { tick: Tick, isTickBelow: boolean } {
 
   const priceInTicks = priceToTick(price)
   const poolInTicks = priceToTick(poolPrice)
@@ -84,22 +87,37 @@ export function pinTickOutside(
 
   if (priceInTicks < poolInTicks) {
     if (priceInTicks >= poolLower) {
-      return { tick: poolLower - nTicksGrid, isBidTick: true }
+      return { tick: poolLower - nTicksGrid, isTickBelow: true }
     } else {
-      return { tick: pinTickLower(price, nTicksGrid), isBidTick: true }
+      return { tick: pinTickLower(price, nTicksGrid), isTickBelow: true }
     }
     
   } else {
     if (priceInTicks <= poolUpper) {
-      return { tick: poolUpper + nTicksGrid, isBidTick: false }
+      return { tick: poolUpper + nTicksGrid, isTickBelow: false }
     } else {
-      return { tick: pinTickUpper(price, nTicksGrid), isBidTick: false }
+      return { tick: pinTickUpper(price, nTicksGrid), isTickBelow: false }
     }
   }
 }
 
+
+/* Returns the neighboring N on-grid ticks to a given price */
+export function neighborTicks (price: number, nTicksGrid: number, 
+  nNeighbors: number = 1): {
+  below: number[], above: number[] } {
+  const priceInTicks = pinTickLower(price, nTicksGrid)
+
+  return { 
+    below: Array.from({length: nNeighbors}).
+      map((_, idx: number) => priceInTicks - (nNeighbors-idx) * nTicksGrid),
+    above: Array.from({length: nNeighbors}).
+      map((_, idx: number) => priceInTicks + (idx + 1) * nTicksGrid)
+  }
+}
+
 export function priceToTick (price: number): Tick {
-  return Math.log(price) / Math.log(1.0001);
+  return Math.floor(Math.log(price) / Math.log(1.0001))
 }
   
 export function tickToPrice(tick: Tick): number {
