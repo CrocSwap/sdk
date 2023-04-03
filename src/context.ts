@@ -101,7 +101,7 @@ export function lookupChain(chainId: number | string): ChainSpec {
   if (typeof chainId === "number") {
     return lookupChain("0x" + chainId.toString(16));
   } else {
-    const context = CHAIN_SPECS[chainId];
+    const context = CHAIN_SPECS[chainId.toLowerCase()];
     if (!context) {
       throw new Error("Unsupported chain ID: " + chainId);
     }
