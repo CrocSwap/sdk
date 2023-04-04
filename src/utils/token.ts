@@ -35,27 +35,22 @@ export function sortBaseQuoteTokens(
 }
 
 export function fromDisplayQty(qty: string, tokenDecimals: number): BigNumber {
-  const sanitQty = parseFloat(qty).toFixed(tokenDecimals)
-  const bigQtyScaled = ethers.utils.parseUnits(sanitQty, tokenDecimals);
-  return bigQtyScaled;
-}
+  try {
+    // First try to directly parse the string, so there's no loss of precision for
+    // long fixed strings.
+    return ethers.utils.parseUnits(qty, tokenDecimals);
 
-// Above this, Javascript string will use scientific notation, which BigNumber
-// can't parse
-const MAX_SAFE_BIGNUM = 1e20
+  } catch {
+    // If that fails (e.g. with scientific notation floats), then cast to float and
+    // back to fixed string
+    const sanitQty = parseFloat(qty).toFixed(tokenDecimals)
+    return ethers.utils.parseUnits(sanitQty, tokenDecimals)
+  }
+}
 
 export function toDisplayQty(
   qty: string | number | BigNumber,
   tokenDecimals: number
 ): string {
-  if (typeof(qty) === "number" && qty > MAX_SAFE_BIGNUM) {
-    return (qty / Math.pow(10, tokenDecimals)).toString()
-
-  } else if (typeof(qty) === "string" && parseFloat(qty) > MAX_SAFE_BIGNUM) {
-    return toDisplayQty(parseFloat(qty), tokenDecimals)
-  
-  } else {
-    const bigQtyUnscaled = ethers.utils.formatUnits(qty.toString(), tokenDecimals);
-    return bigQtyUnscaled;
-  }
+  return ethers.utils.formatUnits(qty, tokenDecimals);
 }

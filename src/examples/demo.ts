@@ -182,6 +182,9 @@ async function demo() {
     
     const pos = new CrocPositionView(pool, "0xa86dabFBb529a4C8186BdD52bd226aC81757E090")
     console.log((await pos.queryRangePos(-74240, -73792)).liq.toString())
+
+    console.log((await croc.tokenEth().balance("benwolski.eth")).toString())
+    console.log(await croc.tokenEth().balanceDisplay("benwolski.eth"))
 }
 
 demo()
