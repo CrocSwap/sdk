@@ -1,7 +1,6 @@
 export * from "./constants";
 export * from "./utils";
 export * from "./abis";
-export * from "./receipt";
 export * from "./pool";
 export * from "./position";
 export * from "./swap";
