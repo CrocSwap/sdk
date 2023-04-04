@@ -110,7 +110,7 @@ export function neighborTicks (price: number, nTicksGrid: number,
 
   return { 
     below: Array.from({length: nNeighbors}).
-      map((_, idx: number) => priceInTicks - (nNeighbors-idx) * nTicksGrid),
+      map((_, idx: number) => priceInTicks - (nNeighbors - idx - 1) * nTicksGrid),
     above: Array.from({length: nNeighbors}).
       map((_, idx: number) => priceInTicks + (idx + 1) * nTicksGrid)
   }
