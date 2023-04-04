@@ -169,7 +169,9 @@ export class CrocPoolView {
     private async sendCmd (calldata: string, txArgs?: { value?: BigNumberish}): 
         Promise<TransactionResponse> {
         let cntx = await this.context
-        return cntx.dex.userCmd(cntx.chain.proxyPaths.liq, calldata, txArgs)
+        return txArgs ?
+            cntx.dex.userCmd(cntx.chain.proxyPaths.liq, calldata, txArgs) :
+            cntx.dex.userCmd(cntx.chain.proxyPaths.liq, calldata)
     }
 
     private async mintAmbient (qty: TokenQty, isQtyBase: boolean, 
