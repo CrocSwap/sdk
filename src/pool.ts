@@ -111,7 +111,9 @@ export class CrocPoolView {
             (await this.context).chain.poolIndex)
         let spotPrice = this.fromDisplayPrice(initPrice)
         let calldata = encoder.encodeInitialize(await spotPrice)        
-        return this.sendCmd(calldata, txArgs)
+
+        let cntx = await this.context
+        return cntx.dex.userCmd(cntx.chain.proxyPaths.cold, calldata, txArgs)
     }
 
     async mintAmbientBase (qty: TokenQty, limits: PriceRange, opts?: CrocLpOpts): 
