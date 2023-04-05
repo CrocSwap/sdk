@@ -102,7 +102,8 @@ export function pinTickOutside(
 }
 
 
-/* Returns the neighboring N on-grid ticks to a given price */
+/* Returns the neighboring N on-grid ticks to a given price. Ticks will be
+ * sorted from closest to furthers */
 export function neighborTicks (price: number, nTicksGrid: number, 
   nNeighbors: number = 1): {
   below: number[], above: number[] } {
@@ -110,7 +111,7 @@ export function neighborTicks (price: number, nTicksGrid: number,
 
   return { 
     below: Array.from({length: nNeighbors}).
-      map((_, idx: number) => priceInTicks - (nNeighbors - idx - 1) * nTicksGrid),
+      map((_, idx: number) => priceInTicks - idx * nTicksGrid),
     above: Array.from({length: nNeighbors}).
       map((_, idx: number) => priceInTicks + (idx + 1) * nTicksGrid)
   }
