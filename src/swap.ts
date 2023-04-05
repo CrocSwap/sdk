@@ -86,7 +86,7 @@ export class CrocSwapPlan {
 
 
   private maskSurplusArgs (args?: CrocSurplusFlags): number {
-    if (!args) { return this.maskSurplusArgs(false); }
+    if (!args) { return this.maskSurplusArgs([false, false]); }
     return encodeSurplusArg(args, !this.sellBase)
   }
 
