@@ -55,9 +55,9 @@ const GOERLI_CHAIN: ChainSpec = {
 const ARB_GOERLI_CHAIN: ChainSpec = {
   nodeUrl: "https://goerli-rollup.arbitrum.io/rpc",
   addrs: {
-    dex: "0x9EA4B2f9b1572eD3aC46b402d9Ba9153821033C6",
-    query: "0x6291Aa5812FF75412Cf3F3258447139653A9a209",
-    impact: "0x5afc7599A4b659C5c628fBC212012B68F3b5D41C"
+    dex: "0x5D42d6046927DEE12b9b4a235be0ceCd55D0E0fb",
+    query: "0x3A6E9cff691a473D4D0742E1dFc8Ea263a99F6d0",
+    impact: "0xf19D3dcdF82af0d40Cb3b4AaE4D266c638A3E454"
   },
   poolIndex: 36000,
   isTestNet: true,
