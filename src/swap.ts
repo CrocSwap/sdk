@@ -7,7 +7,7 @@ import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
 import { CrocPoolView } from './pool';
 import { decodeCrocPrice } from './utils';
-import { TokenQty } from './tokens';
+import { CrocTokenView, TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 import { MAX_SQRT_PRICE, MIN_SQRT_PRICE } from "./constants";
@@ -21,6 +21,7 @@ export interface CrocImpact {
 
 export interface CrocSwapOpts {
   surplus?: CrocSurplusFlags
+  surplusOwner?: string
 }
 
 
@@ -91,12 +92,7 @@ export class CrocSwapPlan {
   }
 
   private async buildTxArgs (surplusArg: number, gasEst?: BigNumber) {
-    let txArgs = {}
-
-    if (this.needsAttachedEth(surplusArg)) {
-      const val = this.qtyInBase ? this.qty : this.calcSlipQty()
-      Object.assign(txArgs, {value: await val})
-    }
+    let txArgs = await this.attachEthMsg(surplusArg)
 
     if (gasEst) {
       const GAS_PADDING = 15000
@@ -106,10 +102,35 @@ export class CrocSwapPlan {
     return txArgs
   }
 
-  private needsAttachedEth (surplusEncoded: number): boolean {
-    return this.sellBase &&
-    (this.baseToken === AddressZero) &&
-    !(decodeSurplusFlag(surplusEncoded)[0])
+  private async attachEthMsg (surplusEncoded: number): Promise<object> {
+    // Only need msg.val if one token is native ETH (will always be base side)
+    if (this.baseToken !== AddressZero) { return { }}
+      
+    // Calculate the maximum amount of ETH we'll need. If on the floating side
+    // account for potential slippage. (Contract will refund unused ETH)
+    const val = this.qtyInBase ? this.qty : this.calcSlipQty()
+
+    if (decodeSurplusFlag(surplusEncoded)[0]) {
+      
+      // If using surplus calculate the amount of ETH not covered by the surplus
+      // collateral.
+      const sender = (await this.context).senderAddr
+      if (sender) {
+        const ethView = new CrocTokenView(this.context, AddressZero)
+        const surpBal = await ethView.balance(sender)
+        if ((await val).gt(await surpBal)) {
+          return { value: (await val).sub(surpBal) }
+        }
+      }
+
+      // Or zero if surplus collateral balance is sufficient and/or
+      // we don't have an address to check the balance for
+      return { value: 0 }
+
+    } else {
+      // Othwerise we need to send the entire balance in msg.val
+      return { value: await val}
+    }
   }
 
   async calcSlipQty(): Promise<BigNumber> {
