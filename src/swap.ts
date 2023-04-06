@@ -104,7 +104,7 @@ export class CrocSwapPlan {
 
   private async attachEthMsg (surplusEncoded: number): Promise<object> {
     // Only need msg.val if one token is native ETH (will always be base side)
-    if (this.baseToken !== AddressZero) { return { }}
+    if (!this.sellBase || this.baseToken !== AddressZero) { return { }}
       
     // Calculate the maximum amount of ETH we'll need. If on the floating side
     // account for potential slippage. (Contract will refund unused ETH)
