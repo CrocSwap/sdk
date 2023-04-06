@@ -12,6 +12,7 @@ export interface CrocContext {
   slipQuery: Contract;
   erc20: Contract;
   chain: ChainSpec;
+  senderAddr?: string
 }
 
 export type ChainIdentifier = number | string;
@@ -46,7 +47,16 @@ async function setupProvider(
 ): Promise<CrocContext> {
   const actor = determineActor(provider, signer);
   const chainId = await getChain(provider);
-  return inflateContracts(chainId, provider, actor);
+  let cntx = inflateContracts(chainId, provider, actor);
+  return await attachSenderAddr(cntx, actor)
+}
+
+async function attachSenderAddr (cntx: CrocContext, 
+  actor: Provider | Signer): Promise<CrocContext> {
+  if ('getAddress' in actor) {
+    cntx.senderAddr = await actor.getAddress()
+  }
+  return cntx
 }
 
 function determineActor(
@@ -54,7 +64,7 @@ function determineActor(
   signer?: Signer
 ): Signer | Provider {
   if (signer) {
-    return signer.connect(provider);
+    return signer.connect(provider)
   } else if ("getSigner" in provider) {
     let signer;
     if ((provider as JsonRpcProvider).connection?.url === "metamask") {
@@ -84,7 +94,8 @@ async function getChain(provider: Provider): Promise<number> {
 function inflateContracts(
   chainId: number,
   provider: Provider,
-  actor: Provider | Signer
+  actor: Provider | Signer,
+  addr?: string
 ): CrocContext {
   const context = lookupChain(chainId);
   return {
@@ -94,6 +105,7 @@ function inflateContracts(
     slipQuery: new Contract(context.addrs.impact, IMPACT_ABI, actor),
     erc20: new Contract(AddressZero, ERC20_ABI, actor),
     chain: context,
+    senderAddr: addr
   };
 }
 
