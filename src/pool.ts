@@ -1,10 +1,10 @@
 /* eslint-disable prefer-const */
 import { CrocContext } from "./context";
 import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew, pinTickLower, pinTickUpper, neighborTicks, pinTickOutside, tickToPrice } from './utils';
-import { CrocTokenView, TokenQty } from './tokens';
+import { CrocEthView, CrocTokenView, TokenQty } from './tokens';
 import { TransactionResponse } from '@ethersproject/providers';
 import { WarmPathEncoder } from './encoding/liquidity';
-import { BigNumber, BigNumberish, ethers } from 'ethers';
+import { BigNumber, BigNumberish } from 'ethers';
 import { AddressZero } from '@ethersproject/constants';
 import { PoolInitEncoder } from "./encoding/init";
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
@@ -256,26 +256,29 @@ export class CrocPoolView {
 
     private async msgValAmbient (qty: TokenQty, isQtyBase: boolean, limits: PriceRange, 
         opts?: CrocLpOpts): Promise<BigNumber> {
-        if (!this.needsAttachedVal(opts)) { return BigNumber.from(0) }
         let ethQty = isQtyBase ? qty :
             this.ethForAmbientQuote(qty, limits)
-        return this.normEth(await ethQty)
+        return this.ethToAttach(await ethQty, opts)
     }
 
     private async msgValRange (qty: TokenQty, isQtyBase: boolean, range: TickRange, 
         limits: PriceRange, opts?: CrocLpOpts): Promise<BigNumber> {
-        if (!this.needsAttachedVal(opts)) { return BigNumber.from(0) }
         let ethQty = isQtyBase ? qty :
             this.ethForRangeQuote(qty, range, limits)
-        return this.normEth(await ethQty)
+        return this.ethToAttach(await ethQty, opts)
     }
 
-    private needsAttachedVal (opts?: CrocLpOpts): boolean {
-        if (this.baseToken === ethers.constants.AddressZero) {
-            let flags = this.maskSurplusFlag(opts)
-            return !(decodeSurplusFlag(flags)[0])
+    private async ethToAttach (neededQty: TokenQty, opts?: CrocLpOpts): Promise<BigNumber> {
+        if (this.baseToken !== AddressZero) { return BigNumber.from(0) }
+    
+        const ethQty = await this.normEth(neededQty)
+        let useSurplus = decodeSurplusFlag(this.maskSurplusFlag(opts))[0]
+
+        if (useSurplus) { 
+            return new CrocEthView(this.context).msgValOverSurplus(ethQty)
+        } else {
+            return BigNumber.from(ethQty)
         }
-        return false
     }
 
     private async ethForAmbientQuote (quoteQty: TokenQty, limits: PriceRange): Promise<TokenQty> {

@@ -2,7 +2,7 @@ import { BigNumber } from "ethers";
 import { sortBaseQuoteTokens } from "./utils/token";
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
-import { CrocTokenView, TokenQty } from './tokens';
+import { CrocEthView, CrocTokenView, TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
 import { KnockoutEncoder } from "./encoding/knockout";
 import { ChainSpec } from "./constants";
@@ -38,7 +38,6 @@ export class CrocKnockoutHandle {
     const cmd = encoder.encodeKnockoutMint(await this.qty, lowerTick, upperTick, 
       this.sellBase, surplus);
     return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd, { value: this.msgVal(surplus) })
-    // return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd, { value: this.msgVal(surplus), gasLimit: 1000000 })
   }
 
   async burn (opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
@@ -91,11 +90,15 @@ export class CrocKnockoutHandle {
   }
 
   private async msgVal (surplusFlags: number): Promise<BigNumber> {
-    const useSurp = decodeSurplusFlag(surplusFlags)[0]
-    if (this.baseToken == AddressZero && this.sellBase && !useSurp) {
-      return this.qty
-    } else {
+    if (this.baseToken !== AddressZero || !this.sellBase) {
       return BigNumber.from(0)
+    }
+
+    const useSurp = decodeSurplusFlag(surplusFlags)[0]
+    if (useSurp) {
+        return new CrocEthView(this.context).msgValOverSurplus(await this.qty)
+    } else {
+      return this.qty
     }
   }
 

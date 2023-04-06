@@ -7,7 +7,7 @@ import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
 import { CrocPoolView } from './pool';
 import { decodeCrocPrice } from './utils';
-import { CrocTokenView, TokenQty } from './tokens';
+import { CrocEthView, TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 import { MAX_SQRT_PRICE, MIN_SQRT_PRICE } from "./constants";
@@ -110,22 +110,11 @@ export class CrocSwapPlan {
     // account for potential slippage. (Contract will refund unused ETH)
     const val = this.qtyInBase ? this.qty : this.calcSlipQty()
 
-    if (decodeSurplusFlag(surplusEncoded)[0]) {
-      
+    if (decodeSurplusFlag(surplusEncoded)[0]) {      
       // If using surplus calculate the amount of ETH not covered by the surplus
       // collateral.
-      const sender = (await this.context).senderAddr
-      if (sender) {
-        const ethView = new CrocTokenView(this.context, AddressZero)
-        const surpBal = await ethView.balance(sender)
-        if ((await val).gt(await surpBal)) {
-          return { value: (await val).sub(surpBal) }
-        }
-      }
-
-      // Or zero if surplus collateral balance is sufficient and/or
-      // we don't have an address to check the balance for
-      return { value: 0 }
+      const needed = new CrocEthView(this.context).msgValOverSurplus(await val)
+      return { value: needed }
 
     } else {
       // Othwerise we need to send the entire balance in msg.val

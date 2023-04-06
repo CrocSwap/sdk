@@ -142,3 +142,28 @@ export class CrocTokenView {
   readonly decimals: Promise<number>;
   readonly isNativeEth: boolean;
 }
+
+export class CrocEthView extends CrocTokenView {
+  constructor (context: Promise<CrocContext>) {
+    super(context, AddressZero)
+  }
+
+  /* Returns the amount needed to attach to msg.value when spending
+   * ETH from surplus collateral. (I.e. the difference between the
+   * two, or 0 if surplus collateral is sufficient) */
+  async msgValOverSurplus (ethNeeded: BigNumber): Promise<BigNumber> {
+    const sender = (await this.context).senderAddr
+
+    if (!sender) {
+      console.warn("No sender address known, returning 0")
+      return BigNumber.from(0)
+    }
+
+    const ethView = new CrocTokenView(this.context, AddressZero)
+    const surpBal = await ethView.balance(sender)
+
+    const hasEnough = surpBal.gt(ethNeeded)
+    return hasEnough ? BigNumber.from(0) :
+      ethNeeded.sub(surpBal)
+  }
+} 
