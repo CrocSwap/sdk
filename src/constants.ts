@@ -61,14 +61,14 @@ const ARB_GOERLI_CHAIN: ChainSpec = {
   },
   poolIndex: 36000,
   isTestNet: true,
-  chainId: "0x66EED",
+  chainId: "0x66eed",
   gridSize: 16,
   proxyPaths: {
     cold: 3,
     long: 4,
     liq: 2
   },
-  blockExplorer: "https://goerli.arbiscan.io",
+  blockExplorer: "https://goerli.arbiscan.io/",
   displayName: "Arbitrum Görli",
   logoUrl: ETHERUM_LOGO,
 };
