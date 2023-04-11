@@ -8,10 +8,12 @@ import { baseTokenForConcLiq, concDepositBalance, quoteTokenForConcLiq } from ".
 
 
 interface RepositionTarget {
-    mint: TickRange
+    mint: TickRange | AmbientRange
     burn: TickRange
     liquidity: BigNumberish
 }
+
+type AmbientRange = "ambient"
 
 interface RepositionOpts {
     slippage?: number
@@ -42,10 +44,16 @@ export class CrocReposition {
     }
     
     async balancePercent(): Promise<number> {
-        let baseQuoteBal = concDepositBalance(await this.spotPrice, 
-            tickToPrice(this.mintRange[0]), tickToPrice(this.mintRange[1]))
-        return await this.isBaseOutOfRange() ? 
-            (1.0 - baseQuoteBal) : baseQuoteBal
+        if (this.mintRange === "ambient") {
+            return 0.5 // Ambient positions are 50/50 balance
+        
+        } else {
+            const baseQuoteBal =
+                concDepositBalance(await this.spotPrice, 
+                    tickToPrice(this.mintRange[0]), tickToPrice(this.mintRange[1]))
+            return await this.isBaseOutOfRange() ? 
+                (1.0 - baseQuoteBal) : baseQuoteBal
+        }
     }
 
     async currentCollateral(): Promise<BigNumber> {
@@ -114,8 +122,14 @@ export class CrocReposition {
         await this.setupSwap(pool)
         
         directive.appendPool((await this.pool.context).chain.poolIndex)
-        let mint = directive.appendRangeMint(this.mintRange[0], this.mintRange[1], 0)
-        mint.rollType = 5
+
+        if (this.mintRange === "ambient") {
+            let mint = directive.appendAmbientMint(0)
+            mint.rollType = 5
+        } else {
+            let mint = directive.appendRangeMint(this.mintRange[0], this.mintRange[1], 0)
+            mint.rollType = 5
+        }
 
         directive.open.limitQty = BigNumber.from(0)
         directive.hops[0].settlement.limitQty = BigNumber.from(0)
@@ -142,7 +156,7 @@ export class CrocReposition {
 
     pool: CrocPoolView
     burnRange: TickRange
-    mintRange: TickRange
+    mintRange: TickRange | AmbientRange
     liquidity: BigNumber
     spotPrice: Promise<number>
     spotTick: Promise<number>

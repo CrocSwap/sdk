@@ -53,6 +53,16 @@ export class OrderDirective {
         return range
     }
 
+    appendAmbientMint (liq: BigNumberish): AmbientDirective {
+        const pool = ((this.hops.at(-1) as HopDirective).pools.at(-1) as PoolDirective)
+        pool.passive.ambient = {
+            isAdd: true, 
+            rollType: 0, 
+            liquidity: BigNumber.from(liq).abs()
+        }
+        return pool.passive.ambient
+    }
+
     appendRangeBurn (lowTick: number, highTick: number, liq: BigNumberish): ConcentratedDirective {
         let range = this.appendRangeMint(lowTick, highTick, liq)
         range.isAdd = false
