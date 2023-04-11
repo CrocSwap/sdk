@@ -52,5 +52,13 @@ export function toDisplayQty(
   qty: string | number | BigNumber,
   tokenDecimals: number
 ): string {
+
+  // formatUnits is temperamental with Javascript numbers, so convert string to
+  // fullwide string to avoid scientific notation (which BigNumber pukes on)
+  if (typeof(qty) === "number" ) {
+    const qtyString = qty.toLocaleString('fullwide', {useGrouping:false})
+    return toDisplayQty(qtyString, tokenDecimals)
+  }
+
   return ethers.utils.formatUnits(qty, tokenDecimals);
 }
