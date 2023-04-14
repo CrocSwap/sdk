@@ -73,6 +73,27 @@ const ARB_GOERLI_CHAIN: ChainSpec = {
   logoUrl: ETHERUM_LOGO,
 };
 
+const MAINNET_CHAIN: ChainSpec = {
+  nodeUrl: "https://mainnet.infura.io/v3/360ea5fda45b4a22883de8522ebd639e",
+  addrs: {
+    dex: "0xe3150C65446Dc05505ac33B51D742E9458fE0BfE",
+    query: "0x62223e90605845Cf5CC6DAE6E0de4CDA130d6DDf",
+    impact: "0xc2c301759B5e0C385a38e678014868A33E2F3ae3"
+  },
+  poolIndex: 420,
+  isTestNet: false,
+  chainId: "0x1",
+  gridSize: 16,
+  proxyPaths: {
+    cold: 3,
+    long: 4,
+    liq: 2
+  },
+  blockExplorer: "https://etherscan.io/",
+  displayName: "Ethereum",
+  logoUrl: ETHERUM_LOGO,
+};
+
 const LOCAL_FORK_CHAIN: ChainSpec = Object.assign({}, GOERLI_CHAIN, {
   nodeUrl: "http://127.0.0.1:8545",
   chainId: "0x7a69",
@@ -80,6 +101,7 @@ const LOCAL_FORK_CHAIN: ChainSpec = Object.assign({}, GOERLI_CHAIN, {
 });
 
 export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
+  "0x1": MAINNET_CHAIN,
   "0x5": GOERLI_CHAIN,
   "0x7a69": LOCAL_FORK_CHAIN,
   "0x66eed": ARB_GOERLI_CHAIN,
@@ -87,6 +109,8 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "arbtest": ARB_GOERLI_CHAIN,
   "arbgoerli": ARB_GOERLI_CHAIN,
   "local": LOCAL_FORK_CHAIN,
+  "ethereum": MAINNET_CHAIN,
+  "mainnet": MAINNET_CHAIN
 };
 
 export const MIN_TICK = -665454;
