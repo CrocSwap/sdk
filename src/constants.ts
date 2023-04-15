@@ -75,6 +75,7 @@ const ARB_GOERLI_CHAIN: ChainSpec = {
 
 const MAINNET_CHAIN: ChainSpec = {
   nodeUrl: "https://mainnet.infura.io/v3/360ea5fda45b4a22883de8522ebd639e",
+  wsUrl: "wss://mainnet.infura.io/ws/v3/360ea5fda45b4a22883de8522ebd639e",
   addrs: {
     dex: "0xe3150C65446Dc05505ac33B51D742E9458fE0BfE",
     query: "0x62223e90605845Cf5CC6DAE6E0de4CDA130d6DDf",
