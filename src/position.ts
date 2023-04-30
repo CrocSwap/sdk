@@ -13,7 +13,7 @@ export class CrocPositionView {
         let blockArg = toCallArg(block)
         let context = await this.pool.context
         return context.query.queryRangePosition(this.owner, 
-            this.pool.baseToken, this.pool.quoteToken, 
+            this.pool.baseToken.tokenAddr, this.pool.quoteToken.tokenAddr, 
             context.chain.poolIndex, lowerTick, upperTick, blockArg)
     }
 
@@ -21,14 +21,15 @@ export class CrocPositionView {
         let blockArg = toCallArg(block)
         let context = await this.pool.context
         return context.query.queryAmbientPosition(this.owner, 
-            this.pool.baseToken, this.pool.quoteToken, context.chain.poolIndex, blockArg)
+            this.pool.baseToken.tokenAddr, this.pool.quoteToken.tokenAddr, 
+            context.chain.poolIndex, blockArg)
     }
 
     async queryRewards (lowerTick: number, upperTick: number, block?: BlockTag) {
         let blockArg = toCallArg(block)
         let context = await this.pool.context
         return (await context.query.queryConcRewards(this.owner, 
-            this.pool.baseToken, this.pool.quoteToken, 
+            this.pool.baseToken.tokenAddr, this.pool.quoteToken.tokenAddr, 
             context.chain.poolIndex, lowerTick, upperTick, blockArg))
     }
 
