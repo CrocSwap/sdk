@@ -1,7 +1,7 @@
 /* eslint-disable prefer-const */
 import { CrocContext } from "./context";
-import { sortBaseQuoteTokens, decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew, pinTickLower, pinTickUpper, neighborTicks, pinTickOutside, tickToPrice } from './utils';
-import { CrocEthView, CrocTokenView, TokenQty } from './tokens';
+import { decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew, pinTickLower, pinTickUpper, neighborTicks, pinTickOutside, tickToPrice } from './utils';
+import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { TransactionResponse } from '@ethersproject/providers';
 import { WarmPathEncoder } from './encoding/liquidity';
 import { BigNumber, BigNumberish } from 'ethers';
@@ -15,18 +15,15 @@ type BlockTag = number | string
 
 export class CrocPoolView {
 
-    constructor (quoteToken: string, baseToken: string, context: Promise<CrocContext>) {
+    constructor (quoteToken: CrocTokenView, baseToken: CrocTokenView, context: Promise<CrocContext>) {
         [this.baseToken, this.quoteToken] = 
-            sortBaseQuoteTokens(baseToken, quoteToken)
+            sortBaseQuoteViews(baseToken, quoteToken)
         this.context = context
 
-        this.baseTokenView = new CrocTokenView(context, this.baseToken)
-        this.quoteTokenView = new CrocTokenView(context, this.quoteToken)
+        this.baseDecimals = this.baseToken.decimals
+        this.quoteDecimals = this.quoteToken.decimals
 
-        this.baseDecimals = this.baseTokenView.decimals
-        this.quoteDecimals = this.quoteTokenView.decimals
-
-        this.useTrueBase = this.baseToken === baseToken
+        this.useTrueBase = this.baseToken.tokenAddr === baseToken.tokenAddr
     }
 
     async isInit(): Promise<boolean> {
@@ -37,8 +34,8 @@ export class CrocPoolView {
     async spotPrice (block?: BlockTag): Promise<number> {
         let txArgs = block ? { blockTag: block } : {} 
         let sqrtPrice = (await this.context).query.queryPrice
-            (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex, 
-            txArgs)
+            (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+                (await this.context).chain.poolIndex, txArgs)
         return decodeCrocPrice(await sqrtPrice)
     }
 
@@ -50,8 +47,8 @@ export class CrocPoolView {
     async spotTick (block?: BlockTag): Promise<number> {
         let txArgs = block ? {} : { blockTag: block }
         return (await this.context).query.queryCurveTick
-            (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
-            txArgs)
+            (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+                (await this.context).chain.poolIndex, txArgs)
     }
 
     async toDisplayPrice (spotPrice: number): Promise<number> {
@@ -105,9 +102,9 @@ export class CrocPoolView {
     async initPool (initPrice: number): Promise<TransactionResponse> {
         // Very small amount of ETH in economic terms but more than sufficient for min init burn
         const ETH_INIT_BURN = BigNumber.from(10).pow(12)
-        let txArgs = this.baseToken === AddressZero ? { value: ETH_INIT_BURN } : { }
+        let txArgs = this.baseToken.tokenAddr === AddressZero ? { value: ETH_INIT_BURN } : { }
         
-        let encoder = new PoolInitEncoder(this.baseToken, this.quoteToken, 
+        let encoder = new PoolInitEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
             (await this.context).chain.poolIndex)
         let spotPrice = this.fromDisplayPrice(initPrice)
         let calldata = encoder.encodeInitialize(await spotPrice)        
@@ -269,7 +266,7 @@ export class CrocPoolView {
     }
 
     private async ethToAttach (neededQty: TokenQty, opts?: CrocLpOpts): Promise<BigNumber> {
-        if (this.baseToken !== AddressZero) { return BigNumber.from(0) }
+        if (this.baseToken.tokenAddr !== AddressZero) { return BigNumber.from(0) }
     
         const ethQty = await this.normEth(neededQty)
         let useSurplus = decodeSurplusFlag(this.maskSurplusFlag(opts))[0]
@@ -310,18 +307,17 @@ export class CrocPoolView {
     }
 
     private async normQty (qty: TokenQty, isBase: boolean): Promise<BigNumber> {
-        let token = isBase ? this.baseTokenView : this.quoteTokenView
+        let token = isBase ? this.baseToken : this.quoteToken
         return token.normQty(qty)
     }
 
     private async makeEncoder(): Promise<WarmPathEncoder> {
-        return new WarmPathEncoder(this.baseToken, this.quoteToken, (await this.context).chain.poolIndex)
+        return new WarmPathEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+            (await this.context).chain.poolIndex)
     }
 
-    readonly baseToken: string
-    readonly quoteToken: string
-    readonly baseTokenView: CrocTokenView
-    readonly quoteTokenView: CrocTokenView
+    readonly baseToken: CrocTokenView
+    readonly quoteToken: CrocTokenView
     readonly baseDecimals: Promise<number>
     readonly quoteDecimals: Promise<number>
     readonly useTrueBase: boolean

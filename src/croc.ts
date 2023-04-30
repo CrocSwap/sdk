@@ -8,46 +8,50 @@ import { CrocKnockoutHandle } from './knockout';
 
 export class CrocEnv {
     constructor (conn: ConnectArg, signer?: Signer) {
-        this.context = connectCroc(conn, signer)        
+        this.context = connectCroc(conn, signer)     
+        this.tokens = new TokenRepo(this.context)   
     }
 
     buy (token: string, qty: TokenQty): BuyPrefix {
-        return new BuyPrefix(token, qty, this.context)
+        return new BuyPrefix(token, qty, this.tokens, this.context)
     }
 
     buyEth (qty: TokenQty): BuyPrefix {
-        return new BuyPrefix(AddressZero, qty, this.context)
+        return new BuyPrefix(AddressZero, qty, this.tokens, this.context)
     }
 
     sell (token: string, qty: TokenQty): SellPrefix {
-        return new SellPrefix(token, qty, this.context)
+        return new SellPrefix(token, qty, this.tokens, this.context)
     }
 
     sellEth (qty: TokenQty): SellPrefix {
-        return new SellPrefix(AddressZero, qty, this.context)
+        return new SellPrefix(AddressZero, qty, this.tokens, this.context)
     }
 
     pool (tokenA: string, tokenB: string): CrocPoolView {
-        return new CrocPoolView(tokenA, tokenB, this.context)
+        const viewA = this.tokens.materialize(tokenA)
+        const viewB = this.tokens.materialize(tokenB)
+        return new CrocPoolView(viewA, viewB, this.context)
     }
 
     poolEth (token: string): CrocPoolView {
-        return new CrocPoolView(token, AddressZero, this.context)
+        return this.pool(token, AddressZero)
     }
 
     poolEthQuote (token: string): CrocPoolView {
-        return new CrocPoolView(AddressZero, token, this.context)
+        return this.pool(AddressZero, token)
     }
 
     token (token: string): CrocTokenView {
-        return new CrocTokenView(this.context, token)
+        return this.tokens.materialize(token)
     }
 
     tokenEth(): CrocTokenView {
-        return new CrocTokenView(this.context, AddressZero)
+        return this.tokens.materialize(AddressZero)
     }
 
     readonly context: Promise<CrocContext>
+    tokens: TokenRepo
 }
 
 interface SwapArgs {
@@ -59,14 +63,16 @@ const DFLT_SWAP_ARGS: SwapArgs = {
 }
 
 class BuyPrefix {
-    constructor (token: string, qty: TokenQty, context: Promise<CrocContext>) {
+    constructor (token: string, qty: TokenQty, repo: TokenRepo, context: Promise<CrocContext>) {
         this.token = token
         this.qty = qty
         this.context = context
+        this.repo = repo
     }
 
     with (token: string, args: SwapArgs = DFLT_SWAP_ARGS): CrocSwapPlan {
-        return new CrocSwapPlan(token, this.token, this.qty, true, args.slippage, this.context)
+        return new CrocSwapPlan(this.repo.materialize(token), 
+            this.repo.materialize(this.token), this.qty, true, args.slippage, this.context)
     }
 
     withEth (args: SwapArgs = DFLT_SWAP_ARGS): CrocSwapPlan {
@@ -74,23 +80,27 @@ class BuyPrefix {
     }
 
     atLimit (token: string, tick: number): CrocKnockoutHandle {
-        return new CrocKnockoutHandle(token, this.token, this.qty, false, tick, this.context)
+        return new CrocKnockoutHandle(this.repo.materialize(token), 
+            this.repo.materialize(this.token), this.qty, false, tick, this.context)
     }
 
     readonly token: string
     readonly qty: TokenQty
     readonly context: Promise<CrocContext>
+    repo: TokenRepo
 }
 
 class SellPrefix {
-    constructor (token: string, qty: TokenQty, context: Promise<CrocContext>) {
+    constructor (token: string, qty: TokenQty, repo: TokenRepo, context: Promise<CrocContext>) {
         this.token = token
         this.qty = qty
         this.context = context
+        this.repo = repo
     }
 
     for (token: string, args: SwapArgs = DFLT_SWAP_ARGS): CrocSwapPlan {
-        return new CrocSwapPlan(this.token, token, this.qty, false, args.slippage, this.context)
+        return new CrocSwapPlan(this.repo.materialize(this.token), 
+            this.repo.materialize(token), this.qty, false, args.slippage, this.context)
     }
 
     forEth (args: SwapArgs = DFLT_SWAP_ARGS): CrocSwapPlan {
@@ -98,10 +108,36 @@ class SellPrefix {
     }
 
     atLimit (token: string, tick: number): CrocKnockoutHandle {
-        return new CrocKnockoutHandle(this.token, token, this.qty, true, tick, this.context)
+        return new CrocKnockoutHandle(this.repo.materialize(this.token), 
+            this.repo.materialize(token), this.qty, true, tick, this.context)
     }
 
     readonly token: string
     readonly qty: TokenQty
     readonly context: Promise<CrocContext>
+    repo: TokenRepo
+
+}
+
+
+/* Use this to cache the construction of CrocTokenView objects across CrocEnv lifetime.
+ * Because token view construction makes on-chain calls to get token metadata, doing this
+ * drastically reduces the number of RPC calls. */
+class TokenRepo {
+    constructor (context: Promise<CrocContext>) {
+        this.tokenViews = new Map<string, CrocTokenView>()
+        this.context = context
+    }
+
+    materialize (tokenAddr: string): CrocTokenView {
+        let tokenView = this.tokenViews.get(tokenAddr)
+        if (!tokenView) {
+            tokenView = new CrocTokenView(this.context, tokenAddr)
+            this.tokenViews.set(tokenAddr, tokenView)
+        }
+        return tokenView
+    }
+
+    tokenViews: Map<string, CrocTokenView>
+    context: Promise<CrocContext>
 }

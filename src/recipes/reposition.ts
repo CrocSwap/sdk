@@ -3,6 +3,7 @@ import { BigNumber, BigNumberish } from "ethers";
 import { OrderDirective, PoolDirective } from "../encoding/longform";
 import { CrocPoolView } from "../pool";
 import { CrocSwapPlan } from "../swap";
+import { CrocTokenView } from "../tokens";
 import { encodeCrocPrice, tickToPrice } from "../utils";
 import { baseTokenForConcLiq, concDepositBalance, quoteTokenForConcLiq } from "../utils/liquidity";
 
@@ -81,8 +82,8 @@ export class CrocReposition {
         let collat = (await this.currentCollateral()).sub(await this.convertCollateral())
         let pool = (await this.pool)
         return await this.isBaseOutOfRange() ?
-            (await pool.baseTokenView).toDisplay(collat) :
-            (await pool.quoteTokenView).toDisplay(collat)
+            pool.baseToken.toDisplay(collat) :
+            pool.quoteToken.toDisplay(collat)
     }
 
     async swapOutput(): Promise<string> {
@@ -105,7 +106,7 @@ export class CrocReposition {
         }
     }
 
-    private async pivotTokens(): Promise<[string, string]> {
+    private async pivotTokens(): Promise<[CrocTokenView, CrocTokenView]> {
         return await this.isBaseOutOfRange() ?
             [this.pool.baseToken, this.pool.quoteToken] :
             [this.pool.quoteToken, this.pool.baseToken]
@@ -114,8 +115,8 @@ export class CrocReposition {
     private async formatDirective(): Promise<OrderDirective> {
         const [openToken, closeToken] = await this.pivotTokens()
         
-        let directive = new OrderDirective(openToken)
-        directive.appendHop(closeToken)
+        let directive = new OrderDirective(openToken.tokenAddr)
+        directive.appendHop(closeToken.tokenAddr)
         let pool = directive.appendPool((await this.pool.context).chain.poolIndex)
 
         directive.appendRangeBurn(this.burnRange[0], this.burnRange[1], this.liquidity)

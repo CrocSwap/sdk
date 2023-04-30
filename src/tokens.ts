@@ -167,3 +167,9 @@ export class CrocEthView extends CrocTokenView {
       ethNeeded.sub(surpBal)
   }
 } 
+
+export function sortBaseQuoteViews (tokenA: CrocTokenView, tokenB: CrocTokenView): 
+  [CrocTokenView, CrocTokenView] {
+  return tokenA.tokenAddr.toLowerCase() < tokenB.tokenAddr.toLowerCase() ?
+    [tokenA, tokenB] : [tokenB, tokenA]
+}

@@ -1,13 +1,10 @@
 import { BigNumber } from "ethers";
 
-import {
-  sortBaseQuoteTokens,
-} from "./utils/token";
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
 import { CrocPoolView } from './pool';
 import { decodeCrocPrice } from './utils';
-import { CrocEthView, TokenQty } from './tokens';
+import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 import { MAX_SQRT_PRICE, MIN_SQRT_PRICE } from "./constants";
@@ -27,14 +24,14 @@ export interface CrocSwapOpts {
 
 export class CrocSwapPlan {
 
-  constructor (sellToken: string, buyToken: string, qty: TokenQty, qtyIsBuy: boolean,
+  constructor (sellToken: CrocTokenView, buyToken: CrocTokenView, qty: TokenQty, qtyIsBuy: boolean,
     slippage: number, context: Promise<CrocContext>) {
-    [this.baseToken, this.quoteToken] = sortBaseQuoteTokens(sellToken, buyToken)
+    [this.baseToken, this.quoteToken] = sortBaseQuoteViews(sellToken, buyToken)
     this.sellBase = (this.baseToken === sellToken)
     this.qtyInBase = (this.sellBase !== qtyIsBuy)
 
     this.poolView = new CrocPoolView(this.baseToken, this.quoteToken, context)
-    const tokenView = this.qtyInBase ? this.poolView.baseTokenView : this.poolView.quoteTokenView
+    const tokenView = this.qtyInBase ? this.baseToken : this.quoteToken
     this.qty = tokenView.normQty(qty)
     
     this.slippage = slippage
@@ -50,13 +47,13 @@ export class CrocSwapPlan {
     const surplusFlags = this.maskSurplusArgs(args.surplus)
 
     const gasEst = (await this.context).dex.estimateGas.swap
-      (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
+      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP, 
       await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
       await this.buildTxArgs(surplusFlags))
 
     return (await this.context).dex.swap
-      (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
+      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP, 
       await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
       await this.buildTxArgs(surplusFlags, await gasEst))
@@ -67,11 +64,11 @@ export class CrocSwapPlan {
     const TIP = 0
     const limitPrice = this.sellBase ? MAX_SQRT_PRICE : MIN_SQRT_PRICE
     const impact = await (await this.context).slipQuery.calcImpact
-      (this.baseToken, this.quoteToken, (await this.context).chain.poolIndex,
+      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP, limitPrice);
 
-    const baseQty = this.poolView.baseTokenView.toDisplay(impact.baseFlow.abs())
-    const quoteQty = this.poolView.quoteTokenView.toDisplay(impact.quoteFlow.abs())
+    const baseQty = this.baseToken.toDisplay(impact.baseFlow.abs())
+    const quoteQty = this.quoteToken.toDisplay(impact.quoteFlow.abs())
     const spotPrice = decodeCrocPrice(impact.finalPrice)
 
     const startPrice = this.poolView.displayPrice()
@@ -104,7 +101,7 @@ export class CrocSwapPlan {
 
   private async attachEthMsg (surplusEncoded: number): Promise<object> {
     // Only need msg.val if one token is native ETH (will always be base side)
-    if (!this.sellBase || this.baseToken !== AddressZero) { return { }}
+    if (!this.sellBase || this.baseToken.tokenAddr !== AddressZero) { return { }}
       
     // Calculate the maximum amount of ETH we'll need. If on the floating side
     // account for potential slippage. (Contract will refund unused ETH)
@@ -130,16 +127,16 @@ export class CrocSwapPlan {
       parseFloat((await this.impact).buyQty) * (1 - this.slippage)
 
     return !this.qtyInBase ? 
-      this.poolView.baseTokenView.roundQty(slipQty) : 
-      this.poolView.quoteTokenView.roundQty(slipQty)
+      this.baseToken.roundQty(slipQty) : 
+      this.quoteToken.roundQty(slipQty)
   }
 
   async calcLimitPrice(): Promise<BigNumber> {
     return this.sellBase ? MAX_SQRT_PRICE : MIN_SQRT_PRICE
   }
 
-  readonly baseToken: string
-  readonly quoteToken: string
+  readonly baseToken: CrocTokenView
+  readonly quoteToken: CrocTokenView
   readonly qty: Promise<BigNumber>
   readonly sellBase: boolean
   readonly qtyInBase: boolean

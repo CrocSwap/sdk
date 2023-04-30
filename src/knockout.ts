@@ -1,8 +1,7 @@
 import { BigNumber } from "ethers";
-import { sortBaseQuoteTokens } from "./utils/token";
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
-import { CrocEthView, CrocTokenView, TokenQty } from './tokens';
+import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
 import { KnockoutEncoder } from "./encoding/knockout";
 import { ChainSpec } from "./constants";
@@ -12,14 +11,13 @@ import { baseTokenForQuoteConc, bigNumToFloat, floatToBigNum, quoteTokenForBaseC
 
 export class CrocKnockoutHandle {
 
-  constructor (sellToken: string, buyToken: string, qty: TokenQty, inSellQty: boolean,
+  constructor (sellToken: CrocTokenView, buyToken: CrocTokenView, qty: TokenQty, inSellQty: boolean,
     knockoutTick: number, context: Promise<CrocContext>) {
-    [this.baseToken, this.quoteToken] = sortBaseQuoteTokens(sellToken, buyToken)
+    [this.baseToken, this.quoteToken] = sortBaseQuoteViews(sellToken, buyToken)
     this.sellBase = (this.baseToken === sellToken)
     this.qtyInBase = inSellQty ? this.sellBase : !this.sellBase
 
-    const tokenView = new CrocTokenView(context,
-      this.qtyInBase ? this.baseToken : this.quoteToken)
+    const tokenView = this.qtyInBase ? this.baseToken : this.quoteToken
     const specQty = tokenView.normQty(qty)
 
     this.qty = inSellQty ? specQty : 
@@ -31,7 +29,8 @@ export class CrocKnockoutHandle {
 
   async mint (opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
     const chain = (await this.context).chain
-    const encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
+    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, 
+      this.quoteToken.tokenAddr, chain.poolIndex)
     const [lowerTick, upperTick] = this.tickRange(chain)
     const surplus = this.maskSurplusFlags(opts)
 
@@ -42,7 +41,8 @@ export class CrocKnockoutHandle {
 
   async burn (opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
     const chain = (await this.context).chain
-    const encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
+    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+      chain.poolIndex)
     const [lowerTick, upperTick] = this.tickRange(chain)
     const surplus = this.maskSurplusFlags(opts)
 
@@ -53,7 +53,8 @@ export class CrocKnockoutHandle {
 
   async burnLiq (liq: BigNumber, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
     const chain = (await this.context).chain
-    const encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
+    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+      chain.poolIndex)
     const [lowerTick, upperTick] = this.tickRange(chain)
     const surplus = this.maskSurplusFlags(opts)
 
@@ -64,7 +65,8 @@ export class CrocKnockoutHandle {
 
   async recoverPost (pivotTime: number, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
     const chain = (await this.context).chain
-    const encoder = new KnockoutEncoder(this.baseToken, this.quoteToken, chain.poolIndex)
+    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+      chain.poolIndex)
     const [lowerTick, upperTick] = this.tickRange(chain)
     const surplus = this.maskSurplusFlags(opts)
 
@@ -76,7 +78,7 @@ export class CrocKnockoutHandle {
   async willMintFail(): Promise<boolean> {
     const gridSize = this.context.then(c => c.chain.gridSize)
     const marketTick = this.context.then(c => c.query.queryCurveTick
-      (this.baseToken, this.quoteToken, c.chain.poolIndex))
+      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, c.chain.poolIndex))
     return this.sellBase ?
       (this.knockoutTick + await gridSize >= await marketTick) :
       (this.knockoutTick - await gridSize <= await marketTick)
@@ -90,7 +92,7 @@ export class CrocKnockoutHandle {
   }
 
   private async msgVal (surplusFlags: number): Promise<BigNumber> {
-    if (this.baseToken !== AddressZero || !this.sellBase) {
+    if (this.baseToken.tokenAddr !== AddressZero || !this.sellBase) {
       return BigNumber.from(0)
     }
 
@@ -106,8 +108,8 @@ export class CrocKnockoutHandle {
     return tickRange(chain, this.knockoutTick, this.sellBase)
   }
 
-  readonly baseToken: string
-  readonly quoteToken: string
+  readonly baseToken: CrocTokenView
+  readonly quoteToken: CrocTokenView
   readonly qty: Promise<BigNumber>
   readonly sellBase: boolean
   readonly qtyInBase: boolean
