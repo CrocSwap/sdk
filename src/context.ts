@@ -4,13 +4,15 @@ import { ChainSpec, CHAIN_SPECS } from "./constants";
 import { CROC_ABI, QUERY_ABI, ERC20_ABI } from "./abis";
 import { AddressZero } from "@ethersproject/constants";
 import { IMPACT_ABI } from "./abis/impact";
+import { ERC20_READ_ABI } from "./abis/erc20.read";
 
 export interface CrocContext {
   provider: Provider;
   dex: Contract;
   query: Contract;
   slipQuery: Contract;
-  erc20: Contract;
+  erc20Read: Contract;
+  erc20Write: Contract;
   chain: ChainSpec;
   senderAddr?: string
 }
@@ -64,18 +66,18 @@ function determineActor(
   signer?: Signer
 ): Signer | Provider {
   if (signer) {
-    return signer.connect(provider)
-  } else if ("getSigner" in provider) {
-    let signer;
-    if ((provider as JsonRpcProvider).connection?.url === "metamask") {
-      signer = (provider as ethers.providers.Web3Provider).getSigner();
-    } else {
-      signer = (provider as ethers.providers.Web3Provider).getSigner(
-        "0x946FDB6AF17EC1497975D0BB5C915A5D38BA327A"
-      );
+    try {
+      return signer.connect(provider)
+    } catch {
+      return signer
     }
-
-    return signer;
+  } else if ("getSigner" in provider) {
+    try {
+      let signer = (provider as ethers.providers.Web3Provider).getSigner();
+      return signer
+    } catch { 
+      return provider 
+    }
   } else {
     return provider;
   }
@@ -101,9 +103,10 @@ function inflateContracts(
   return {
     provider: provider,
     dex: new Contract(context.addrs.dex, CROC_ABI, actor),
-    query: new Contract(context.addrs.query, QUERY_ABI, actor),
-    slipQuery: new Contract(context.addrs.impact, IMPACT_ABI, actor),
-    erc20: new Contract(AddressZero, ERC20_ABI, actor),
+    query: new Contract(context.addrs.query, QUERY_ABI, provider),
+    slipQuery: new Contract(context.addrs.impact, IMPACT_ABI, provider),
+    erc20Write: new Contract(AddressZero, ERC20_ABI, actor),
+    erc20Read: new Contract(AddressZero, ERC20_READ_ABI, provider),
     chain: context,
     senderAddr: addr
   };

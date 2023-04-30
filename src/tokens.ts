@@ -32,12 +32,12 @@ export class CrocTokenView {
     // transaction. The default value is low gas calldata, but Metamask and other wallets
     // will often ask users to change the approval amount. Without the padding, approval
     // transactions can run out of gas.
-    const gasEst = (await this.resolve()).estimateGas.approve(
+    const gasEst = (await this.resolveWrite()).estimateGas.approve(
       (await this.context).dex.address,
       weiQty
     );
 
-    return (await this.resolve()).approve(
+    return (await this.resolveWrite()).approve(
       (await this.context).dex.address,
       weiQty, { gasLimit: (await gasEst).add(2000)}
     );
@@ -109,7 +109,11 @@ export class CrocTokenView {
   }
 
   private async resolve(): Promise<Contract> {
-    return (await this.context).erc20.attach(this.tokenAddr);
+    return (await this.context).erc20Read.attach(this.tokenAddr);
+  }
+
+  private async resolveWrite(): Promise<Contract> {
+    return (await this.context).erc20Write.attach(this.tokenAddr);
   }
 
   async deposit (qty: TokenQty, recv: string): Promise<TransactionResponse> {
