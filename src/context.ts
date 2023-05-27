@@ -56,7 +56,9 @@ async function setupProvider(
 async function attachSenderAddr (cntx: CrocContext, 
   actor: Provider | Signer): Promise<CrocContext> {
   if ('getAddress' in actor) {
-    cntx.senderAddr = await actor.getAddress()
+    try {
+      cntx.senderAddr = await actor.getAddress()
+    } catch (e) { }
   }
   return cntx
 }
