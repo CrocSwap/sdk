@@ -198,9 +198,8 @@ export class CrocPoolView {
             amplifyUpper = lowerPrice/BOUND_PREC
 
         } else {
-            // Generally assume we don't want to send more than 5X the floating side token implied
-            // by current price
-            const MAX_AMPLICATION = 10.0
+            // Generally assume we don't want to send more than 1% more than the floating side
+            const MAX_AMPLICATION = 1.02
             const slippageCap = 1 - Math.pow(1 - 1/MAX_AMPLICATION, 2)
 
             amplifyLower = ((await spotPrice) - lowerPrice) * slippageCap + lowerPrice
