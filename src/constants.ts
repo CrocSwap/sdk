@@ -35,7 +35,7 @@ const GOERLI_CHAIN: ChainSpec = {
   wsUrl: "wss://goerli.infura.io/ws/v3/" + DFLT_SDK_INFURA_KEY, 
   addrs: {
     dex: "0xfafcd1f5530827e7398b6d3c509f450b1b24a209",
-    query: "0x93a4baFDd49dB0e06f3F3f9FddC1A67792F47518",
+    query: "0xc9900777baa5EE94Cd2C6509fb09278A1A46b7e8",
     impact: "0x142BE02F2A3A27ecD6e2f18a43c2C234F372C831"
   },
   poolIndex: 36000,
