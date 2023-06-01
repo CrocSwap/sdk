@@ -51,6 +51,15 @@ export class CrocPoolView {
                 (await this.context).chain.poolIndex, txArgs)
     }
 
+    async cumAmbientGrowth (block?: BlockTag): Promise<number> {
+        let txArgs = block ? {} : { blockTag: block }
+        const queryCurve = (await this.context).query.queryCurve
+            (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+                (await this.context).chain.poolIndex, txArgs)
+        const seedDeflator = (await queryCurve).seedDeflator_
+        return seedDeflator / Math.pow(2, 48)
+    }
+
     async toDisplayPrice (spotPrice: number): Promise<number> {
         return toDisplayPrice(spotPrice, await this.baseDecimals, await this.quoteDecimals,
             !this.useTrueBase)

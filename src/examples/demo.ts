@@ -184,6 +184,8 @@ async function demo() {
     const pool = croc.poolEthQuote(USDC)
     console.log(await pool.spotPrice())
 
+    console.log(await pool.cumAmbientGrowth())
+
     /*const pos = new CrocPositionView(pool, "0xa86dabFBb529a4C8186BdD52bd226aC81757E090")
     console.log((await pos.queryRangePos(-74240, -73792)).liq.toString())
 
