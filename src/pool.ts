@@ -45,14 +45,14 @@ export class CrocPoolView {
     }
 
     async spotTick (block?: BlockTag): Promise<number> {
-        let txArgs = block ? {} : { blockTag: block }
+        let txArgs = block ? { blockTag: block } : {}
         return (await this.context).query.queryCurveTick
             (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
                 (await this.context).chain.poolIndex, txArgs)
     }
 
     async cumAmbientGrowth (block?: BlockTag): Promise<number> {
-        let txArgs = block ? {} : { blockTag: block }
+        let txArgs = block ? { blockTag: block } : {}
         const queryCurve = (await this.context).query.queryCurve
             (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
                 (await this.context).chain.poolIndex, txArgs)
