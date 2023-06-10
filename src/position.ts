@@ -25,6 +25,20 @@ export class CrocPositionView {
             context.chain.poolIndex, blockArg)
     }
 
+    async queryKnockoutLivePos (isBid: boolean, lowerTick: number, upperTick: number, block?: BlockTag) {
+        let blockArg = toCallArg(block)
+        let context = await this.pool.context
+        let pivotTick = isBid ? lowerTick : upperTick
+        
+        const pivotTime = (await context.query.queryKnockoutPivot(
+            this.pool.baseToken.tokenAddr, this.pool.quoteToken.tokenAddr, 
+            context.chain.poolIndex, isBid, pivotTick, blockArg)).pivot
+
+        return context.query.queryKnockoutTokens(this.owner,
+                this.pool.baseToken.tokenAddr, this.pool.quoteToken.tokenAddr, 
+                context.chain.poolIndex, pivotTime, isBid, lowerTick, upperTick, blockArg)
+    }   
+
     async queryRewards (lowerTick: number, upperTick: number, block?: BlockTag) {
         let blockArg = toCallArg(block)
         let context = await this.pool.context

@@ -83,6 +83,50 @@ export const QUERY_ABI = [
         "internalType": "uint256",
         "name": "poolIdx",
         "type": "uint256"
+      }
+    ],
+    "name": "queryAmbientTokens",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "liq",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "baseQty",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "quoteQty",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
       },
       {
         "internalType": "int24",
@@ -99,7 +143,17 @@ export const QUERY_ABI = [
     "outputs": [
       {
         "internalType": "uint128",
-        "name": "",
+        "name": "liqRewards",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "baseRewards",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "quoteRewards",
         "type": "uint128"
       }
     ],
@@ -357,6 +411,75 @@ export const QUERY_ABI = [
     "inputs": [
       {
         "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint32",
+        "name": "pivot",
+        "type": "uint32"
+      },
+      {
+        "internalType": "bool",
+        "name": "isBid",
+        "type": "bool"
+      },
+      {
+        "internalType": "int24",
+        "name": "lowerTick",
+        "type": "int24"
+      },
+      {
+        "internalType": "int24",
+        "name": "upperTick",
+        "type": "int24"
+      }
+    ],
+    "name": "queryKnockoutTokens",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "liq",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "baseQty",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "quoteQty",
+        "type": "uint128"
+      },
+      {
+        "internalType": "bool",
+        "name": "knockedOut",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
         "name": "base",
         "type": "address"
       },
@@ -542,6 +665,60 @@ export const QUERY_ABI = [
       },
       {
         "internalType": "address",
+        "name": "base",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "quote",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "poolIdx",
+        "type": "uint256"
+      },
+      {
+        "internalType": "int24",
+        "name": "lowerTick",
+        "type": "int24"
+      },
+      {
+        "internalType": "int24",
+        "name": "upperTick",
+        "type": "int24"
+      }
+    ],
+    "name": "queryRangeTokens",
+    "outputs": [
+      {
+        "internalType": "uint128",
+        "name": "liq",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "baseQty",
+        "type": "uint128"
+      },
+      {
+        "internalType": "uint128",
+        "name": "quoteQty",
+        "type": "uint128"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
         "name": "token",
         "type": "address"
       }
@@ -587,3 +764,4 @@ export const QUERY_ABI = [
     "type": "function"
   }
 ]
+

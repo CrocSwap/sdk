@@ -186,10 +186,9 @@ async function demo() {
 
     console.log(await pool.cumAmbientGrowth())
 
-    /*const pos = new CrocPositionView(pool, "0xa86dabFBb529a4C8186BdD52bd226aC81757E090")
-    console.log((await pos.queryRangePos(-74240, -73792)).liq.toString())
+    //croc.sell(DAI, 200).atLimit(ETH, -64000).burn({surplus: true})
 
-    console.log((await croc.tokenEth().balance("benwolski.eth")).toString())
+    /*console.log((await croc.tokenEth().balance("benwolski.eth")).toString())
     console.log(await croc.tokenEth().balanceDisplay("benwolski.eth"))*/
 }
 
