@@ -146,14 +146,14 @@ export class CrocPoolView {
         Promise<TransactionResponse> {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeBurnAmbient
-            (liq, lowerBound, upperBound, this.maskSurplusFlag(opts))
+            (liq, lowerBound, upperBound, this.maskSurplusFlag(opts), this.applyLpConduit(opts))
         return this.sendCmd(calldata)
     }
 
     async burnAmbientAll (limits: PriceRange, opts?: CrocLpOpts): Promise<TransactionResponse> {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeBurnAmbientAll
-            (lowerBound, upperBound, this.maskSurplusFlag(opts))
+            (lowerBound, upperBound, this.maskSurplusFlag(opts), this.applyLpConduit(opts))
         return this.sendCmd(calldata)
     }
 
@@ -162,7 +162,7 @@ export class CrocPoolView {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         let roundLotLiq = roundForConcLiq(liq)
         const calldata = (await this.makeEncoder()).encodeBurnConc
-            (range[0], range[1], roundLotLiq, lowerBound, upperBound, this.maskSurplusFlag(opts))
+            (range[0], range[1], roundLotLiq, lowerBound, upperBound, this.maskSurplusFlag(opts), this.applyLpConduit(opts))
         return this.sendCmd(calldata)
     }
 
@@ -170,7 +170,7 @@ export class CrocPoolView {
         Promise<TransactionResponse> {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
         const calldata = (await this.makeEncoder()).encodeHarvestConc
-            (range[0], range[1], lowerBound, upperBound, this.maskSurplusFlag(opts))
+            (range[0], range[1], lowerBound, upperBound, this.maskSurplusFlag(opts), this.applyLpConduit(opts))
         return this.sendCmd(calldata)
     }
 
@@ -189,7 +189,7 @@ export class CrocPoolView {
         let [lowerBound, upperBound] = await this.transformLimits(limits)
 
         const calldata = (await this.makeEncoder()).encodeMintAmbient(
-            await weiQty, isQtyBase, lowerBound, upperBound, this.maskSurplusFlag(opts))
+            await weiQty, isQtyBase, lowerBound, upperBound, this.maskSurplusFlag(opts), this.applyLpConduit(opts))
         return this.sendCmd(calldata, {value: await msgVal})
     }
 
@@ -250,13 +250,18 @@ export class CrocPoolView {
         let [lowerBound, upperBound] = await this.transformLimits(await saneLimits)
         
         const calldata = (await this.makeEncoder()).encodeMintConc(range[0], range[1],
-            await weiQty, isQtyBase, lowerBound, upperBound, this.maskSurplusFlag(opts))
+            await weiQty, isQtyBase, lowerBound, upperBound, this.maskSurplusFlag(opts), this.applyLpConduit(opts))
         return this.sendCmd(calldata, { value: await msgVal })
     }
 
     private maskSurplusFlag (opts?: CrocLpOpts): number {
         if (!opts || opts.surplus === undefined) { return this.maskSurplusFlag({surplus: false})}
         return encodeSurplusArg(opts.surplus, this.useTrueBase)
+    }
+
+    private applyLpConduit (opts?: CrocLpOpts): string {
+        if (!opts || opts.lpConduit === undefined) { return AddressZero }
+        return opts.lpConduit;
     }
 
     private async msgValAmbient (qty: TokenQty, isQtyBase: boolean, limits: PriceRange, 
@@ -333,5 +338,6 @@ export class CrocPoolView {
 }
 
 export interface CrocLpOpts {
-    surplus?: CrocSurplusFlags
+    surplus?: CrocSurplusFlags,
+    lpConduit?: string
 }
