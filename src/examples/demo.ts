@@ -1,4 +1,6 @@
 import { CrocEnv } from '../croc';
+import { CrocPositionView } from '../position';
+import { ERC20_READ_ABI } from '../abis/erc20.read';
 import { ethers } from 'ethers';
 
 //const ETH = ethers.constants.AddressZero
@@ -7,6 +9,9 @@ const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
 
 // deepcode ignore HardcodedSecret: testnet dummy key
 const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
+
+// USDC/ETH lpConduit
+const USDC_ETH_LP_CONDUIT = "0x8c1A6FfA18183ef223d5Eb3b0A0208515E64bB88";
 
 async function demo() {
     const wallet = new ethers.Wallet(KEY)
@@ -190,6 +195,20 @@ async function demo() {
 
     /*console.log((await croc.tokenEth().balance("benwolski.eth")).toString())
     console.log(await croc.tokenEth().balanceDisplay("benwolski.eth"))*/
+
+    // await croc.poolEth(USDC).mintAmbientQuote(50, [0.0001, 0.001]);
+
+    // mint USDC/ETH lp tokens
+    // await croc.poolEth(USDC).mintAmbientQuote(50, [0.0001, 0.001], { lpConduit: USDC_ETH_LP_CONDUIT });
+    const lpConduitContract = new ethers.Contract(USDC_ETH_LP_CONDUIT, ERC20_READ_ABI, (await croc.context).provider);
+    const lpTokenBalance = await lpConduitContract.balanceOf(wallet.address);
+    console.log(ethers.utils.formatUnits(lpTokenBalance, 18));
+
+    // burn USDC/ETH lp tokens
+    const lpConduitPositionView = new CrocPositionView(pool, USDC_ETH_LP_CONDUIT);
+    const lpConduitPosition = await lpConduitPositionView.queryAmbient()
+    console.log(lpConduitPosition);
+    // await croc.poolEth(USDC).burnAmbientLiq(lpConduitPosition.seeds, [0.0001, 0.001], { lpConduit: USDC_ETH_LP_CONDUIT });
 }
 
 demo()
