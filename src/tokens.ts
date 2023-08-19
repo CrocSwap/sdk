@@ -1,7 +1,7 @@
 import { CrocContext } from "./context";
 import { Contract, BigNumber, ethers } from "ethers";
 import { TransactionResponse } from "@ethersproject/providers";
-import { AddressZero } from "@ethersproject/constants";
+import { AddressZero, MaxUint256 } from "@ethersproject/constants";
 import { MAX_LIQ } from "./constants";
 import { toDisplayQty, fromDisplayQty } from "./utils/token";
 
@@ -26,7 +26,7 @@ export class CrocTokenView {
     if (this.isNativeEth) {
       return undefined;
     }
-    const weiQty = BigNumber.from(2).pow(120); // Lots of 0 bytes in calldata to save gas
+    const weiQty = MaxUint256;
 
     // We want to hardcode the gas limit, so we can manually pad it from the estimated
     // transaction. The default value is low gas calldata, but Metamask and other wallets
