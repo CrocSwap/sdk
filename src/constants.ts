@@ -5,21 +5,21 @@ type ChainId = string;
 
 export interface ChainSpec {
   nodeUrl: string;
-  wsUrl?: string,
+  wsUrl?: string;
   poolIndex: number;
   addrs: {
     dex: ChainAddress;
     query: ChainAddress;
-    impact: ChainAddress
-  }
+    impact: ChainAddress;
+  };
   isTestNet: boolean;
   chainId: ChainId;
   gridSize: number;
   proxyPaths: {
-    cold: number,
-    liq: number,
-    long: number
-  }
+    cold: number;
+    liq: number;
+    long: number;
+  };
   blockExplorer?: string;
   displayName: string;
   logoUrl?: string;
@@ -27,16 +27,18 @@ export interface ChainSpec {
 
 const ETHERUM_LOGO =
   "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg";
+const ARBITRUM_LOGO =
+  "https://assets.coingecko.com/coins/images/16547/thumb/photo_2023-03-29_21.47.00.jpeg?1680097630";
 
-const DFLT_SDK_INFURA_KEY = '360ea5fda45b4a22883de8522ebd639e'
+const DFLT_SDK_INFURA_KEY = "360ea5fda45b4a22883de8522ebd639e";
 
 const GOERLI_CHAIN: ChainSpec = {
-  nodeUrl: "https://goerli.infura.io/v3/" + DFLT_SDK_INFURA_KEY, 
-  wsUrl: "wss://goerli.infura.io/ws/v3/" + DFLT_SDK_INFURA_KEY, 
+  nodeUrl: "https://goerli.infura.io/v3/" + DFLT_SDK_INFURA_KEY,
+  wsUrl: "wss://goerli.infura.io/ws/v3/" + DFLT_SDK_INFURA_KEY,
   addrs: {
     dex: "0xfafcd1f5530827e7398b6d3c509f450b1b24a209",
     query: "0xc9900777baa5EE94Cd2C6509fb09278A1A46b7e8",
-    impact: "0x142BE02F2A3A27ecD6e2f18a43c2C234F372C831"
+    impact: "0x142BE02F2A3A27ecD6e2f18a43c2C234F372C831",
   },
   poolIndex: 36000,
   isTestNet: true,
@@ -45,20 +47,19 @@ const GOERLI_CHAIN: ChainSpec = {
   proxyPaths: {
     cold: 0,
     long: 4,
-    liq: 2
+    liq: 2,
   },
   blockExplorer: "https://goerli.etherscan.io/",
   displayName: "Görli",
   logoUrl: ETHERUM_LOGO,
 };
 
-
 const ARB_GOERLI_CHAIN: ChainSpec = {
   nodeUrl: "https://goerli-rollup.arbitrum.io/rpc",
   addrs: {
     dex: "0x5D42d6046927DEE12b9b4a235be0ceCd55D0E0fb",
     query: "0x3A6E9cff691a473D4D0742E1dFc8Ea263a99F6d0",
-    impact: "0xf19D3dcdF82af0d40Cb3b4AaE4D266c638A3E454"
+    impact: "0xf19D3dcdF82af0d40Cb3b4AaE4D266c638A3E454",
   },
   poolIndex: 36000,
   isTestNet: true,
@@ -67,11 +68,11 @@ const ARB_GOERLI_CHAIN: ChainSpec = {
   proxyPaths: {
     cold: 3,
     long: 4,
-    liq: 2
+    liq: 2,
   },
   blockExplorer: "https://goerli.arbiscan.io/",
   displayName: "Arbitrum Görli",
-  logoUrl: ETHERUM_LOGO,
+  logoUrl: ARBITRUM_LOGO,
 };
 
 const MAINNET_CHAIN: ChainSpec = {
@@ -80,7 +81,7 @@ const MAINNET_CHAIN: ChainSpec = {
   addrs: {
     dex: "0xAaAaAAAaA24eEeb8d57D431224f73832bC34f688",
     query: "0xc2e1f740E11294C64adE66f69a1271C5B32004c8",
-    impact: "0x3e3EDd3eD7621891E574E5d7f47b1f30A994c0D0"
+    impact: "0x3e3EDd3eD7621891E574E5d7f47b1f30A994c0D0",
   },
   poolIndex: 420,
   isTestNet: false,
@@ -89,7 +90,7 @@ const MAINNET_CHAIN: ChainSpec = {
   proxyPaths: {
     cold: 3,
     long: 4,
-    liq: 2
+    liq: 2,
   },
   blockExplorer: "https://etherscan.io/",
   displayName: "Ethereum",
@@ -99,7 +100,7 @@ const MAINNET_CHAIN: ChainSpec = {
 const LOCAL_FORK_CHAIN: ChainSpec = Object.assign({}, GOERLI_CHAIN, {
   nodeUrl: "http://127.0.0.1:8545",
   chainId: "0x7a69",
-  displayName: "Local Fork"
+  displayName: "Local Fork",
 });
 
 export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
@@ -107,17 +108,18 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x5": GOERLI_CHAIN,
   "0x7a69": LOCAL_FORK_CHAIN,
   "0x66eed": ARB_GOERLI_CHAIN,
-  "goerli": GOERLI_CHAIN,
-  "arbtest": ARB_GOERLI_CHAIN,
-  "arbgoerli": ARB_GOERLI_CHAIN,
-  "local": LOCAL_FORK_CHAIN,
-  "ethereum": MAINNET_CHAIN,
-  "mainnet": MAINNET_CHAIN
+  goerli: GOERLI_CHAIN,
+  arbtest: ARB_GOERLI_CHAIN,
+  arbgoerli: ARB_GOERLI_CHAIN,
+  local: LOCAL_FORK_CHAIN,
+  ethereum: MAINNET_CHAIN,
+  mainnet: MAINNET_CHAIN,
 };
 
 export const MIN_TICK = -665454;
 export const MAX_TICK = 831818;
 export const MAX_SQRT_PRICE: BigNumber = BigNumber.from(
-  "21267430153580247136652501917186561138").sub(1);
+  "21267430153580247136652501917186561138"
+).sub(1);
 export const MIN_SQRT_PRICE: BigNumber = BigNumber.from("65538").sub(1);
 export const MAX_LIQ = BigNumber.from(2).pow(128).sub(1);
