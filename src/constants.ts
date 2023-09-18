@@ -27,6 +27,8 @@ export interface ChainSpec {
 
 const ETHERUM_LOGO =
   "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg";
+const ARBITRUM_LOGO =
+  "https://assets.coingecko.com/coins/images/16547/thumb/photo_2023-03-29_21.47.00.jpeg?1680097630";
 
 const DFLT_SDK_INFURA_KEY = '360ea5fda45b4a22883de8522ebd639e'
 
@@ -96,6 +98,27 @@ const MAINNET_CHAIN: ChainSpec = {
   logoUrl: ETHERUM_LOGO,
 };
 
+const ARB_MAINNET_CHAIN: ChainSpec = {
+  nodeUrl: "https://arbitrum-mainnet.infura.io/v3/360ea5fda45b4a22883de8522ebd639e",
+  addrs: {
+    dex: "",
+    query: "",
+    impact: ""
+  },
+  poolIndex: 420,
+  isTestNet: false,
+  chainId: "0xa4b1",
+  gridSize: 16,
+  proxyPaths: {
+    cold: 3,
+    long: 4,
+    liq: 2
+  },
+  blockExplorer: "https://arbiscan.io/",
+  displayName: "Arbitrum",
+  logoUrl: ARBITRUM_LOGO,
+};
+
 const LOCAL_FORK_CHAIN: ChainSpec = Object.assign({}, GOERLI_CHAIN, {
   nodeUrl: "http://127.0.0.1:8545",
   chainId: "0x7a69",
@@ -107,12 +130,15 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x5": GOERLI_CHAIN,
   "0x7a69": LOCAL_FORK_CHAIN,
   "0x66eed": ARB_GOERLI_CHAIN,
+  "0xa4b1": ARB_MAINNET_CHAIN,
   "goerli": GOERLI_CHAIN,
   "arbtest": ARB_GOERLI_CHAIN,
   "arbgoerli": ARB_GOERLI_CHAIN,
   "local": LOCAL_FORK_CHAIN,
   "ethereum": MAINNET_CHAIN,
-  "mainnet": MAINNET_CHAIN
+  "mainnet": MAINNET_CHAIN,
+  "arbitrum": ARB_MAINNET_CHAIN,
+  "arbmainnet": ARB_MAINNET_CHAIN,
 };
 
 export const MIN_TICK = -665454;
