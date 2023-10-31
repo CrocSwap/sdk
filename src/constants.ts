@@ -96,6 +96,48 @@ const MAINNET_CHAIN: ChainSpec = {
   logoUrl: ETHERUM_LOGO,
 };
 
+const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
+  nodeUrl: "https://sepolia-rpc.scroll.io",
+  addrs: {
+    dex: "0xaaAAAaa6612bd88cD409cb0D70C99556C87A0E8c",
+    query: "0x43eC1302FE3587862e15B2D52AD9653575FD79e9",
+    impact: "0x9B28970D51A231741416D8D3e5281d9c51a50892"
+  },
+  poolIndex: 36000,
+  isTestNet: true,
+  chainId: "0x8274f",
+  gridSize: 1,
+  proxyPaths: {
+    cold: 3,
+    long: 130,
+    liq: 128
+  },
+  blockExplorer: "https://sepolia.scrollscan.dev",
+  displayName: "Scroll Sepolia",
+  logoUrl: ETHERUM_LOGO,
+};
+
+const SCROLL_CHAIN: ChainSpec = {
+  nodeUrl: "https://rpc.scroll.io",
+  addrs: {
+    dex: "0xaaaaAAAACB71BF2C8CaE522EA5fa455571A74106",
+    query: "0x62223e90605845Cf5CC6DAE6E0de4CDA130d6DDf",
+    impact: "0xc2c301759B5e0C385a38e678014868A33E2F3ae3"
+  },
+  poolIndex: 420,
+  isTestNet: false,
+  chainId: "0x82750",
+  gridSize: 4,
+  proxyPaths: {
+    cold: 3,
+    long: 130,
+    liq: 128
+  },
+  blockExplorer: "https://scrollscan.com",
+  displayName: "Scroll",
+  logoUrl: ETHERUM_LOGO,
+};
+
 const LOCAL_FORK_CHAIN: ChainSpec = Object.assign({}, GOERLI_CHAIN, {
   nodeUrl: "http://127.0.0.1:8545",
   chainId: "0x7a69",
@@ -107,12 +149,16 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x5": GOERLI_CHAIN,
   "0x7a69": LOCAL_FORK_CHAIN,
   "0x66eed": ARB_GOERLI_CHAIN,
+  "0x8274f": SCROLL_SEPOLIA_CHAIN,
+  "0x82750": SCROLL_CHAIN,
   "goerli": GOERLI_CHAIN,
   "arbtest": ARB_GOERLI_CHAIN,
   "arbgoerli": ARB_GOERLI_CHAIN,
   "local": LOCAL_FORK_CHAIN,
   "ethereum": MAINNET_CHAIN,
-  "mainnet": MAINNET_CHAIN
+  "mainnet": MAINNET_CHAIN,
+  "scrolltest": SCROLL_SEPOLIA_CHAIN,
+  "scroll": SCROLL_CHAIN,
 };
 
 export const MIN_TICK = -665454;

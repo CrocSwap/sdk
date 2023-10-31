@@ -3,7 +3,7 @@ import { ethers } from 'ethers';
 
 //const ETH = ethers.constants.AddressZero
 //const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
-const USDC = "0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C"
+const USDC = "0x4D65fB724CEd0CFC6ABFD03231C9CDC2C36A587B"
 
 // deepcode ignore HardcodedSecret: testnet dummy key
 const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
@@ -11,7 +11,7 @@ const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
 async function demo() {
     const wallet = new ethers.Wallet(KEY)
 
-    const croc = new CrocEnv("goerli", wallet)
+    const croc = new CrocEnv("scrolltest", wallet)
 
     //console.log(await croc.sellEth(0.01).for(USDC).swap({ surplus: [true, false]}))
 
