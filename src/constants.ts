@@ -112,7 +112,7 @@ const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
     long: 130,
     liq: 128
   },
-  blockExplorer: "https://sepolia.scrollscan.dev",
+  blockExplorer: "https://sepolia.scrollscan.dev/",
   displayName: "Scroll Sepolia",
   logoUrl: ETHERUM_LOGO,
 };
@@ -133,7 +133,7 @@ const SCROLL_CHAIN: ChainSpec = {
     long: 130,
     liq: 128
   },
-  blockExplorer: "https://scrollscan.com",
+  blockExplorer: "https://scrollscan.com/",
   displayName: "Scroll",
   logoUrl: ETHERUM_LOGO,
 };
