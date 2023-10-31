@@ -25,8 +25,10 @@ export interface ChainSpec {
   logoUrl?: string;
 }
 
-const ETHERUM_LOGO =
+const ETHEREUM_LOGO =
   "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg";
+const SCROLL_LOGO =
+  "https://develop--ambient-finance.netlify.app/scroll_logo.png";
 
 const DFLT_SDK_INFURA_KEY = '360ea5fda45b4a22883de8522ebd639e'
 
@@ -49,7 +51,7 @@ const GOERLI_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://goerli.etherscan.io/",
   displayName: "Görli",
-  logoUrl: ETHERUM_LOGO,
+  logoUrl: ETHEREUM_LOGO,
 };
 
 
@@ -71,7 +73,7 @@ const ARB_GOERLI_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://goerli.arbiscan.io/",
   displayName: "Arbitrum Görli",
-  logoUrl: ETHERUM_LOGO,
+  logoUrl: ETHEREUM_LOGO,
 };
 
 const MAINNET_CHAIN: ChainSpec = {
@@ -93,7 +95,7 @@ const MAINNET_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://etherscan.io/",
   displayName: "Ethereum",
-  logoUrl: ETHERUM_LOGO,
+  logoUrl: ETHEREUM_LOGO,
 };
 
 const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
@@ -114,7 +116,7 @@ const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://sepolia.scrollscan.dev/",
   displayName: "Scroll Sepolia",
-  logoUrl: ETHERUM_LOGO,
+  logoUrl: SCROLL_LOGO,
 };
 
 const SCROLL_CHAIN: ChainSpec = {
@@ -135,7 +137,7 @@ const SCROLL_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://scrollscan.com/",
   displayName: "Scroll",
-  logoUrl: ETHERUM_LOGO,
+  logoUrl: SCROLL_LOGO,
 };
 
 const LOCAL_FORK_CHAIN: ChainSpec = Object.assign({}, GOERLI_CHAIN, {
