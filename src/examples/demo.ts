@@ -1,9 +1,12 @@
 import { CrocEnv } from '../croc';
 import { ethers } from 'ethers';
+//import { CrocPositionView } from '../position';
 
 //const ETH = ethers.constants.AddressZero
 //const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
-const USDC = "0x4D65fB724CEd0CFC6ABFD03231C9CDC2C36A587B"
+//const USDC = "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"
+
+const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
 
 // deepcode ignore HardcodedSecret: testnet dummy key
 const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
@@ -11,7 +14,7 @@ const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
 async function demo() {
     const wallet = new ethers.Wallet(KEY)
 
-    const croc = new CrocEnv("scrolltest", wallet)
+    const croc = new CrocEnv("mainnet", wallet)
 
     //console.log(await croc.sellEth(0.01).for(USDC).swap({ surplus: [true, false]}))
 
@@ -181,10 +184,16 @@ async function demo() {
     /*console.log(await pool.displayToPinTick(1378.62))
     console.log(await pool.displayToPinTick(1691.94))*/
 
-    const pool = croc.poolEthQuote(USDC)
+    /*const pool = croc.poolEthQuote(USDC)
     console.log(await pool.spotPrice())
 
     console.log(await pool.cumAmbientGrowth())
+
+    const posView = new CrocPositionView(pool, "0x9ee66F4ac79395479d6A8Bb552AF6eC3F27049CC")
+
+    console.log(await posView.queryRangePos(199308, 201312))*/
+
+    console.log(await croc.poolEthQuote(USDC).displayPrice())
 
     //croc.sell(DAI, 200).atLimit(ETH, -64000).burn({surplus: true})
 

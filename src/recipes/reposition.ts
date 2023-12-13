@@ -16,20 +16,20 @@ interface RepositionTarget {
 
 type AmbientRange = "ambient"
 
-interface RepositionOpts {
-    slippage?: number
+export interface CrocRepositionOpts {
+    impact?: number
 }
 
 export class CrocReposition {
 
-    constructor (pool: CrocPoolView, target: RepositionTarget, opts: RepositionOpts = { }) {
+    constructor (pool: CrocPoolView, target: RepositionTarget, opts: CrocRepositionOpts = { }) {
         this.pool = pool
         this.burnRange = target.burn
         this.mintRange = target.mint
         this.liquidity = BigNumber.from(target.liquidity)
         this.spotPrice = this.pool.spotPrice()
         this.spotTick = this.pool.spotTick()
-        this.impact = opts.slippage ? opts.slippage : DEFAULT_REBAL_SLIPPAGE
+        this.impact = opts?.impact || DEFAULT_REBAL_SLIPPAGE
     }
 
     async rebal(): Promise<TransactionResponse> {        
@@ -90,7 +90,7 @@ export class CrocReposition {
         const [sellToken, buyToken] = await this.pivotTokens()
         
         let swap = new CrocSwapPlan(sellToken, buyToken, await this.convertCollateral(), 
-            false, this.impact, (await this.pool).context)
+            false, (await this.pool).context, { slippage: this.impact })
         let impact = await swap.calcImpact()
         return impact.buyQty
     }

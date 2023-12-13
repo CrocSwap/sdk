@@ -9,6 +9,14 @@ import { AddressZero } from '@ethersproject/constants';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 import { MAX_SQRT_PRICE, MIN_SQRT_PRICE } from "./constants";
 
+/* Describes the predicted impact of a given swap. 
+ * @property sellQty The total quantity of tokens predicted to be sold by the swapper to the dex.
+  * @property buyQty The total quantity of tokens predicted to be bought by the swapper from the dex.
+  * @property finalPrice The final price of the pool after the swap. *Note* this is not the same as the 
+  *                      realized swap price.
+  * @property percentChange The percent change in the pool price after the swap. Note this is not the same 
+  *                         as the swapper's slippage against the pool.
+  */
 export interface CrocImpact {
   sellQty: string,
   buyQty: string,
@@ -16,16 +24,20 @@ export interface CrocImpact {
   percentChange: number
 }
 
-export interface CrocSwapOpts {
-  surplus?: CrocSurplusFlags
-  surplusOwner?: string
+/* Options for the */
+export interface CrocSwapExecOpts {
+  settlement?: boolean | 
+    { buyDexSurplus: boolean, sellDexSurplus: boolean }
 }
 
+export interface CrocSwapPlanOpts {
+  slippage?: number
+}
 
 export class CrocSwapPlan {
 
   constructor (sellToken: CrocTokenView, buyToken: CrocTokenView, qty: TokenQty, qtyIsBuy: boolean,
-    slippage: number, context: Promise<CrocContext>) {
+    context: Promise<CrocContext>, opts: CrocSwapPlanOpts = DFLT_SWAP_ARGS) {
     [this.baseToken, this.quoteToken] = sortBaseQuoteViews(sellToken, buyToken)
     this.sellBase = (this.baseToken === sellToken)
     this.qtyInBase = (this.sellBase !== qtyIsBuy)
@@ -34,17 +46,18 @@ export class CrocSwapPlan {
     const tokenView = this.qtyInBase ? this.baseToken : this.quoteToken
     this.qty = tokenView.normQty(qty)
     
-    this.slippage = slippage
-    this.priceSlippage = slippage * PRICE_SLIP_MULT
+    this.slippage = opts.slippage || DFLT_SWAP_ARGS.slippage
+    this.priceSlippage = this.slippage * PRICE_SLIP_MULT
     this.context = context
 
     this.impact = this.calcImpact()
   }
+  
 
-
-  async swap (args: CrocSwapOpts = { }): Promise<TransactionResponse> {
+  async swap (args: CrocSwapExecOpts = { }): Promise<TransactionResponse> {
     const TIP = 0
-    const surplusFlags = this.maskSurplusArgs(args.surplus)
+
+    const surplusFlags = this.maskSurplusArgs(args)
 
     const gasEst = (await this.context).dex.estimateGas.swap
       (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
@@ -59,6 +72,24 @@ export class CrocSwapPlan {
       await this.buildTxArgs(surplusFlags, await gasEst))
   }
 
+
+  
+  async simulate (args: CrocSwapExecOpts = { }): Promise<TransactionResponse> {
+    const TIP = 0
+    const surplusFlags = this.maskSurplusArgs(args)
+
+    const gasEst = (await this.context).dex.estimateGas.swap
+      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
+      this.sellBase, this.qtyInBase, await this.qty, TIP, 
+      await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
+      await this.buildTxArgs(surplusFlags))
+
+    return (await this.context).dex.callStatic.swap
+      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
+      this.sellBase, this.qtyInBase, await this.qty, TIP, 
+      await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
+      await this.buildTxArgs(surplusFlags, await gasEst))
+  }  
 
   async calcImpact(): Promise<CrocImpact> {
     const TIP = 0
@@ -83,10 +114,20 @@ export class CrocSwapPlan {
     }
   }
 
+  private maskSurplusArgs (args?: CrocSwapExecOpts): number {
+    return encodeSurplusArg(this.maskSurplusFlags(args))
+  }
 
-  private maskSurplusArgs (args?: CrocSurplusFlags): number {
-    if (!args) { return this.maskSurplusArgs([false, false]); }
-    return encodeSurplusArg(args, !this.sellBase)
+  private maskSurplusFlags (args?: CrocSwapExecOpts): CrocSurplusFlags {
+    if (!args || !args.settlement) { 
+      return [false, false] 
+    } else if (typeof args.settlement === "boolean") {
+      return [args.settlement, args.settlement]
+    } else {
+      return this.sellBase ?
+        [args.settlement.sellDexSurplus, args.settlement.buyDexSurplus] :
+        [args.settlement.buyDexSurplus, args.settlement.sellDexSurplus]
+    }
   }
 
   private async buildTxArgs (surplusArg: number, gasEst?: BigNumber) {
@@ -151,3 +192,9 @@ export class CrocSwapPlan {
 // Price slippage limit multiplies normal slippage tolerance by amount that should
 // be reasonable (300%)
 const PRICE_SLIP_MULT = 3.0
+
+// Default slippage is set to 1%. User should evaluate this carefully for low liquidity
+// pools of when swapping large amounts.
+const DFLT_SWAP_ARGS = {
+  slippage: 0.01
+}

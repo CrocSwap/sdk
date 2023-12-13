@@ -5,12 +5,19 @@ import { AddressZero } from "@ethersproject/constants";
 import { MAX_LIQ } from "./constants";
 import { toDisplayQty, fromDisplayQty } from "./utils/token";
 
-// Convention where token quantities can be repesented either as BigNumbers, indicating that it's
-// the full wei value. *OR* can be represented as strings/numbers, indicating that the quantity
-// represents a decimal norm'ed value. E.g. 1 ETH could either be 1.0, "1.0" or BigNumber(10).pow(10)
+/* Type representing specified token quantities. This type can either represent the raw non-decimalized
+ * on-chain value in wei, if passed as a BigNuber. Or it can represent the decimalized value if passed
+ * as a string or Javascript float. */
 export type TokenQty = BigNumber | string | number;
 
+/* General top-level class for interacting with specific ERC20 tokens. Handles functionality for
+ * approval, getting token balances both in wallet and on dex, and display/decimalization. */
 export class CrocTokenView {
+
+  /* Creates a new CrocTokenView for specificied token address. 
+   * 
+   * @param context The CrocContext environment context. Specific to a given chain.
+   * @param tokenAddr The address of the token contract. Use zero address for native ETH token. */
   constructor(context: Promise<CrocContext>, tokenAddr: string) {
     this.context = context;
     this.tokenAddr = tokenAddr;
@@ -22,11 +29,17 @@ export class CrocTokenView {
     }
   }
 
-  async approve(): Promise<TransactionResponse | undefined> {
+  /* Sends a signed transaction to approve the CrocSwap contract for the ERC20 token contract.
+   *
+   * @param approveQty Optional arugment to specify the quantity to approve. Defaults to 2^120
+   *                   if unspecified. */
+  async approve (approveQty?: TokenQty): Promise<TransactionResponse | undefined> {
     if (this.isNativeEth) {
       return undefined;
     }
-    const weiQty = BigNumber.from(2).pow(120); // Lots of 0 bytes in calldata to save gas
+
+    const weiQty = approveQty ? await this.normQty(approveQty) : 
+      BigNumber.from(2).pow(120); // Lots of 0 bytes in calldata to save gas
 
     // We want to hardcode the gas limit, so we can manually pad it from the estimated
     // transaction. The default value is low gas calldata, but Metamask and other wallets
