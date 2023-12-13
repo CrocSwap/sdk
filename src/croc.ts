@@ -5,6 +5,7 @@ import { TokenQty, CrocTokenView } from './tokens';
 import { CrocSwapPlan, CrocSwapPlanOpts } from './swap';
 import { Signer } from 'ethers';
 import { CrocKnockoutHandle } from './knockout';
+import { CrocPositionView } from './position';
 
 /* This is the main entry point for the Croc SDK. It provides a high-level interface
  * for interacting with CrocSwap smart contracts in an ergonomic way. */
@@ -79,6 +80,12 @@ export class CrocEnv {
      *       crocEnv.poolEthQuote(USDC) */
     poolEthQuote (token: string): CrocPoolView {
         return this.pool(AddressZero, token)
+    }
+
+    /* Returns a position view for a single user on the canonical pool for a single pair. */
+    positions (tokenQuote: string, tokenBase: string, owner: string): CrocPositionView {
+        return new CrocPositionView(this.tokens.materialize(tokenQuote),
+            this.tokens.materialize(tokenBase), owner, this.context)
     }
 
     /* Returns a tokenView for a single token

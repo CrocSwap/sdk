@@ -26,6 +26,7 @@ export class CrocPoolView {
         this.useTrueBase = this.baseToken.tokenAddr === baseToken.tokenAddr
     }
 
+    /* Checks to see if a canonical pool has been initialized for this pair. */
     async isInit(): Promise<boolean> {
         return this.spotPrice()
             .then(p => p > 0)
