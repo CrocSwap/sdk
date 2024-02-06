@@ -39,7 +39,7 @@ export class CrocTokenView {
     }
 
     const weiQty = approveQty ? await this.normQty(approveQty) : 
-      approveQty // Lots of 0 bytes in calldata to save gas
+      MaxUint256 // Lots of 0 bytes in calldata to save gas
 
     // We want to hardcode the gas limit, so we can manually pad it from the estimated
     // transaction. The default value is low gas calldata, but Metamask and other wallets
