@@ -52,6 +52,20 @@ export class CrocPoolView {
                 (await this.context).chain.poolIndex, txArgs)
     }
 
+    async xykLiquidity (block?: BlockTag): Promise<TokenQty> {
+        let txArgs = block ? { blockTag: block } : {}
+        return (await this.context).query.queryLiquidity
+            (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+                (await this.context).chain.poolIndex, txArgs)
+    }
+
+    async curveState (block?: BlockTag) {
+        let txArgs = block ? { blockTag: block } : {}
+        return (await this.context).query.queryCurve
+            (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+                (await this.context).chain.poolIndex, txArgs)
+    }
+
     async cumAmbientGrowth (block?: BlockTag): Promise<number> {
         let txArgs = block ? { blockTag: block } : {}
         const queryCurve = (await this.context).query.queryCurve
