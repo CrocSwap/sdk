@@ -30,7 +30,7 @@ export class KnockoutEncoder {
     encodeKnockoutBurnLiq (liq: BigNumberish, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number): string {
         const BURN_SUBCMD = 92
-        const suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [liq, true, false])
+        const suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [liq, true, true])
         return this.encodeCommonArgs(BURN_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
     }
 
