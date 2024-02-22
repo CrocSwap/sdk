@@ -105,6 +105,27 @@ const MAINNET_CHAIN: ChainSpec = {
   logoUrl: ETHEREUM_LOGO,
 };
 
+const SEPOLIA_CHAIN: ChainSpec = {
+  nodeUrl: "https://sepolia.infura.io/v3/360ea5fda45b4a22883de8522ebd639e",
+  addrs: {
+    dex: "0xFb8A46E7963E6397DBB4B2E1c0B3f0464fb5BDFF",
+    query: "0xDB182F4687708D0F5798c77b4d02ad3425f4B672",
+    impact: "0x80aEB76D091ecbEd3c609c0B794fC1A09B9cB8F4"
+  },
+  poolIndex: 36000,
+  isTestNet: true,
+  chainId: "0x1",
+  gridSize: 16,
+  proxyPaths: {
+    cold: 3,
+    long: 4,
+    liq: 2
+  },
+  blockExplorer: "https://sepolia.etherscan.io/",
+  displayName: "Ethereum",
+  logoUrl: ETHEREUM_LOGO,
+};
+
 const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
   nodeUrl: "https://sepolia-rpc.scroll.io",
   addrs: {
@@ -158,9 +179,11 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x5": GOERLI_CHAIN,
   "0x7a69": LOCAL_FORK_CHAIN,
   "0x66eed": ARB_GOERLI_CHAIN,
+  "0xaa36a7": SEPOLIA_CHAIN,
   "0x8274f": SCROLL_SEPOLIA_CHAIN,
   "0x82750": SCROLL_CHAIN,
   "goerli": GOERLI_CHAIN,
+  "sepolia": SEPOLIA_CHAIN,
   "arbtest": ARB_GOERLI_CHAIN,
   "arbgoerli": ARB_GOERLI_CHAIN,
   "local": LOCAL_FORK_CHAIN,
