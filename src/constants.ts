@@ -114,7 +114,7 @@ const SEPOLIA_CHAIN: ChainSpec = {
   },
   poolIndex: 36000,
   isTestNet: true,
-  chainId: "0x1",
+  chainId: "0xaa36a7",
   gridSize: 16,
   proxyPaths: {
     cold: 3,
@@ -122,7 +122,7 @@ const SEPOLIA_CHAIN: ChainSpec = {
     liq: 2
   },
   blockExplorer: "https://sepolia.etherscan.io/",
-  displayName: "Ethereum",
+  displayName: "Sepolia",
   logoUrl: ETHEREUM_LOGO,
 };
 
