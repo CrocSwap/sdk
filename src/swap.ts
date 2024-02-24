@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, ContractFunction } from "ethers";
 
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
@@ -8,6 +8,8 @@ import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './toke
 import { AddressZero } from '@ethersproject/constants';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 import { MAX_SQRT_PRICE, MIN_SQRT_PRICE } from "./constants";
+import { AbiCoder } from "ethers/lib/utils";
+import { CrocSlotReader } from "./slots";
 
 /* Describes the predicted impact of a given swap. 
  * @property sellQty The total quantity of tokens predicted to be sold by the swapper to the dex.
@@ -28,6 +30,7 @@ export interface CrocImpact {
 export interface CrocSwapExecOpts {
   settlement?: boolean | 
     { buyDexSurplus: boolean, sellDexSurplus: boolean }
+  gasEst?: BigNumber
 }
 
 export interface CrocSwapPlanOpts {
@@ -51,45 +54,65 @@ export class CrocSwapPlan {
     this.context = context
 
     this.impact = this.calcImpact()
+    this.useProxy = false
   }
   
-
   async swap (args: CrocSwapExecOpts = { }): Promise<TransactionResponse> {
-    const TIP = 0
-
-    const surplusFlags = this.maskSurplusArgs(args)
-
-    const gasEst = (await this.context).dex.estimateGas.swap
-      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
-      this.sellBase, this.qtyInBase, await this.qty, TIP, 
-      await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
-      await this.buildTxArgs(surplusFlags))
-
-    return (await this.context).dex.swap
-      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
-      this.sellBase, this.qtyInBase, await this.qty, TIP, 
-      await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
-      await this.buildTxArgs(surplusFlags, await gasEst))
+    const gasEst = await this.estimateGas(args)
+    const callArgs = Object.assign({gasEst: gasEst }, args)
+    return this.sendTx(Object.assign({}, args, callArgs))
   }
-
-
   
   async simulate (args: CrocSwapExecOpts = { }): Promise<TransactionResponse> {
+    const gasEst = await this.estimateGas(args)
+    const callArgs = Object.assign({gasEst: gasEst }, args)
+    return this.callStatic(Object.assign({}, args, callArgs))
+  }
+
+  private async sendTx (args: CrocSwapExecOpts): Promise<TransactionResponse> {
+    return this.hotPathCall((await this.context).dex, args)
+  }
+
+  private async callStatic (args: CrocSwapExecOpts): Promise<TransactionResponse> {
+    return this.hotPathCall((await this.context).dex.callStatic, args)
+  }
+
+  async estimateGas (args: CrocSwapExecOpts = { }): Promise<BigNumber> {
+    return this.hotPathCall((await this.context).dex.estimateGas, args)
+  }
+
+  private async hotPathCall<T> (base: { [name: string]: ContractFunction<T>; }, args: CrocSwapExecOpts) {
+    const reader = new CrocSlotReader(this.context)
+    if (this.useProxy) { return this.userCmdCall(base, args) }
+    return await reader.isHotPathOpen() ?
+      this.swapCall(base, args) : this.userCmdCall(base, args)
+  }
+
+  private async swapCall<T> (base: { [name: string]: ContractFunction<T>; }, args: CrocSwapExecOpts) {
     const TIP = 0
     const surplusFlags = this.maskSurplusArgs(args)
 
-    const gasEst = (await this.context).dex.estimateGas.swap
+    return base.swap
       (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP, 
       await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
-      await this.buildTxArgs(surplusFlags))
+      await this.buildTxArgs(surplusFlags, args.gasEst), )
+  }
 
-    return (await this.context).dex.callStatic.swap
-      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
-      this.sellBase, this.qtyInBase, await this.qty, TIP, 
-      await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
-      await this.buildTxArgs(surplusFlags, await gasEst))
-  }  
+  private async userCmdCall<T> (base: { [name: string]: ContractFunction<T>; }, args: CrocSwapExecOpts) {
+    const TIP = 0
+    const surplusFlags = this.maskSurplusArgs(args)
+
+    const HOT_PROXY_IDX = 1
+
+    let abi = new AbiCoder()
+    let cmd = abi.encode(["address", "address", "uint256", "bool", "bool", "uint128", "uint16", "uint128", "uint128", "uint8"],
+      [this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
+       this.sellBase, this.qtyInBase, await this.qty, TIP, 
+       await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags])
+
+    return base.userCmd(HOT_PROXY_IDX, cmd, await this.buildTxArgs(surplusFlags, args.gasEst))
+  }
 
   async calcImpact(): Promise<CrocImpact> {
     const TIP = 0
@@ -177,6 +200,11 @@ export class CrocSwapPlan {
     return this.sellBase ? MAX_SQRT_PRICE : MIN_SQRT_PRICE
   }
 
+  forceProxy(): CrocSwapPlan {
+    this.useProxy = true
+    return this
+  }
+
   readonly baseToken: CrocTokenView
   readonly quoteToken: CrocTokenView
   readonly qty: Promise<BigNumber>
@@ -187,6 +215,7 @@ export class CrocSwapPlan {
   readonly poolView: CrocPoolView
   readonly context: Promise<CrocContext>
   readonly impact: Promise<CrocImpact>
+  private useProxy: boolean
 }
 
 // Price slippage limit multiplies normal slippage tolerance by amount that should
