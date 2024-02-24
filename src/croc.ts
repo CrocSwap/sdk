@@ -6,6 +6,7 @@ import { CrocSwapPlan, CrocSwapPlanOpts } from './swap';
 import { Signer } from 'ethers';
 import { CrocKnockoutHandle } from './knockout';
 import { CrocPositionView } from './position';
+import { CrocSlotReader } from './slots';
 
 /* This is the main entry point for the Croc SDK. It provides a high-level interface
  * for interacting with CrocSwap smart contracts in an ergonomic way. */
@@ -97,6 +98,10 @@ export class CrocEnv {
     /* Returns a tokenView for native ETH. */
     tokenEth(): CrocTokenView {
         return this.tokens.materialize(AddressZero)
+    }
+
+    slotReader(): CrocSlotReader {
+        return new CrocSlotReader(this.context)
     }
 
     readonly context: Promise<CrocContext>
