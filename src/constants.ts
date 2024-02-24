@@ -17,7 +17,9 @@ export interface ChainSpec {
   addrs: {
     dex: ChainAddress;
     query: ChainAddress;
-    impact: ChainAddress
+    impact: ChainAddress;
+    router?: ChainAddress
+    routerBypass?: ChainAddress
   }
   isTestNet: boolean;
   chainId: ChainId;
@@ -110,7 +112,9 @@ const SEPOLIA_CHAIN: ChainSpec = {
   addrs: {
     dex: "0xFb8A46E7963E6397DBB4B2E1c0B3f0464fb5BDFF",
     query: "0xDB182F4687708D0F5798c77b4d02ad3425f4B672",
-    impact: "0x80aEB76D091ecbEd3c609c0B794fC1A09B9cB8F4"
+    impact: "0x80aEB76D091ecbEd3c609c0B794fC1A09B9cB8F4",
+    router: "0x168dB7Ad649D9f7918028F709C5e2F245af284A4",
+    routerBypass: "0xBC3d1Bb2d8A59eb25DA1E527bF0cA62B44346EE1"
   },
   poolIndex: 36000,
   isTestNet: true,

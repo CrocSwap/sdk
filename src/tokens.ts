@@ -34,6 +34,14 @@ export class CrocTokenView {
    * @param approveQty Optional arugment to specify the quantity to approve. Defaults to 2^120
    *                   if unspecified. */
   async approve (approveQty?: TokenQty): Promise<TransactionResponse | undefined> {
+    return this.approveAddr((await this.context).dex.address, approveQty)
+  }
+
+  async approveRouter (approveQty?: TokenQty): Promise<TransactionResponse | undefined> {
+    return this.approveAddr((await this.context).router.address, approveQty)
+  }
+
+  private async approveAddr (addr: string, approveQty?: TokenQty): Promise<TransactionResponse | undefined> {
     if (this.isNativeEth) {
       return undefined;
     }
@@ -45,14 +53,23 @@ export class CrocTokenView {
     // will often ask users to change the approval amount. Without the padding, approval
     // transactions can run out of gas.
     const gasEst = (await this.resolveWrite()).estimateGas.approve(
-      (await this.context).dex.address,
+      addr,
       weiQty
     );
 
     return (await this.resolveWrite()).approve(
-      (await this.context).dex.address,
-      weiQty, { gasLimit: (await gasEst).add(2000)}
+      addr, weiQty, { gasLimit: (await gasEst).add(2000)}
     );
+  }
+
+  async approveBypassRouter(): Promise<TransactionResponse | undefined> {
+    let abiCoder = new ethers.utils.AbiCoder()
+    const MANY_CALLS = 1000000000
+    const HOT_PROXY_IDX = 1
+    const COLD_PROXY_IDX = 3
+    const cmd = abiCoder.encode(["uint8", "address", "uint32", "uint16[]"],
+            [72, (await this.context).routerBypass.address, MANY_CALLS, [HOT_PROXY_IDX]])
+    return (await this.context).dex.userCmd(COLD_PROXY_IDX, cmd)
   }
 
   async wallet (address: string): Promise<BigNumber> {

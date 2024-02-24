@@ -54,7 +54,7 @@ export class CrocSwapPlan {
     this.context = context
 
     this.impact = this.calcImpact()
-    this.useProxy = false
+    this.callType = ""
   }
   
   async swap (args: CrocSwapExecOpts = { }): Promise<TransactionResponse> {
@@ -70,22 +70,41 @@ export class CrocSwapPlan {
   }
 
   private async sendTx (args: CrocSwapExecOpts): Promise<TransactionResponse> {
-    return this.hotPathCall((await this.context).dex, args)
+    return this.hotPathCall(await this.txBase(), args)
   }
 
   private async callStatic (args: CrocSwapExecOpts): Promise<TransactionResponse> {
-    return this.hotPathCall((await this.context).dex.callStatic, args)
+    const base = await this.txBase()
+    return this.hotPathCall(base.callStatic, args)
   }
 
   async estimateGas (args: CrocSwapExecOpts = { }): Promise<BigNumber> {
-    return this.hotPathCall((await this.context).dex.estimateGas, args)
+    const base = await this.txBase()
+    return this.hotPathCall(base.estimateGas, args)
+  }
+
+  private async txBase() {
+    if (this.callType === "router") {
+      return (await this.context).router
+    } else if (this.callType === "bypass") {
+      return (await this.context).routerBypass
+    } else {
+      return (await this.context).dex
+    }
   }
 
   private async hotPathCall<T> (base: { [name: string]: ContractFunction<T>; }, args: CrocSwapExecOpts) {
     const reader = new CrocSlotReader(this.context)
-    if (this.useProxy) { return this.userCmdCall(base, args) }
-    return await reader.isHotPathOpen() ?
-      this.swapCall(base, args) : this.userCmdCall(base, args)
+    if (this.callType === "proxy") { 
+      return this.userCmdCall(base, args) 
+    } else if (this.callType === "router") {
+      return this.swapCall(base, args)
+    } else if (this.callType === "bypass") {
+      return this.swapCall(base, args)
+    } else {
+      return await reader.isHotPathOpen() ?
+        this.swapCall(base, args) : this.userCmdCall(base, args)
+    }
   }
 
   private async swapCall<T> (base: { [name: string]: ContractFunction<T>; }, args: CrocSwapExecOpts) {
@@ -201,7 +220,17 @@ export class CrocSwapPlan {
   }
 
   forceProxy(): CrocSwapPlan {
-    this.useProxy = true
+    this.callType = "proxy"
+    return this
+  }
+
+  useRouter(): CrocSwapPlan {
+    this.callType = "router"
+    return this
+  }
+
+  useBypass(): CrocSwapPlan {
+    this.callType = "bypass"
     return this
   }
 
@@ -215,7 +244,7 @@ export class CrocSwapPlan {
   readonly poolView: CrocPoolView
   readonly context: Promise<CrocContext>
   readonly impact: Promise<CrocImpact>
-  private useProxy: boolean
+  private callType: string
 }
 
 // Price slippage limit multiplies normal slippage tolerance by amount that should
