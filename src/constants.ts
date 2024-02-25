@@ -197,4 +197,5 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "mainnet": MAINNET_CHAIN,
   "scrolltest": SCROLL_SEPOLIA_CHAIN,
   "scroll": SCROLL_CHAIN,
+  "scrollsepolia": SCROLL_SEPOLIA_CHAIN,
 };
