@@ -91,7 +91,9 @@ const MAINNET_CHAIN: ChainSpec = {
   addrs: {
     dex: "0xAaAaAAAaA24eEeb8d57D431224f73832bC34f688",
     query: "0xc2e1f740E11294C64adE66f69a1271C5B32004c8",
-    impact: "0x3e3EDd3eD7621891E574E5d7f47b1f30A994c0D0"
+    impact: "0x3e3EDd3eD7621891E574E5d7f47b1f30A994c0D0",
+    router: "0x533E164ded63f4c55E83E1f409BDf2BaC5278035",
+    routerBypass: "0x533E164ded63f4c55E83E1f409BDf2BaC5278035"
   },
   poolIndex: 420,
   isTestNet: false,
@@ -158,7 +160,9 @@ const SCROLL_CHAIN: ChainSpec = {
   addrs: {
     dex: "0xaaaaAAAACB71BF2C8CaE522EA5fa455571A74106",
     query: "0x62223e90605845Cf5CC6DAE6E0de4CDA130d6DDf",
-    impact: "0xc2c301759B5e0C385a38e678014868A33E2F3ae3"
+    impact: "0xc2c301759B5e0C385a38e678014868A33E2F3ae3",
+    router: "0xfB5f26851E03449A0403Ca945eBB4201415fd1fc",
+    routerBypass: "0xED5535C6237f72BD9b4fDEAa3b6D8d9998b4C4e4",
   },
   poolIndex: 420,
   isTestNet: false,
