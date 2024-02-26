@@ -74,7 +74,7 @@ export class CrocSwapPlan {
 
 
   
-  async simulate (args: CrocSwapExecOpts = { }): Promise<TransactionResponse> {
+  async simulate (args: CrocSwapExecOpts = { }): Promise<BigNumber> {
     const TIP = 0
     const surplusFlags = this.maskSurplusArgs(args)
 
