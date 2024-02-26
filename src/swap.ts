@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, Transaction } from "ethers";
 
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
@@ -90,6 +90,32 @@ export class CrocSwapPlan {
       await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
       await this.buildTxArgs(surplusFlags, await gasEst))
   }  
+
+  async getFauxTx (args: CrocSwapExecOpts = { }): Promise<Transaction> {
+    const TIP = 0
+    const surplusFlags = this.maskSurplusArgs(args)
+
+    const unsignedTx = await (await this.context).dex.populateTransaction.swap
+      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
+      this.sellBase, this.qtyInBase, await this.qty, TIP, 
+      await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
+      await this.buildTxArgs(surplusFlags))
+
+    const r = "0x" + "ff".repeat(32)
+    const s = "0x" + "ff".repeat(32)
+    const v = 0xff
+
+    return {
+      ...unsignedTx,
+      chainId: unsignedTx.chainId || 0xffff,
+      data: unsignedTx.data || "0x",
+      gasLimit: unsignedTx.gasLimit || BigNumber.from(0),
+      gasPrice: unsignedTx.gasPrice || BigNumber.from(0),
+      nonce: 0xffff,
+      value: unsignedTx.value || BigNumber.from(0),
+      r, s, v,
+    }
+  }
 
   async calcImpact(): Promise<CrocImpact> {
     const TIP = 0
