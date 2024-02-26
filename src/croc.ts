@@ -7,6 +7,7 @@ import { Signer } from 'ethers';
 import { CrocKnockoutHandle } from './knockout';
 import { CrocPositionView } from './position';
 import { CrocSlotReader } from './slots';
+import { TransactionResponse } from "@ethersproject/providers";
 
 /* This is the main entry point for the Croc SDK. It provides a high-level interface
  * for interacting with CrocSwap smart contracts in an ergonomic way. */
@@ -98,6 +99,10 @@ export class CrocEnv {
     /* Returns a tokenView for native ETH. */
     tokenEth(): CrocTokenView {
         return this.tokens.materialize(AddressZero)
+    }
+
+    async approveBypassRouter(): Promise<TransactionResponse | undefined> {
+        return this.tokenEth().approveBypassRouter()
     }
 
     slotReader(): CrocSlotReader {
