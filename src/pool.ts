@@ -1,6 +1,6 @@
 /* eslint-disable prefer-const */
 import { CrocContext } from "./context";
-import { decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew, pinTickLower, pinTickUpper, neighborTicks, pinTickOutside, tickToPrice } from './utils';
+import { decodeCrocPrice, toDisplayPrice, bigNumToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew, pinTickLower, pinTickUpper, neighborTicks, pinTickOutside, tickToPrice, concBaseSlippagePrice, concQuoteSlippagePrice } from './utils';
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { TransactionResponse } from '@ethersproject/providers';
 import { WarmPathEncoder } from './encoding/liquidity';
@@ -208,7 +208,8 @@ export class CrocPoolView {
         return this.sendCmd(calldata, {value: await msgVal})
     }
 
-    private async boundLimits (range: TickRange, limits: PriceRange): Promise<PriceRange> {
+    private async boundLimits (range: TickRange, limits: PriceRange, isQtyBase: boolean, 
+        floatingSlippage: number = 0.1): Promise<PriceRange> {
         let spotPrice = this.spotPrice()
         const [lowerPrice, upperPrice] = this.rangeToPrice(range)
         const [boundLower, boundUpper] = await this.transformLimits(limits)
@@ -220,14 +221,12 @@ export class CrocPoolView {
             amplifyLower = upperPrice*BOUND_PREC
         } else if (lowerPrice > await spotPrice) {
             amplifyUpper = lowerPrice/BOUND_PREC
-
         } else {
-            // Generally assume we don't want to send more than 1% more than the floating side
-            const MAX_AMPLICATION = 1.02
-            const slippageCap = 1 - Math.pow(1 - 1/MAX_AMPLICATION, 2)
-
-            amplifyLower = ((await spotPrice) - lowerPrice) * slippageCap + lowerPrice
-            amplifyUpper = upperPrice - (upperPrice - (await spotPrice)) * slippageCap
+            if (isQtyBase) {
+                amplifyLower = concBaseSlippagePrice(await spotPrice, upperPrice, floatingSlippage)
+            } else {
+                amplifyUpper = concQuoteSlippagePrice(await spotPrice, lowerPrice, floatingSlippage)
+            }
         }
 
         return this.untransformLimits(
@@ -258,7 +257,7 @@ export class CrocPoolView {
 
     private async mintRange (qty: TokenQty, isQtyBase: boolean, 
         range: TickRange, limits: PriceRange, opts?: CrocLpOpts): Promise<TransactionResponse> {
-        const saneLimits = await this.boundLimits(range, limits)
+        const saneLimits = await this.boundLimits(range, limits, isQtyBase, opts?.floatingSlippage)
 
         let msgVal = this.msgValRange(qty, isQtyBase, range, await saneLimits, opts)
         let weiQty = this.normQty(qty, isQtyBase)
@@ -349,4 +348,5 @@ export class CrocPoolView {
 
 export interface CrocLpOpts {
     surplus?: CrocSurplusFlags
+    floatingSlippage?: number
 }

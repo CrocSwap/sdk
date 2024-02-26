@@ -4,19 +4,44 @@ import { ethers } from 'ethers';
 
 //const ETH = ethers.constants.AddressZero
 //const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
-//const USDC = "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"
 
-const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+// Scroll
+const USDC = "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"
+
+// Mainnet
+//const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+
+// Sepolia
+//const USDC = "0x60bBA138A74C5e7326885De5090700626950d509"
 
 // deepcode ignore HardcodedSecret: testnet dummy key
-const KEY = "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
+const KEY = process.env.WALLET_KEY || "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
 
 async function demo() {
     const wallet = new ethers.Wallet(KEY)
 
-    const croc = new CrocEnv("mainnet", wallet)
+    const croc = new CrocEnv("scroll", wallet)
 
-    //console.log(await croc.sellEth(0.01).for(USDC).swap({ surplus: [true, false]}))
+    //console.log(await croc.approveBypassRouter())
+    //console.log(await croc.token(USDC).approveRouter(100))
+
+    console.log((await croc.buy(USDC, 5).withEth().useRouter().swap()))
+    /*console.log((await croc.sell(USDC, 0.01).forEth().useBypass().swap()))
+    console.log((await croc.sellEth(0.00001).for(USDC).useBypass().swap()))
+    console.log((await croc.buyEth(0.00001).with(USDC).useBypass().swap()))*/
+
+    /*const types = ["uint128","uint128","uint128","uint64","uint64","int24","bool","bool","uint8","uint128","uint128",
+        "uint8","uint16","uint8","uint16","uint8","uint8","uint8","bytes32","address"]
+    console.log(abi.decode(types, log))*/
+
+    //await croc.token(USDC).approve(0.001)
+    //await croc.token(USDC).approveRouter()
+    //await croc.token(USDC).approveBypassRouter()
+    
+    //console.log((await croc.sell(USDC, 7.5).forEth().useBypass().swap()))
+    //console.log((await croc.sellEth(0).for(USDC).swap()))
+    //console.log((await croc.buy(USDC, 1).withEth().useBypass().swap()))
+    //console.log((await croc.buyEth(0).with(USDC).forceProxy().swap()))
 
     /*croc.token(DAI).deposit(1, wallet.address)
     croc.token(DAI).withdraw(0.25, wallet.address)
@@ -193,12 +218,16 @@ async function demo() {
 
     console.log(await posView.queryRangePos(199308, 201312))*/
 
-    console.log(await croc.poolEthQuote(USDC).displayPrice())
+    //console.log(await croc.poolEthQuote(USDC).displayPrice())
 
     //croc.sell(DAI, 200).atLimit(ETH, -64000).burn({surplus: true})
 
     /*console.log((await croc.tokenEth().balance("benwolski.eth")).toString())
     console.log(await croc.tokenEth().balanceDisplay("benwolski.eth"))*/
+
+    /*croc.slotReader().isHotPathOpen().then(console.log)
+    console.log(await croc.slotReader().proxyContract(1))
+    console.log(await croc.slotReader().proxyContract(131))*/
 }
 
 demo()

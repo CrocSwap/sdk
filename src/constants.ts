@@ -17,7 +17,9 @@ export interface ChainSpec {
   addrs: {
     dex: ChainAddress;
     query: ChainAddress;
-    impact: ChainAddress
+    impact: ChainAddress;
+    router?: ChainAddress
+    routerBypass?: ChainAddress
   }
   isTestNet: boolean;
   chainId: ChainId;
@@ -84,12 +86,14 @@ const ARB_GOERLI_CHAIN: ChainSpec = {
 };
 
 const MAINNET_CHAIN: ChainSpec = {
-  nodeUrl: "https://mainnet.infura.io/v3/360ea5fda45b4a22883de8522ebd639e",
-  wsUrl: "wss://mainnet.infura.io/ws/v3/360ea5fda45b4a22883de8522ebd639e",
+  nodeUrl: "https://mainnet.infura.io/v3/" + DFLT_SDK_INFURA_KEY,
+  wsUrl: "wss://mainnet.infura.io/ws/v3/" + DFLT_SDK_INFURA_KEY,
   addrs: {
     dex: "0xAaAaAAAaA24eEeb8d57D431224f73832bC34f688",
     query: "0xc2e1f740E11294C64adE66f69a1271C5B32004c8",
-    impact: "0x3e3EDd3eD7621891E574E5d7f47b1f30A994c0D0"
+    impact: "0x3e3EDd3eD7621891E574E5d7f47b1f30A994c0D0",
+    router: "0x533E164ded63f4c55E83E1f409BDf2BaC5278035",
+    routerBypass: "0xa3e58B0cB05447398358B6C59E4B2465342EFEd2"
   },
   poolIndex: 420,
   isTestNet: false,
@@ -106,11 +110,14 @@ const MAINNET_CHAIN: ChainSpec = {
 };
 
 const SEPOLIA_CHAIN: ChainSpec = {
-  nodeUrl: "https://sepolia.infura.io/v3/360ea5fda45b4a22883de8522ebd639e",
+  nodeUrl: "https://sepolia.infura.io/v3/" + DFLT_SDK_INFURA_KEY,
+  wsUrl: "wss://sepolia.infura.io/ws/v3/" + DFLT_SDK_INFURA_KEY,
   addrs: {
     dex: "0xFb8A46E7963E6397DBB4B2E1c0B3f0464fb5BDFF",
     query: "0xDB182F4687708D0F5798c77b4d02ad3425f4B672",
-    impact: "0x80aEB76D091ecbEd3c609c0B794fC1A09B9cB8F4"
+    impact: "0x80aEB76D091ecbEd3c609c0B794fC1A09B9cB8F4",
+    router: "0x168dB7Ad649D9f7918028F709C5e2F245af284A4",
+    routerBypass: "0xBC3d1Bb2d8A59eb25DA1E527bF0cA62B44346EE1"
   },
   poolIndex: 36000,
   isTestNet: true,
@@ -131,7 +138,9 @@ const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
   addrs: {
     dex: "0xaaAAAaa6612bd88cD409cb0D70C99556C87A0E8c",
     query: "0x43eC1302FE3587862e15B2D52AD9653575FD79e9",
-    impact: "0x9B28970D51A231741416D8D3e5281d9c51a50892"
+    impact: "0x9B28970D51A231741416D8D3e5281d9c51a50892",
+    router: "0x323172539B1B0D9eDDFFBd0318C4d6Ab45292843",
+    routerBypass: "0xb2aE163293C82DCF36b0cE704591eDC2f9E2608D"
   },
   poolIndex: 36000,
   isTestNet: true,
@@ -152,7 +161,9 @@ const SCROLL_CHAIN: ChainSpec = {
   addrs: {
     dex: "0xaaaaAAAACB71BF2C8CaE522EA5fa455571A74106",
     query: "0x62223e90605845Cf5CC6DAE6E0de4CDA130d6DDf",
-    impact: "0xc2c301759B5e0C385a38e678014868A33E2F3ae3"
+    impact: "0xc2c301759B5e0C385a38e678014868A33E2F3ae3",
+    router: "0xfB5f26851E03449A0403Ca945eBB4201415fd1fc",
+    routerBypass: "0xED5535C6237f72BD9b4fDEAa3b6D8d9998b4C4e4",
   },
   poolIndex: 420,
   isTestNet: false,
@@ -191,4 +202,5 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "mainnet": MAINNET_CHAIN,
   "scrolltest": SCROLL_SEPOLIA_CHAIN,
   "scroll": SCROLL_CHAIN,
+  "scrollsepolia": SCROLL_SEPOLIA_CHAIN,
 };
