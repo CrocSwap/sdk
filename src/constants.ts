@@ -93,7 +93,7 @@ const MAINNET_CHAIN: ChainSpec = {
     query: "0xc2e1f740E11294C64adE66f69a1271C5B32004c8",
     impact: "0x3e3EDd3eD7621891E574E5d7f47b1f30A994c0D0",
     router: "0x533E164ded63f4c55E83E1f409BDf2BaC5278035",
-    routerBypass: "0x533E164ded63f4c55E83E1f409BDf2BaC5278035"
+    routerBypass: "0xa3e58B0cB05447398358B6C59E4B2465342EFEd2"
   },
   poolIndex: 420,
   isTestNet: false,
