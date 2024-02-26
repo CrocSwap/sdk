@@ -86,8 +86,8 @@ const ARB_GOERLI_CHAIN: ChainSpec = {
 };
 
 const MAINNET_CHAIN: ChainSpec = {
-  nodeUrl: "https://mainnet.infura.io/v3/360ea5fda45b4a22883de8522ebd639e",
-  wsUrl: "wss://mainnet.infura.io/ws/v3/360ea5fda45b4a22883de8522ebd639e",
+  nodeUrl: "https://mainnet.infura.io/v3/" + DFLT_SDK_INFURA_KEY,
+  wsUrl: "wss://mainnet.infura.io/ws/v3/" + DFLT_SDK_INFURA_KEY,
   addrs: {
     dex: "0xAaAaAAAaA24eEeb8d57D431224f73832bC34f688",
     query: "0xc2e1f740E11294C64adE66f69a1271C5B32004c8",
@@ -110,7 +110,8 @@ const MAINNET_CHAIN: ChainSpec = {
 };
 
 const SEPOLIA_CHAIN: ChainSpec = {
-  nodeUrl: "https://sepolia.infura.io/v3/360ea5fda45b4a22883de8522ebd639e",
+  nodeUrl: "https://sepolia.infura.io/v3/" + DFLT_SDK_INFURA_KEY,
+  wsUrl: "wss://sepolia.infura.io/ws/v3/" + DFLT_SDK_INFURA_KEY,
   addrs: {
     dex: "0xFb8A46E7963E6397DBB4B2E1c0B3f0464fb5BDFF",
     query: "0xDB182F4687708D0F5798c77b4d02ad3425f4B672",
