@@ -85,9 +85,15 @@ export class CrocSwapPlan {
 
   private async txBase() {
     if (this.callType === "router") {
-      return (await this.context).router
-    } else if (this.callType === "bypass") {
-      return (await this.context).routerBypass
+      let router = (await this.context).router
+      if (!router) { throw new Error("Router not available on network") }  
+      return router
+
+    } else if (this.callType === "bypass" && (await this.context).routerBypass) {
+      let router = (await this.context).routerBypass
+      if (!router) { throw new Error("Router not available on network") }
+      return router || (await this.context).dex
+      
     } else {
       return (await this.context).dex
     }

@@ -38,7 +38,8 @@ export class CrocTokenView {
   }
 
   async approveRouter (approveQty?: TokenQty): Promise<TransactionResponse | undefined> {
-    return this.approveAddr((await this.context).router.address, approveQty)
+    let router = (await this.context).router
+    return router && this.approveAddr(router.address, approveQty)
   }
 
   private async approveAddr (addr: string, approveQty?: TokenQty): Promise<TransactionResponse | undefined> {
@@ -63,12 +64,17 @@ export class CrocTokenView {
   }
 
   async approveBypassRouter(): Promise<TransactionResponse | undefined> {
+    let router = (await this.context).router
+    if (!router) {
+      return undefined
+    }
+
     let abiCoder = new ethers.utils.AbiCoder()
     const MANY_CALLS = 1000000000
     const HOT_PROXY_IDX = 1
     const COLD_PROXY_IDX = 3
     const cmd = abiCoder.encode(["uint8", "address", "uint32", "uint16[]"],
-            [72, (await this.context).routerBypass.address, MANY_CALLS, [HOT_PROXY_IDX]])
+            [72, router.address, MANY_CALLS, [HOT_PROXY_IDX]])
     return (await this.context).dex.userCmd(COLD_PROXY_IDX, cmd)
   }
 

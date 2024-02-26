@@ -9,8 +9,8 @@ import { ERC20_READ_ABI } from "./abis/erc20.read";
 export interface CrocContext {
   provider: Provider;
   dex: Contract;
-  router: Contract;
-  routerBypass: Contract;
+  router?: Contract;
+  routerBypass?: Contract;
   query: Contract;
   slipQuery: Contract;
   erc20Read: Contract;
@@ -107,8 +107,8 @@ function inflateContracts(
   return {
     provider: provider,
     dex: new Contract(context.addrs.dex, CROC_ABI, actor),
-    router: new Contract(context.addrs.router || AddressZero, CROC_ABI, actor),
-    routerBypass: new Contract(context.addrs.routerBypass || AddressZero, CROC_ABI, actor),
+    router: context.addrs.router ? new Contract(context.addrs.router || AddressZero, CROC_ABI, actor) : undefined,
+    routerBypass: context.addrs.routerBypass ? new Contract(context.addrs.routerBypass || AddressZero, CROC_ABI, actor) : undefined,
     query: new Contract(context.addrs.query, QUERY_ABI, provider),
     slipQuery: new Contract(context.addrs.impact, IMPACT_ABI, provider),
     erc20Write: new Contract(AddressZero, ERC20_ABI, actor),
