@@ -199,8 +199,17 @@ export function capitalConcFactor(
   return 1 / ((base + quote) / 2.0)
 }
 
+export function concBaseSlippagePrice (spotPrice: number, upperPrice: number, slippage: number): number {
+  const delta = Math.sqrt(upperPrice) - Math.sqrt(spotPrice)
+  const lowerSqrt = Math.sqrt(upperPrice) - delta * (1 + slippage)
+  return Math.pow(lowerSqrt, 2)
+}
 
-
+export function concQuoteSlippagePrice (spotPrice: number, lowerPrice: number, slippage: number): number {
+  const delta = Math.sqrt(spotPrice) - Math.sqrt(lowerPrice)
+  const upperSqrt = ((1 + slippage) * delta) + Math.sqrt(lowerPrice)
+  return Math.pow(upperSqrt, 2)
+}
 
 /* Rounds a liquidity magnitude to a multiple that can be used inside the protocol. */
 export function roundForConcLiq(liq: BigNumber): BigNumber {
