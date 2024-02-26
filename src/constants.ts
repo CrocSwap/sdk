@@ -27,7 +27,8 @@ export interface ChainSpec {
   proxyPaths: {
     cold: number,
     liq: number,
-    long: number
+    long: number,
+    dfltColdSwap?: boolean
   }
   blockExplorer?: string;
   displayName: string;
@@ -102,7 +103,8 @@ const MAINNET_CHAIN: ChainSpec = {
   proxyPaths: {
     cold: 3,
     long: 4,
-    liq: 2
+    liq: 2,
+    dfltColdSwap: true
   },
   blockExplorer: "https://etherscan.io/",
   displayName: "Ethereum",
@@ -172,7 +174,8 @@ const SCROLL_CHAIN: ChainSpec = {
   proxyPaths: {
     cold: 3,
     long: 130,
-    liq: 128
+    liq: 128,
+    dfltColdSwap: true
   },
   blockExplorer: "https://scrollscan.com/",
   displayName: "Scroll",

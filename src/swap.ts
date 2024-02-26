@@ -101,12 +101,12 @@ export class CrocSwapPlan {
 
   private async hotPathCall<T> (base: { [name: string]: ContractFunction<T>; }, args: CrocSwapExecOpts) {
     const reader = new CrocSlotReader(this.context)
-    if (this.callType === "proxy") { 
-      return this.userCmdCall(base, args) 
-    } else if (this.callType === "router") {
+    if (this.callType === "router") {
       return this.swapCall(base, args)
     } else if (this.callType === "bypass") {
       return this.swapCall(base, args)
+    } else if (this.callType === "proxy" || (await this.context).chain.proxyPaths.dfltColdSwap) { 
+      return this.userCmdCall(base, args) 
     } else {
       return await reader.isHotPathOpen() ?
         this.swapCall(base, args) : this.userCmdCall(base, args)
