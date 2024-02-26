@@ -1,4 +1,4 @@
-import { BigNumber, Contract, Transaction, utils } from "ethers";
+import { BigNumber, Contract, PopulatedTransaction, Transaction, utils } from "ethers";
 import { CrocEnv } from "../croc";
 import { L1_GAS_PRICE_ORACLE_ABI } from "../abis/external/L1GasPriceOracle";
 
@@ -23,7 +23,27 @@ export function getRawTransaction(tx: Transaction) {
   // Double check things went well
   if (utils.keccak256(raw) !== tx.hash) { throw new Error("serializing failed!"); }
 
-  return raw;
+  return raw as `0x${string}`;
+}
+
+/**
+ * Compute the raw transaction data for a given transaction without the signature.
+ * 
+ * ref: https://docs.ethers.org/v5/cookbook/transactions/#cookbook--compute-raw-transaction
+ */
+export function getUnsignedRawTransaction(tx: PopulatedTransaction) {
+  function addKey(accum: any, key: keyof PopulatedTransaction) {
+    if (tx[key]) { accum[key] = tx[key]; }
+    return accum;
+  }
+
+  // Extract the relevant parts of the transaction and signature
+  const txFields = ["accessList","chainId","data","gasPrice","gasLimit","maxFeePerGas","maxPriorityFeePerGas","nonce","to","type","value"] as const;
+
+  // Serialize the signed transaction
+  const raw = utils.serializeTransaction(txFields.reduce(addKey, { }));
+
+  return raw as `0x${string}`;
 }
 
 /**

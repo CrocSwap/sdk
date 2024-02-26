@@ -1,9 +1,9 @@
-import { BigNumber, Transaction } from "ethers";
+import { BigNumber, /* Transaction */ } from "ethers";
 
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
 import { CrocPoolView } from './pool';
-import { decodeCrocPrice } from './utils';
+import { decodeCrocPrice, getUnsignedRawTransaction } from './utils';
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
@@ -91,7 +91,13 @@ export class CrocSwapPlan {
       await this.buildTxArgs(surplusFlags, await gasEst))
   }  
 
-  async getFauxTx (args: CrocSwapExecOpts = { }): Promise<Transaction> {
+  /**
+   * Utility function to generate a "signed" raw transaction for a swap, used for L1 gas estimation on L2's like Scroll.
+   * Extra 0xFF...F is appended to the unsigned raw transaction to simulate the signature and other missing fields.
+   * 
+   * Note: This function is only intended for L1 gas estimation, and does not generate valid signed transactions.
+   */
+  async getFauxRawTx (args: CrocSwapExecOpts = { }): Promise<`0x${string}`> {
     const TIP = 0
     const surplusFlags = this.maskSurplusArgs(args)
 
@@ -101,20 +107,8 @@ export class CrocSwapPlan {
       await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
       await this.buildTxArgs(surplusFlags))
 
-    const r = "0x" + "ff".repeat(32)
-    const s = "0x" + "ff".repeat(32)
-    const v = 0xff
-
-    return {
-      ...unsignedTx,
-      chainId: unsignedTx.chainId || 0xffff,
-      data: unsignedTx.data || "0x",
-      gasLimit: unsignedTx.gasLimit || BigNumber.from(0),
-      gasPrice: unsignedTx.gasPrice || BigNumber.from(0),
-      nonce: 0xffff,
-      value: unsignedTx.value || BigNumber.from(0),
-      r, s, v,
-    }
+    // append 160 'f's to the end of the raw transaction to simulate the signature and other missing fields
+    return getUnsignedRawTransaction(unsignedTx) + "f".repeat(160) as `0x${string}`
   }
 
   async calcImpact(): Promise<CrocImpact> {
