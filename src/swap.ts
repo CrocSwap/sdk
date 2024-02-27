@@ -3,7 +3,7 @@ import { BigNumber, ContractFunction } from "ethers";
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
 import { CrocPoolView } from './pool';
-import { decodeCrocPrice } from './utils';
+import { decodeCrocPrice, getUnsignedRawTransaction } from './utils';
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { AddressZero } from '@ethersproject/constants';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
@@ -137,6 +137,26 @@ export class CrocSwapPlan {
        await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags])
 
     return base.userCmd(HOT_PROXY_IDX, cmd, await this.buildTxArgs(surplusFlags, args.gasEst))
+  }
+
+  /**
+   * Utility function to generate a "signed" raw transaction for a swap, used for L1 gas estimation on L2's like Scroll.
+   * Extra 0xFF...F is appended to the unsigned raw transaction to simulate the signature and other missing fields.
+   * 
+   * Note: This function is only intended for L1 gas estimation, and does not generate valid signed transactions.
+   */
+  async getFauxRawTx (args: CrocSwapExecOpts = { }): Promise<`0x${string}`> {
+    const TIP = 0
+    const surplusFlags = this.maskSurplusArgs(args)
+
+    const unsignedTx = await (await this.context).dex.populateTransaction.swap
+      (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
+      this.sellBase, this.qtyInBase, await this.qty, TIP, 
+      await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
+      await this.buildTxArgs(surplusFlags))
+
+    // append 160 'f's to the end of the raw transaction to simulate the signature and other missing fields
+    return getUnsignedRawTransaction(unsignedTx) + "f".repeat(160) as `0x${string}`
   }
 
   async calcImpact(): Promise<CrocImpact> {
