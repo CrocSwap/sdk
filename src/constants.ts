@@ -39,6 +39,8 @@ const ETHEREUM_LOGO =
   "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg";
 const SCROLL_LOGO =
   "https://develop--ambient-finance.netlify.app/scroll_logo.png";
+const BLAST_LOGO = 
+ "https://assets-global.website-files.com/65a6baa1a3f8ed336f415cb4/65a6cc95aae1066cf96d497d_Logo%20Black%20on%20Yellow%20Background%402x-p-500.png"
 
 const DFLT_SDK_INFURA_KEY = '360ea5fda45b4a22883de8522ebd639e'
 
@@ -135,6 +137,30 @@ const SEPOLIA_CHAIN: ChainSpec = {
   logoUrl: ETHEREUM_LOGO,
 };
 
+const BLAST_SEPOLIA_CHAIN: ChainSpec = {
+  nodeUrl: "https://sepolia.blast.io",
+  addrs: {
+    dex: "0xf65976C7f25b6320c7CD81b1db10cEe97F2bb7AC",
+    query: "0x7757BAEC9c492691eAE235c6f01FB99AaA622975",
+    impact: "0x5D42d6046927DEE12b9b4a235be0ceCd55D0E0fb",
+    router: "0xdCB3b5ec9170beF68E9fff21F0EDD622F72f1899",
+    routerBypass: "0x3A6E9cff691a473D4D0742E1dFc8Ea263a99F6d0"
+  },
+  poolIndex: 36000,
+  isTestNet: true,
+  chainId: "0xa0c71fd",
+  gridSize: 1,
+  proxyPaths: {
+    cold: 3,
+    long: 130,
+    liq: 128,
+    dfltColdSwap: true
+  },
+  blockExplorer: "https://testnet.blastscan.io/",
+  displayName: "Blast Sepolia",
+  logoUrl: BLAST_LOGO,
+};
+
 const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
   nodeUrl: "https://sepolia-rpc.scroll.io",
   addrs: {
@@ -196,6 +222,7 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0xaa36a7": SEPOLIA_CHAIN,
   "0x8274f": SCROLL_SEPOLIA_CHAIN,
   "0x82750": SCROLL_CHAIN,
+  "0xa0c71fd": BLAST_SEPOLIA_CHAIN,
   "goerli": GOERLI_CHAIN,
   "sepolia": SEPOLIA_CHAIN,
   "arbtest": ARB_GOERLI_CHAIN,
@@ -206,4 +233,5 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "scrolltest": SCROLL_SEPOLIA_CHAIN,
   "scroll": SCROLL_CHAIN,
   "scrollsepolia": SCROLL_SEPOLIA_CHAIN,
+  "blastSepolia": BLAST_SEPOLIA_CHAIN,
 };
