@@ -137,6 +137,30 @@ const SEPOLIA_CHAIN: ChainSpec = {
   logoUrl: ETHEREUM_LOGO,
 };
 
+const BLAST_CHAIN: ChainSpec = {
+  nodeUrl: "https://rpc.ankr.com/blast",
+  addrs: {
+    dex: "0xaAaaaAAAFfe404EE9433EEf0094b6382D81fb958",
+    query: "0xA3BD3bE19012De72190c885FB270beb93e36a8A7",
+    impact: "0x6A699AB45ADce02891E6115b81Dfb46CAa5efDb9",
+    router: "0xaab17419F062bB28CdBE82f9FC05E7C47C3F6194",
+    routerBypass: "0xd83eF4d0e968A96329aC297bBf049CDdaC7E0362"
+  },
+  poolIndex: 420,
+  isTestNet: true,
+  chainId: "0x13e31",
+  gridSize: 4,
+  proxyPaths: {
+    cold: 3,
+    long: 130,
+    liq: 128,
+    dfltColdSwap: true
+  },
+  blockExplorer: "https://blastscan.io/",
+  displayName: "Blast",
+  logoUrl: BLAST_LOGO,
+};
+
 const BLAST_SEPOLIA_CHAIN: ChainSpec = {
   nodeUrl: "https://sepolia.blast.io",
   addrs: {
@@ -223,6 +247,7 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x8274f": SCROLL_SEPOLIA_CHAIN,
   "0x82750": SCROLL_CHAIN,
   "0xa0c71fd": BLAST_SEPOLIA_CHAIN,
+  "0x13e31": BLAST_CHAIN,
   "goerli": GOERLI_CHAIN,
   "sepolia": SEPOLIA_CHAIN,
   "arbtest": ARB_GOERLI_CHAIN,
