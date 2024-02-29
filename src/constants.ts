@@ -258,5 +258,6 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "scrolltest": SCROLL_SEPOLIA_CHAIN,
   "scroll": SCROLL_CHAIN,
   "scrollsepolia": SCROLL_SEPOLIA_CHAIN,
+  "blast": BLAST_CHAIN,
   "blastSepolia": BLAST_SEPOLIA_CHAIN,
 };
