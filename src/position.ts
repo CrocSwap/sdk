@@ -28,7 +28,7 @@ export class CrocPositionView {
             context.chain.poolIndex, blockArg)
     }
 
-    async queryAmbientPositiom (block?: BlockTag) {
+    async queryAmbientPosition (block?: BlockTag) {
         let blockArg = toCallArg(block)
         let context = await this.context
         return context.query.queryAmbientPosition(this.owner, 
