@@ -1,12 +1,11 @@
 import { CrocEnv } from '../croc';
 import { ethers } from 'ethers';
-//import { CrocPositionView } from '../position';
 
 //const ETH = ethers.constants.AddressZero
 //const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
 
 // Scroll
-const USDC = "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"
+//const USDC = "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"
 
 // Mainnet
 //const USDC = "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
@@ -14,18 +13,26 @@ const USDC = "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"
 // Sepolia
 //const USDC = "0x60bBA138A74C5e7326885De5090700626950d509"
 
+// Blast
+const USDB = "0x4300000000000000000000000000000000000003" 
+
 // deepcode ignore HardcodedSecret: testnet dummy key
 const KEY = process.env.WALLET_KEY || "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
 
 async function demo() {
     const wallet = new ethers.Wallet(KEY)
 
-    const croc = new CrocEnv("scroll", wallet)
+    const croc = new CrocEnv("blast", wallet)
+
+    //let tx = croc.token(USDB).approve()
+    //let tx = croc.tokenEth().deposit(0.01, wallet.address)
+    //let tx = croc.token(USDB).deposit(100, wallet.address)
+    //console.log(await tx)
 
     //console.log(await croc.approveBypassRouter())
     //console.log(await croc.token(USDC).approveRouter(100))
 
-    console.log((await croc.buy(USDC, 5).withEth().useRouter().swap()))
+    //console.log((await croc.buy(USDC, 5).withEth().useRouter().swap()))
     /*console.log((await croc.sell(USDC, 0.01).forEth().useBypass().swap()))
     console.log((await croc.sellEth(0.00001).for(USDC).useBypass().swap()))
     console.log((await croc.buyEth(0.00001).with(USDC).useBypass().swap()))*/
@@ -225,9 +232,11 @@ async function demo() {
     /*console.log((await croc.tokenEth().balance("benwolski.eth")).toString())
     console.log(await croc.tokenEth().balanceDisplay("benwolski.eth"))*/
 
-    /*croc.slotReader().isHotPathOpen().then(console.log)
+    croc.slotReader().isHotPathOpen().then(console.log)
     console.log(await croc.slotReader().proxyContract(1))
-    console.log(await croc.slotReader().proxyContract(131))*/
+    console.log(await croc.slotReader().proxyContract(131))
+
+    console.log(await croc.poolEthQuote(USDB).curveState())
 }
 
 demo()
