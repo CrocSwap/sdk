@@ -4,6 +4,7 @@ import { TransactionResponse } from "@ethersproject/providers";
 import { AddressZero, MaxUint256 } from "@ethersproject/constants";
 import { MAX_LIQ } from "./constants";
 import { toDisplayQty, fromDisplayQty } from "./utils/token";
+import { BlockTag } from "./position";
 
 /* Type representing specified token quantities. This type can either represent the raw non-decimalized
  * on-chain value in wei, if passed as a BigNuber. Or it can represent the decimalized value if passed
@@ -78,25 +79,25 @@ export class CrocTokenView {
     return (await this.context).dex.userCmd(COLD_PROXY_IDX, cmd)
   }
 
-  async wallet (address: string): Promise<BigNumber> {
+  async wallet (address: string, block: BlockTag = "latest"): Promise<BigNumber> {
     if (this.isNativeEth) {
-      return (await this.context).provider.getBalance(address);
+      return (await this.context).provider.getBalance(address, block);
     } else {
-      return (await this.resolve()).balanceOf(address);
+      return (await this.resolve()).balanceOf(address, block);
     }
   }
 
-  async walletDisplay (address: string): Promise<string> {
-    const balance = this.wallet(address);
+  async walletDisplay (address: string, block: BlockTag = "latest"): Promise<string> {
+    const balance = this.wallet(address, block);
     return toDisplayQty(await balance, await this.decimals);
   }
 
-  async balance (address: string): Promise<BigNumber> {
-    return (await this.context).query.querySurplus(address, this.tokenAddr)
+  async balance (address: string, block: BlockTag = "latest"): Promise<BigNumber> {
+    return (await this.context).query.querySurplus(address, this.tokenAddr, block)
   }
 
-  async balanceDisplay (address: string): Promise<string> {
-    const balance = this.balance(address);
+  async balanceDisplay (address: string, block: BlockTag = "latest"): Promise<string> {
+    const balance = this.balance(address, block);
     return toDisplayQty(await balance, await this.decimals);
   }
 

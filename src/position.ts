@@ -2,7 +2,7 @@ import { CrocContext } from './context';
 import { CrocTokenView, sortBaseQuoteViews } from './tokens';
 
 type Address = string
-type BlockTag = number | string
+export type BlockTag = number | string
 
 export class CrocPositionView {
     constructor (base: CrocTokenView, quote: CrocTokenView, owner: Address, context: Promise<CrocContext>) {
