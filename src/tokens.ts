@@ -83,7 +83,7 @@ export class CrocTokenView {
     if (this.isNativeEth) {
       return (await this.context).provider.getBalance(address, block);
     } else {
-      return (await this.resolve()).balanceOf(address, block);
+      return (await this.resolve()).balanceOf(address, { blockTag: block });
     }
   }
 
@@ -93,7 +93,7 @@ export class CrocTokenView {
   }
 
   async balance (address: string, block: BlockTag = "latest"): Promise<BigNumber> {
-    return (await this.context).query.querySurplus(address, this.tokenAddr, block)
+    return (await this.context).query.querySurplus(address, this.tokenAddr, { blockTag: block })
   }
 
   async balanceDisplay (address: string, block: BlockTag = "latest"): Promise<string> {
