@@ -42,7 +42,7 @@ const SCROLL_LOGO =
 const BLAST_LOGO = 
  "https://assets-global.website-files.com/65a6baa1a3f8ed336f415cb4/65a6cc95aae1066cf96d497d_Logo%20Black%20on%20Yellow%20Background%402x-p-500.png"
 
-const DFLT_SDK_INFURA_KEY = '360ea5fda45b4a22883de8522ebd639e'
+const DFLT_SDK_INFURA_KEY = '4741d1713bff4013bc3075ed6e7ce091'
 
 const GOERLI_CHAIN: ChainSpec = {
   nodeUrl: "https://goerli.infura.io/v3/" + DFLT_SDK_INFURA_KEY, 

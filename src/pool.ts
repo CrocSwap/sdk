@@ -258,7 +258,7 @@ export class CrocPoolView {
     private async mintRange (qty: TokenQty, isQtyBase: boolean, 
         range: TickRange, limits: PriceRange, opts?: CrocLpOpts): Promise<TransactionResponse> {
         const saneLimits = await this.boundLimits(range, limits, isQtyBase, opts?.floatingSlippage)
-
+        
         let msgVal = this.msgValRange(qty, isQtyBase, range, await saneLimits, opts)
         let weiQty = this.normQty(qty, isQtyBase)
         let [lowerBound, upperBound] = await this.transformLimits(await saneLimits)
@@ -314,10 +314,10 @@ export class CrocPoolView {
 
     private async ethForRangeQuote (quoteQty: TokenQty, range: TickRange, 
         limits: PriceRange): Promise<TokenQty> {        
-        const [, boundPrice] = await this.transformLimits(limits)
+        const spotPrice = await this.spotPrice() ;
         const [lowerPrice, upperPrice] = this.rangeToPrice(range)
 
-        let skew = concDepositSkew(boundPrice, lowerPrice, upperPrice)
+        let skew = concDepositSkew( spotPrice , lowerPrice, upperPrice)
         let ambiQty = this.calcEthInQuote(quoteQty, limits)
         let concQty = ambiQty.then(aq => Math.ceil(aq * skew))
 
