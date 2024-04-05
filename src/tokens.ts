@@ -60,7 +60,7 @@ export class CrocTokenView {
     );
 
     return (await this.resolveWrite()).approve(
-      addr, weiQty, { gasLimit: (await gasEst).add(2000)}
+      addr, weiQty, { gasLimit: (await gasEst).add(15000)}
     );
   }
 

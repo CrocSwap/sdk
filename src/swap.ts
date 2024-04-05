@@ -202,7 +202,7 @@ export class CrocSwapPlan {
     let txArgs = await this.attachEthMsg(surplusArg)
 
     if (gasEst) {
-      const GAS_PADDING = 15000
+      const GAS_PADDING = 30000
       Object.assign(txArgs, { gasLimit: gasEst.add(GAS_PADDING)})
     }
 
