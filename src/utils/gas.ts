@@ -2,6 +2,9 @@ import { BigNumber, Contract, PopulatedTransaction, Transaction, utils } from "e
 import { CrocEnv } from "../croc";
 import { L1_GAS_PRICE_ORACLE_ABI } from "../abis/external/L1GasPriceOracle";
 
+// Applied to all gas estimates.
+export const GAS_PADDING = 30000;
+
 /**
  * Compute the raw transaction data for a given transaction.
  * 

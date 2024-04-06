@@ -1,4 +1,4 @@
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import { TransactionResponse } from '@ethersproject/providers';
 import { CrocContext } from './context';
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
@@ -7,6 +7,7 @@ import { KnockoutEncoder } from "./encoding/knockout";
 import { ChainSpec } from "./constants";
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 import { baseTokenForQuoteConc, bigNumToFloat, floatToBigNum, quoteTokenForBaseConc, roundForConcLiq } from "./utils";
+import { GAS_PADDING } from "./utils";
 
 
 export class CrocKnockoutHandle {
@@ -36,7 +37,7 @@ export class CrocKnockoutHandle {
 
     const cmd = encoder.encodeKnockoutMint(await this.qty, lowerTick, upperTick, 
       this.sellBase, surplus);
-    return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd, { value: this.msgVal(surplus) })
+    return this.sendCmd(cmd, { value: await this.msgVal(surplus) })
   }
 
   async burn (opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
@@ -48,7 +49,7 @@ export class CrocKnockoutHandle {
 
     const cmd = encoder.encodeKnockoutBurnQty(await this.qty, lowerTick, upperTick, 
       this.sellBase, surplus);
-    return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd)
+    return this.sendCmd(cmd)
   }
 
   async burnLiq (liq: BigNumber, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
@@ -60,7 +61,7 @@ export class CrocKnockoutHandle {
 
     const cmd = encoder.encodeKnockoutBurnLiq(roundForConcLiq(liq), lowerTick, upperTick, 
       this.sellBase, surplus);
-    return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd)
+    return this.sendCmd(cmd)
   }
 
   async recoverPost (pivotTime: number, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
@@ -72,7 +73,7 @@ export class CrocKnockoutHandle {
 
     const cmd = encoder.encodeKnockoutRecover(pivotTime, lowerTick, upperTick, 
       this.sellBase, surplus);
-    return (await this.context).dex.userCmd(KNOCKOUT_PATH, cmd)
+    return this.sendCmd(cmd)
   }
 
   async willMintFail(): Promise<boolean> {
@@ -84,6 +85,14 @@ export class CrocKnockoutHandle {
       (this.knockoutTick - await gridSize <= await marketTick)
   }
 
+  private async sendCmd (calldata: string, txArgs?: { value?: BigNumberish }):
+      Promise<TransactionResponse> {
+      let cntx = await this.context
+      if (txArgs === undefined) { txArgs = {} }
+      const gasEst = await cntx.dex.estimateGas.userCmd(KNOCKOUT_PATH, calldata, txArgs)
+      Object.assign(txArgs, { gasLimit: gasEst.add(GAS_PADDING)})
+      return cntx.dex.userCmd(KNOCKOUT_PATH, calldata, txArgs);
+  }
 
   private maskSurplusFlags (opts?: CrocKnockoutOpts): number {
     if (!opts || !opts.surplus) { return encodeSurplusArg(false) }

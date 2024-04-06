@@ -5,6 +5,7 @@ import { AddressZero, MaxUint256 } from "@ethersproject/constants";
 import { MAX_LIQ } from "./constants";
 import { toDisplayQty, fromDisplayQty } from "./utils/token";
 import { BlockTag } from "./position";
+import { GAS_PADDING } from "./utils";
 
 /* Type representing specified token quantities. This type can either represent the raw non-decimalized
  * on-chain value in wei, if passed as a BigNuber. Or it can represent the decimalized value if passed
@@ -173,8 +174,9 @@ export class CrocTokenView {
   
       const txArgs = useMsgVal ? { value: await weiQty } : { }
       let cntx = await this.context
+      const gasEst = await cntx.dex.estimateGas.userCmd(cntx.chain.proxyPaths.cold, cmd, txArgs)
+      Object.assign(txArgs, { gasLimit: gasEst.add(GAS_PADDING)})
       return cntx.dex.userCmd(cntx.chain.proxyPaths.cold, cmd, txArgs)
-  
   }
 
   readonly tokenAddr: string;

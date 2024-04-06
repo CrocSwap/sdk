@@ -10,6 +10,7 @@ import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encodin
 import { MAX_SQRT_PRICE, MIN_SQRT_PRICE } from "./constants";
 import { AbiCoder } from "ethers/lib/utils";
 import { CrocSlotReader } from "./slots";
+import { GAS_PADDING } from "./utils";
 
 /* Describes the predicted impact of a given swap. 
  * @property sellQty The total quantity of tokens predicted to be sold by the swapper to the dex.
@@ -202,7 +203,6 @@ export class CrocSwapPlan {
     let txArgs = await this.attachEthMsg(surplusArg)
 
     if (gasEst) {
-      const GAS_PADDING = 30000
       Object.assign(txArgs, { gasLimit: gasEst.add(GAS_PADDING)})
     }
 

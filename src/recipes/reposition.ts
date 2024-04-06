@@ -6,6 +6,7 @@ import { CrocSwapPlan } from "../swap";
 import { CrocTokenView } from "../tokens";
 import { encodeCrocPrice, tickToPrice } from "../utils";
 import { baseTokenForConcLiq, concDepositBalance, quoteTokenForConcLiq } from "../utils/liquidity";
+import { GAS_PADDING } from "../utils";
 
 
 interface RepositionTarget {
@@ -34,8 +35,10 @@ export class CrocReposition {
 
     async rebal(): Promise<TransactionResponse> {        
         const directive = await this.formatDirective()
-        const path = (await this.pool.context).chain.proxyPaths.long
-        return (await this.pool.context).dex.userCmd(path, directive.encodeBytes())
+        let cntx = await this.pool.context
+        const path = cntx.chain.proxyPaths.long
+        const gasEst = await cntx.dex.estimateGas.userCmd(path, directive.encodeBytes())
+        return cntx.dex.userCmd(path, directive.encodeBytes(), { gasLimit: gasEst.add(GAS_PADDING)})
     }
 
     async simStatic() {

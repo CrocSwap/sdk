@@ -8,6 +8,7 @@ import { BigNumber, BigNumberish } from 'ethers';
 import { AddressZero } from '@ethersproject/constants';
 import { PoolInitEncoder } from "./encoding/init";
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
+import { GAS_PADDING } from "./utils";
 
 type PriceRange = [number, number]
 type TickRange = [number, number]
@@ -134,6 +135,8 @@ export class CrocPoolView {
         let calldata = encoder.encodeInitialize(await spotPrice)        
 
         let cntx = await this.context
+        const gasEst = await cntx.dex.estimateGas.userCmd(cntx.chain.proxyPaths.cold, calldata, txArgs)
+        Object.assign(txArgs, { gasLimit: gasEst.add(GAS_PADDING)})
         return cntx.dex.userCmd(cntx.chain.proxyPaths.cold, calldata, txArgs)
     }
 
@@ -189,12 +192,13 @@ export class CrocPoolView {
         return this.sendCmd(calldata)
     }
 
-    private async sendCmd (calldata: string, txArgs?: { value?: BigNumberish}): 
+    private async sendCmd (calldata: string, txArgs?: { value?: BigNumberish }):
         Promise<TransactionResponse> {
         let cntx = await this.context
-        return txArgs ?
-            cntx.dex.userCmd(cntx.chain.proxyPaths.liq, calldata, txArgs) :
-            cntx.dex.userCmd(cntx.chain.proxyPaths.liq, calldata)
+        if (txArgs === undefined) { txArgs = {} }
+        const gasEst = await cntx.dex.estimateGas.userCmd(cntx.chain.proxyPaths.liq, calldata, txArgs)
+        Object.assign(txArgs, { gasLimit: gasEst.add(GAS_PADDING)})
+        return cntx.dex.userCmd(cntx.chain.proxyPaths.liq, calldata, txArgs);
     }
 
     private async mintAmbient (qty: TokenQty, isQtyBase: boolean, 
