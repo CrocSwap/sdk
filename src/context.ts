@@ -1,97 +1,101 @@
-import { Provider, JsonRpcProvider } from "@ethersproject/providers";
-import { Contract, ethers, Signer } from "ethers";
+import { WalletClient, PublicClient, getContract, Address, createPublicClient, http } from "viem";
 import { ChainSpec, CHAIN_SPECS } from "./constants";
-import { CROC_ABI, QUERY_ABI, ERC20_ABI } from "./abis";
-import { AddressZero } from "@ethersproject/constants";
+import { CROC_ABI, QUERY_ABI } from "./abis";
 import { IMPACT_ABI } from "./abis/impact";
-import { ERC20_READ_ABI } from "./abis/erc20.read";
 
 export interface CrocContext {
-  provider: Provider;
-  dex: Contract;
-  router?: Contract;
-  routerBypass?: Contract;
-  query: Contract;
-  slipQuery: Contract;
-  erc20Read: Contract;
-  erc20Write: Contract;
+  publicClient: PublicClient;
+  walletClient?: WalletClient;
+  dex: any;
+  router?: any;
+  routerBypass?: any;
+  query: any;
+  slipQuery: any;
+  // erc20Read: any;
+  // erc20Write: any;
   chain: ChainSpec;
   senderAddr?: string
 }
 
 export type ChainIdentifier = number | string;
-export type ConnectArg = Provider | Signer | ChainIdentifier;
+export type ConnectArg = PublicClient | ChainIdentifier;
 
 export async function connectCroc(
   providerOrChainId: ConnectArg,
-  signer?: Signer
+  signer?: WalletClient
 ): Promise<CrocContext> {
-  const [provider, maybeSigner] = await buildProvider(providerOrChainId, signer);
-  return setupProvider(provider, maybeSigner);
+  const [provider, maybeWalletClient] = await buildPublicClient(providerOrChainId, signer);
+  return setupPublicClient(provider, maybeWalletClient);
 }
 
-async function buildProvider(
+async function buildPublicClient(
   arg: ConnectArg,
-  signer?: Signer
-): Promise<[Provider, Signer | undefined]> {
+  signer?: WalletClient
+): Promise<any> { // TODO: fix any
   if (typeof arg === "number" || typeof arg == "string") {
     const context = lookupChain(arg);
-    return buildProvider(new JsonRpcProvider(context.nodeUrl), signer);
-  } else if ("getNetwork" in arg) {
+    // console.warn("crocsdk is creating a public client from scratch")
+    const p = createPublicClient({
+      chain: context.viemChain,
+      transport: http(context.nodeUrl),
+      batch: {
+          multicall: true,
+      }
+    });
+    return [p, signer]
+  } else if ("estimateGas" in arg) {
     return [arg, signer];
-  } else {
-    const chainId = await arg.getChainId();
-    return buildProvider(chainId, signer);
   }
 }
 
-async function setupProvider(
-  provider: Provider,
-  signer?: Signer
+async function setupPublicClient(
+  publicClient: PublicClient,
+  walletClient?: WalletClient
 ): Promise<CrocContext> {
-  const actor = determineActor(provider, signer);
-  const chainId = await getChain(provider);
-  let cntx = inflateContracts(chainId, provider, actor);
-  return await attachSenderAddr(cntx, actor)
-}
-
-async function attachSenderAddr (cntx: CrocContext, 
-  actor: Provider | Signer): Promise<CrocContext> {
-  if ('getAddress' in actor) {
-    try {
-      cntx.senderAddr = await actor.getAddress()
-    } catch (e) { }
-  }
+  // const actor = determineActor(provider, signer);
+  const chainId = await getChain(publicClient);
+  const cntx = inflateContracts(chainId, publicClient, walletClient);
+  cntx.senderAddr = walletClient?.account?.address
+  // return await attachSenderAddr(cntx, actor)
   return cntx
 }
 
-function determineActor(
-  provider: Provider,
-  signer?: Signer
-): Signer | Provider {
-  if (signer) {
-    try {
-      return signer.connect(provider)
-    } catch {
-      return signer
-    }
-  } else if ("getSigner" in provider) {
-    try {
-      let signer = (provider as ethers.providers.Web3Provider).getSigner();
-      return signer
-    } catch { 
-      return provider 
-    }
-  } else {
-    return provider;
-  }
-}
+// async function attachSenderAddr (cntx: CrocContext,
+//   actor: PublicClient | WalletClient): Promise<CrocContext> {
+//   try {
+//     cntx.senderAddr = (actor.account?.address)
+//   } catch (e) { }
+//   return cntx
+// }
 
-async function getChain(provider: Provider): Promise<number> {
+// function determineActor(
+//   provider: PublicClient,
+//   signer?: WalletClient
+// ): WalletClient | PublicClient {
+//   if (signer) {
+//     try {
+//       return signer.connect(provider)
+//     } catch {
+//       return signer
+//     }
+//   } else if ("getWalletClient" in provider) {
+//     try {
+//       let signer = (provider as ethers.providers.Web3PublicClient).getWalletClient();
+//       return signer
+//     } catch {
+//       return provider
+//     }
+//   } else {
+//     return provider;
+//   }
+// }
+
+// TODO: types here
+async function getChain(provider: PublicClient): Promise<number> {
   if ("chainId" in provider) {
     return (provider as any).chainId as number;
-  } else if ("getNetwork" in provider) {
-    return provider.getNetwork().then((n) => n.chainId);
+  } else if ("chain" in provider) {
+    return provider.chain?.id as number;
   } else {
     throw new Error("Invalid provider");
   }
@@ -99,20 +103,22 @@ async function getChain(provider: Provider): Promise<number> {
 
 function inflateContracts(
   chainId: number,
-  provider: Provider,
-  actor: Provider | Signer,
+  publicClient: PublicClient,
+  walletClient?: WalletClient,
   addr?: string
 ): CrocContext {
   const context = lookupChain(chainId);
+  const actor = walletClient ? walletClient : publicClient;
   return {
-    provider: provider,
-    dex: new Contract(context.addrs.dex, CROC_ABI, actor),
-    router: context.addrs.router ? new Contract(context.addrs.router || AddressZero, CROC_ABI, actor) : undefined,
-    routerBypass: context.addrs.routerBypass ? new Contract(context.addrs.routerBypass || AddressZero, CROC_ABI, actor) : undefined,
-    query: new Contract(context.addrs.query, QUERY_ABI, provider),
-    slipQuery: new Contract(context.addrs.impact, IMPACT_ABI, provider),
-    erc20Write: new Contract(AddressZero, ERC20_ABI, actor),
-    erc20Read: new Contract(AddressZero, ERC20_READ_ABI, provider),
+    publicClient,
+    walletClient,
+    dex: getContract({address: context.addrs.dex as Address, abi: CROC_ABI, client: actor}),
+    router: context.addrs.router ? getContract({address: context.addrs.router as Address, abi: CROC_ABI, client: actor}): undefined,
+    routerBypass: context.addrs.routerBypass ? getContract({address: context.addrs.routerBypass as Address, abi: CROC_ABI, client: actor}) : undefined,
+    query: getContract({address: context.addrs.query as Address, abi: QUERY_ABI, client: actor}),
+    slipQuery: getContract({address: context.addrs.impact as Address, abi: IMPACT_ABI, client: actor}),
+    // erc20Write: getContract({address: AddressZero as Address, abi: ERC20_ABI, client: actor}),
+    // erc20Read: getContract({address: AddressZero as Address, abi: ERC20_READ_ABI, client: actor}),
     chain: context,
     senderAddr: addr
   };

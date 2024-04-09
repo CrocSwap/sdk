@@ -1,6 +1,6 @@
 {
   "name": "@crocswap-libs/sdk",
-  "version": "0.3.9-2",
+  "version": "1.0.0",
   "description": "🛠🐊🛠 An SDK for building applications on top of CrocSwap",
   "author": "Ben Wolski <ben@crocodilelabs.io>",
   "repository": "https://github.com/CrocSwap/sdk.git",
@@ -40,6 +40,6 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "ethers": "^5.5.3"
+    "viem": "^2.9.13"
   }
 }

@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { encodeAbiParameters } from "viem";
 import { encodeCrocPrice } from "../utils/price";
 
 type Address = string;
@@ -10,18 +10,19 @@ export class PoolInitEncoder {
     this.baseToken = baseToken
     this.quoteToken = quoteToken
     this.poolIdx = poolIdx
-    this.abiCoder = new ethers.utils.AbiCoder();
   }
 
   encodeInitialize (initPrice: number): string {
     const crocPrice = encodeCrocPrice(initPrice)
-    const POOL_INIT_TYPES = ["uint8", "address", "address", "uint256", "uint128"]
-    return this.abiCoder.encode(POOL_INIT_TYPES,
+    const POOL_INIT_TYPES = [{type: "uint8", name: "subCmd"},
+      {type: "address", name: "baseToken"},
+      {type: "address", name: "quoteToken"},
+      {type: "uint256", name: "poolIdx"},]
+    return encodeAbiParameters(POOL_INIT_TYPES,
       [71, this.baseToken, this.quoteToken, this.poolIdx, crocPrice])
   }
 
   private baseToken: Address
   private quoteToken: Address
   private poolIdx: PoolType
-  private abiCoder: ethers.utils.AbiCoder;
 }

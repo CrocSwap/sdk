@@ -1,5 +1,3 @@
-import { TransactionResponse } from "@ethersproject/abstract-provider";
-import { BigNumber, BigNumberish } from "ethers";
 import { OrderDirective, PoolDirective } from "../encoding/longform";
 import { CrocPoolView } from "../pool";
 import { CrocSwapPlan } from "../swap";
@@ -12,7 +10,7 @@ import { GAS_PADDING } from "../utils";
 interface RepositionTarget {
     mint: TickRange | AmbientRange
     burn: TickRange
-    liquidity: BigNumberish
+    liquidity: bigint
 }
 
 type AmbientRange = "ambient"
@@ -27,63 +25,63 @@ export class CrocReposition {
         this.pool = pool
         this.burnRange = target.burn
         this.mintRange = target.mint
-        this.liquidity = BigNumber.from(target.liquidity)
+        this.liquidity = target.liquidity
         this.spotPrice = this.pool.spotPrice()
         this.spotTick = this.pool.spotTick()
         this.impact = opts?.impact || DEFAULT_REBAL_SLIPPAGE
     }
 
-    async rebal(): Promise<TransactionResponse> {        
+    async rebal(): Promise<any> { // TODO: fix any
         const directive = await this.formatDirective()
-        let cntx = await this.pool.context
+        const cntx = await this.pool.context
         const path = cntx.chain.proxyPaths.long
-        const gasEst = await cntx.dex.estimateGas.userCmd(path, directive.encodeBytes())
-        return cntx.dex.userCmd(path, directive.encodeBytes(), { gasLimit: gasEst.add(GAS_PADDING)})
+        const gasEst = await cntx.dex.estimateGas.userCmd([path, directive.encodeBytes()])
+        return cntx.dex.write.userCmd([path, directive.encodeBytes()], { gasLimit: gasEst + GAS_PADDING})
     }
 
     async simStatic() {
         const directive = await this.formatDirective()
         const path = (await this.pool.context).chain.proxyPaths.long
-        return (await this.pool.context).dex.callStatic.userCmd(path, directive.encodeBytes())
+        return (await this.pool.context).dex.simulate.userCmd([path, directive.encodeBytes()])
     }
-    
+
     async balancePercent(): Promise<number> {
         if (this.mintRange === "ambient") {
             return 0.5 // Ambient positions are 50/50 balance
-        
+
         } else {
             const baseQuoteBal =
-                concDepositBalance(await this.spotPrice, 
+                concDepositBalance(await this.spotPrice,
                     tickToPrice(this.mintRange[0]), tickToPrice(this.mintRange[1]))
-            return await this.isBaseOutOfRange() ? 
+            return await this.isBaseOutOfRange() ?
                 (1.0 - baseQuoteBal) : baseQuoteBal
         }
     }
 
-    async currentCollateral(): Promise<BigNumber> {
-        let tokenFn = await this.isBaseOutOfRange() ? baseTokenForConcLiq : quoteTokenForConcLiq
-        return tokenFn(await this.spotPrice, this.liquidity, 
+    async currentCollateral(): Promise<bigint> {
+        const tokenFn = await this.isBaseOutOfRange() ? baseTokenForConcLiq : quoteTokenForConcLiq
+        return tokenFn(await this.spotPrice, this.liquidity,
             tickToPrice(this.burnRange[0]),
             tickToPrice(this.burnRange[1]))
     }
 
-    async convertCollateral(): Promise<BigNumber> {
-        let balance = await this.swapFraction()
-        let collat = await this.currentCollateral()
-        return collat.mul(balance).div(10000)
+    async convertCollateral(): Promise<bigint> {
+        const balance = await this.swapFraction()
+        const collat = await this.currentCollateral()
+        return collat * balance / BigInt(10000)
     }
 
     async postBalance(): Promise<[number, number]> {
-        let outside = this.mintInput().then(parseFloat)
-        let inside = this.swapOutput().then(parseFloat)
+        const outside = this.mintInput().then(parseFloat)
+        const inside = this.swapOutput().then(parseFloat)
         return await this.isBaseOutOfRange() ?
             [await outside, await inside] :
             [await inside, await outside]
     }
 
     async mintInput(): Promise<string> {
-        let collat = (await this.currentCollateral()).sub(await this.convertCollateral())
-        let pool = (await this.pool)
+        const collat = (await this.currentCollateral()) - (await this.convertCollateral())
+        const pool = this.pool
         return await this.isBaseOutOfRange() ?
             pool.baseToken.toDisplay(collat) :
             pool.quoteToken.toDisplay(collat)
@@ -91,15 +89,15 @@ export class CrocReposition {
 
     async swapOutput(): Promise<string> {
         const [sellToken, buyToken] = await this.pivotTokens()
-        
-        let swap = new CrocSwapPlan(sellToken, buyToken, await this.convertCollateral(), 
-            false, (await this.pool).context, { slippage: this.impact })
-        let impact = await swap.calcImpact()
+
+        const swap = new CrocSwapPlan(sellToken, buyToken, await this.convertCollateral(),
+            false, this.pool.context, { slippage: this.impact })
+        const impact = await swap.calcImpact()
         return impact.buyQty
     }
 
     private async isBaseOutOfRange(): Promise<boolean> {
-        let spot = await this.spotTick
+        const spot = await this.spotTick
         if (spot >= this.burnRange[1]) {
             return true
         } else if (spot < this.burnRange[0]) {
@@ -117,33 +115,33 @@ export class CrocReposition {
 
     private async formatDirective(): Promise<OrderDirective> {
         const [openToken, closeToken] = await this.pivotTokens()
-        
-        let directive = new OrderDirective(openToken.tokenAddr)
+
+        const directive = new OrderDirective(openToken.tokenAddr)
         directive.appendHop(closeToken.tokenAddr)
-        let pool = directive.appendPool((await this.pool.context).chain.poolIndex)
+        const pool = directive.appendPool((await this.pool.context).chain.poolIndex)
 
         directive.appendRangeBurn(this.burnRange[0], this.burnRange[1], this.liquidity)
         await this.setupSwap(pool)
-        
+
         directive.appendPool((await this.pool.context).chain.poolIndex)
 
         if (this.mintRange === "ambient") {
-            let mint = directive.appendAmbientMint(0)
+            const mint = directive.appendAmbientMint(BigInt(0))
             mint.rollType = 5
         } else {
-            let mint = directive.appendRangeMint(this.mintRange[0], this.mintRange[1], 0)
+            const mint = directive.appendRangeMint(this.mintRange[0], this.mintRange[1], BigInt(0))
             mint.rollType = 5
         }
 
-        directive.open.limitQty = BigNumber.from(0)
-        directive.hops[0].settlement.limitQty = BigNumber.from(0)
+        directive.open.limitQty = BigInt(0)
+        directive.hops[0].settlement.limitQty = BigInt(0)
         return directive
     }
 
     private async setupSwap (pool: PoolDirective) {
         pool.chain.swapDefer = true
         pool.swap.rollType = 4
-        pool.swap.qty = BigNumber.from(await this.swapFraction())
+        pool.swap.qty = await this.swapFraction()
 
         const sellBase = await this.isBaseOutOfRange()
         pool.swap.isBuy = sellBase
@@ -153,15 +151,15 @@ export class CrocReposition {
         pool.swap.limitPrice = encodeCrocPrice((await this.spotPrice) * priceMult)
     }
 
-    private async swapFraction(): Promise<BigNumber> {
-        let swapProp = await this.balancePercent() + this.impact
-        return BigNumber.from(Math.floor(Math.min(swapProp, 1.0) * 10000))
+    private async swapFraction(): Promise<bigint> {
+        const swapProp = await this.balancePercent() + this.impact
+        return BigInt(Math.floor(Math.min(swapProp, 1.0) * 10000))
     }
 
     pool: CrocPoolView
     burnRange: TickRange
     mintRange: TickRange | AmbientRange
-    liquidity: BigNumber
+    liquidity: bigint
     spotPrice: Promise<number>
     spotTick: Promise<number>
     impact: number

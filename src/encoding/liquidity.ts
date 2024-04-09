@@ -1,7 +1,7 @@
-import { BigNumber, ethers } from "ethers";
+import { decodeAbiParameters, encodeAbiParameters, hexToBytes } from "viem";
 import { MAX_LIQ } from "../constants";
 import { encodeCrocPrice } from "../utils/price";
-import { AddressZero } from "@ethersproject/constants";
+import { AddressZero } from "../utils";
 
 type Address = string;
 type PoolType = number;
@@ -11,18 +11,16 @@ export class WarmPathEncoder {
     this.base = base;
     this.quote = quote;
     this.poolIdx = poolIdx;
-    this.abiCoder = new ethers.utils.AbiCoder();
   }
 
   private base: Address;
   private quote: Address;
   private poolIdx: PoolType;
-  private abiCoder: ethers.utils.AbiCoder;
 
   encodeMintConc(
     lowerTick: number,
     upperTick: number,
-    qty: BigNumber,
+    qty: bigint,
     qtyIsBase: boolean,
     limitLow: number,
     limitHigh: number,
@@ -42,7 +40,7 @@ export class WarmPathEncoder {
   encodeBurnConc(
     lowerTick: number,
     upperTick: number,
-    liq: BigNumber,
+    liq: bigint,
     limitLow: number,
     limitHigh: number,
     useSurplus: number
@@ -69,7 +67,7 @@ export class WarmPathEncoder {
       HARVEST_CONCENTRATED,
       lowerTick,
       upperTick,
-      BigNumber.from(0),
+      BigInt(0),
       limitLow,
       limitHigh,
       useSurplus
@@ -77,7 +75,7 @@ export class WarmPathEncoder {
   }
 
   encodeMintAmbient(
-    qty: BigNumber,
+    qty: bigint,
     qtyIsBase: boolean,
     limitLow: number,
     limitHigh: number,
@@ -95,7 +93,7 @@ export class WarmPathEncoder {
   }
 
   encodeBurnAmbient(
-    liq: BigNumber,
+    liq: bigint,
     limitLow: number,
     limitHigh: number,
     useSurplus: number
@@ -131,12 +129,12 @@ export class WarmPathEncoder {
     callCode: number,
     lowerTick: number,
     upperTick: number,
-    qty: BigNumber,
+    qty: bigint,
     limitLow: number,
     limitHigh: number,
     useSurplus: number
   ): string {
-    return this.abiCoder.encode(WARM_ARG_TYPES, [
+    return encodeAbiParameters(WARM_ARG_TYPES, [
       callCode,
       this.base,
       this.quote,
@@ -162,29 +160,29 @@ const MINT_AMBIENT_QUOTE: number = 32;
 const BURN_AMBIENT: number = 4;
 const HARVEST_CONCENTRATED: number = 5
 
+
 const WARM_ARG_TYPES = [
-  "uint8", // Type call
-  "address", // Base
-  "address", // Quote
-  "uint24", // Pool Index
-  "int24", // Lower Tick
-  "int24", // Upper Tick
-  "uint128", // Liquidity
-  "uint128", // Lower limit
-  "uint128", // Upper limit
-  "uint8", // reserve flags
-  "address", // deposit vault
+  { type: "uint8", name: "callType" },
+  { type: "address", name: "base" },
+  { type: "address", name: "quote" },
+  { type: "uint24", name: "poolIdx" },
+  { type: "int24", name: "lowerTick" },
+  { type: "int24", name: "upperTick" },
+  { type: "uint128", name: "qty" },
+  { type: "uint128", name: "limitLow" },
+  { type: "uint128", name: "limitHigh" },
+  { type: "uint8", name: "useSurplus" },
+  { type: "address", name: "depositVault"}
 ];
 
 export function isTradeWarmCall(txData: string): boolean {
   const USER_CMD_METHOD = "0xa15112f9";
   const LIQ_PATH = 2
-  const encoder = new ethers.utils.AbiCoder();
 
   if (txData.slice(0, 10) === USER_CMD_METHOD) {
-    const result = encoder.decode(
-      ["uint16", "bytes"],
-      "0x".concat(txData.slice(10))
+    const result = decodeAbiParameters(
+      [{ type: "uint16", name: "cmd" }, { type: "bytes", name: "data" }],
+      hexToBytes(txData.slice(10) as any) // TODO: fix typing
     );
     return result[0] == LIQ_PATH;
   }
@@ -199,21 +197,21 @@ interface WarmPathArgs {
   poolIdx: number;
   lowerTick: number;
   upperTick: number;
-  qty: BigNumber;
+  qty: bigint;
 }
 
+// TODO: fix typing mess
 export function decodeWarmPathCall(txData: string): WarmPathArgs {
-  const argData = "0x".concat(txData.slice(10 + 192));
-  const encoder = new ethers.utils.AbiCoder();
-  const result = encoder.decode(WARM_ARG_TYPES, argData);
+  const argData = "0x" + txData.slice(10 + 192);
+  const result = decodeAbiParameters(WARM_ARG_TYPES, hexToBytes(argData as any));
   return {
-    isMint: [MINT_AMBIENT, MINT_CONCENTRATED].includes(result[0]),
-    isAmbient: [MINT_AMBIENT, BURN_AMBIENT].includes(result[0]),
-    base: result[1],
-    quote: result[2],
-    poolIdx: result[3],
-    lowerTick: result[4],
-    upperTick: result[5],
-    qty: result[6],
+    isMint: [MINT_AMBIENT, MINT_CONCENTRATED].includes(result[0] as number),
+    isAmbient: [MINT_AMBIENT, BURN_AMBIENT].includes(result[0] as number),
+    base: result[1] as Address,
+    quote: result[2] as Address,
+    poolIdx: result[3] as number,
+    lowerTick: result[4] as number,
+    upperTick: result[5] as number,
+    qty: result[6] as bigint,
   };
 }

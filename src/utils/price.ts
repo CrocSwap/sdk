@@ -1,27 +1,26 @@
-import { BigNumber } from "ethers";
 import { MIN_TICK, MAX_TICK } from "../constants";
 
 type Tick = number;
 
-export function encodeCrocPrice(price: number): BigNumber {
+export function encodeCrocPrice(price: number): bigint {
   let floatPrice = Math.sqrt(price) * 2 ** 64;
-  let scale = 0;
+  let scale = BigInt(0);
 
   const PRECISION_BITS = 16;
   while (floatPrice > Number.MAX_SAFE_INTEGER) {
     floatPrice = floatPrice / 2 ** PRECISION_BITS;
-    scale = scale + PRECISION_BITS;
+    scale = scale + BigInt(PRECISION_BITS);
   }
 
   const pinPrice = Math.round(floatPrice);
-  const bnSeed = BigNumber.from(pinPrice);
+  const bnSeed = BigInt(pinPrice);
 
-  return bnSeed.mul(BigNumber.from(2).pow(scale));
+  return bnSeed * (BigInt(2) ** scale);
 }
 
-export function decodeCrocPrice(val: BigNumber) {
-  const x = val.lt(Number.MAX_SAFE_INTEGER - 1)
-    ? val.toNumber()
+export function decodeCrocPrice(val: bigint) {
+  const x = val < (Number.MAX_SAFE_INTEGER - 1)
+    ? Number(val)
     : parseFloat(val.toString());
   const sq = x / 2 ** 64;
   return sq * sq;
@@ -62,7 +61,7 @@ export function priceHalfBelowTick(
   const halfTickBelow = (tick - (.5 * nTicksGrid))
   return Math.pow(1.0001, halfTickBelow);
 }
-  
+
 export function pinTickUpper(
   price: number,
   nTicksGrid: number): Tick {
@@ -82,7 +81,7 @@ export function pinTickOutside(
 
   const priceInTicks = priceToTick(price)
   const poolInTicks = priceToTick(poolPrice)
-  const [poolLower, poolUpper] = 
+  const [poolLower, poolUpper] =
     [pinTickLower(poolPrice, nTicksGrid), pinTickUpper(poolPrice, nTicksGrid)]
 
   if (priceInTicks < poolInTicks) {
@@ -91,7 +90,7 @@ export function pinTickOutside(
     } else {
       return { tick: pinTickLower(price, nTicksGrid), isTickBelow: true }
     }
-    
+
   } else {
     if (priceInTicks <= poolUpper) {
       return { tick: poolUpper + nTicksGrid, isTickBelow: false }
@@ -104,12 +103,12 @@ export function pinTickOutside(
 
 /* Returns the neighboring N on-grid ticks to a given price. Ticks will be
  * sorted from closest to furthers */
-export function neighborTicks (price: number, nTicksGrid: number, 
+export function neighborTicks (price: number, nTicksGrid: number,
   nNeighbors: number = 1): {
   below: number[], above: number[] } {
   const priceInTicks = pinTickLower(price, nTicksGrid)
 
-  return { 
+  return {
     below: Array.from({length: nNeighbors}).
       map((_, idx: number) => priceInTicks - idx * nTicksGrid),
     above: Array.from({length: nNeighbors}).
@@ -120,11 +119,11 @@ export function neighborTicks (price: number, nTicksGrid: number,
 export function priceToTick (price: number): Tick {
   return Math.floor(Math.log(price) / Math.log(1.0001))
 }
-  
+
 export function tickToPrice(tick: Tick): number {
   return Math.pow(1.0001, tick);
 }
-  
+
 export function priceHalfAboveTick(
   tick: number,
   nTicksGrid: number): Tick {
