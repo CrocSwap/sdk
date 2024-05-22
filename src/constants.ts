@@ -232,6 +232,53 @@ const SCROLL_CHAIN: ChainSpec = {
   logoUrl: SCROLL_LOGO,
 };
 
+const BASE_SEPOLIA_CHAIN: ChainSpec = {
+  nodeUrl: "https://sepolia.base.org",
+  addrs: {
+    dex: "0xaaAAAaa6612bd88cD409cb0D70C99556C87A0E8c",
+    query: "0x43eC1302FE3587862e15B2D52AD9653575FD79e9",
+    impact: "0x9B28970D51A231741416D8D3e5281d9c51a50892",
+    router: "0x323172539B1B0D9eDDFFBd0318C4d6Ab45292843",
+    routerBypass: "0xb2aE163293C82DCF36b0cE704591eDC2f9E2608D"
+  },
+  poolIndex: 36000,
+  isTestNet: true,
+  chainId: "0x14a34",
+  gridSize: 1,
+  proxyPaths: {
+    cold: 3,
+    long: 130,
+    liq: 128
+  },
+  blockExplorer: "https://sepolia.basescan.org/",
+  displayName: "Base Sepolia",
+  logoUrl: undefined,
+};
+
+// const BASE_CHAIN: ChainSpec = {
+//   nodeUrl: "https://mainnet.base.org",
+//   addrs: {
+//     dex: "0xaaaaAAAACB71BF2C8CaE522EA5fa455571A74106",
+//     query: "0x62223e90605845Cf5CC6DAE6E0de4CDA130d6DDf",
+//     impact: "0xc2c301759B5e0C385a38e678014868A33E2F3ae3",
+//     router: "0xfB5f26851E03449A0403Ca945eBB4201415fd1fc",
+//     routerBypass: "0xED5535C6237f72BD9b4fDEAa3b6D8d9998b4C4e4",
+//   },
+//   poolIndex: 420,
+//   isTestNet: false,
+//   chainId: "0x2105",
+//   gridSize: 4,
+//   proxyPaths: {
+//     cold: 3,
+//     long: 130,
+//     liq: 128,
+//     dfltColdSwap: true
+//   },
+//   blockExplorer: "https://basescan.org/",
+//   displayName: "Base",
+//   logoUrl: undefined,
+// };
+
 const LOCAL_FORK_CHAIN: ChainSpec = Object.assign({}, GOERLI_CHAIN, {
   nodeUrl: "http://127.0.0.1:8545",
   chainId: "0x7a69",
@@ -246,6 +293,8 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0xaa36a7": SEPOLIA_CHAIN,
   "0x8274f": SCROLL_SEPOLIA_CHAIN,
   "0x82750": SCROLL_CHAIN,
+  "0x14a34": BASE_SEPOLIA_CHAIN,
+  // "0x2105": BASE_CHAIN,
   "0xa0c71fd": BLAST_SEPOLIA_CHAIN,
   "0x13e31": BLAST_CHAIN,
   "goerli": GOERLI_CHAIN,
@@ -258,6 +307,8 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "scrolltest": SCROLL_SEPOLIA_CHAIN,
   "scroll": SCROLL_CHAIN,
   "scrollsepolia": SCROLL_SEPOLIA_CHAIN,
+  // "base": BASE_CHAIN,
+  "basesepolia": BASE_SEPOLIA_CHAIN,
   "blast": BLAST_CHAIN,
   "blastSepolia": BLAST_SEPOLIA_CHAIN,
 };
