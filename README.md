@@ -32,5 +32,5 @@ parse a transaction receipt from ethers.js and web3.js
 # yarn ts-node ./examples/01-retrieve-spot-price.ts
 
 # project dependencies
-ethers
+ethers v6
 ```
