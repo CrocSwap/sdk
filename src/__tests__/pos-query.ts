@@ -1,3 +1,9 @@
+describe('Placeholder Test Suite', () => {
+  it('should pass this placeholder test', () => {
+    expect(true).toBe(true);
+  });
+});
+
 /*import { queryClaim, AmbientClaim, RangeClaim, queryPos, AmbientLiqPos, RangeLiqPos, queryPosAnchors } from "../position";
 import { ethers } from "ethers";
 import { NODE_URL } from "..";
