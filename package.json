@@ -1,6 +1,6 @@
 {
   "name": "@crocswap-libs/sdk",
-  "version": "0.3.9-3",
+  "version": "1.0.0-1",
   "description": "🛠🐊🛠 An SDK for building applications on top of CrocSwap",
   "author": "Ben Wolski <ben@crocodilelabs.io>",
   "repository": "https://github.com/CrocSwap/sdk.git",
@@ -16,7 +16,7 @@
     "dist/**/*"
   ],
   "scripts": {
-    "lint": "eslint src/ --ext .js,.jsx,.ts,.tsx",
+    "lint": "eslint .",
     "test": "jest",
     "clean": "rm -rf dist build package",
     "ts-node": "ts-node",
@@ -27,19 +27,19 @@
     "build-local": "yarn build-all && yarn copy-local"
   },
   "devDependencies": {
-    "@types/jest": "^27.4.0",
-    "@types/node": "^17.0.8",
-    "@typescript-eslint/eslint-plugin": "^5.9.0",
-    "@typescript-eslint/parser": "^5.9.0",
-    "esbuild": "^0.14.11",
-    "eslint": "^8.6.0",
-    "jest": "^27.4.7",
-    "ts-jest": "^27.1.2",
-    "ts-node": "^10.4.0",
-    "typedoc": "^0.25.4",
-    "typescript": "^5.3.3"
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.12",
+    "@typescript-eslint/eslint-plugin": "^7.11.0",
+    "@typescript-eslint/parser": "^7.11.0",
+    "esbuild": "^0.21.4",
+    "eslint": "^9.3.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.4",
+    "ts-node": "^10.9.2",
+    "typedoc": "^0.25.13",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
-    "ethers": "^5.5.3"
+    "ethers": "^6.13.0"
   }
 }

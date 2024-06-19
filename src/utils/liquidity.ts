@@ -1,7 +1,6 @@
-import { BigNumber } from "ethers";
 import {
-  bigNumToFloat,
-  floatToBigNum,
+  bigIntToFloat,
+  floatToBigInt,
   truncateRightBits,
 } from "./";
 
@@ -14,11 +13,11 @@ import {
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
 export function liquidityForBaseQty(
   price: number,
-  qty: BigNumber,
+  qty: bigint,
   mult: number = 1.0
-): BigNumber {
-  return floatToBigNum(
-    Math.floor((bigNumToFloat(qty) / Math.sqrt(price)) * mult)
+): bigint {
+  return floatToBigInt(
+    Math.floor((bigIntToFloat(qty) / Math.sqrt(price)) * mult)
   );
 }
 
@@ -31,28 +30,28 @@ export function liquidityForBaseQty(
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this quote token quantity. */
 export function liquidityForQuoteQty(
   price: number,
-  qty: BigNumber,
+  qty: bigint,
   mult = 1.0
-): BigNumber {
-  return floatToBigNum(
-    Math.floor(bigNumToFloat(qty) * Math.sqrt(price) * mult)
+): bigint {
+  return floatToBigInt(
+    Math.floor(bigIntToFloat(qty) * Math.sqrt(price) * mult)
   );
 }
 
 export function baseVirtualReserves(
   price: number,
-  liq: BigNumber,
+  liq: bigint,
   mult: number = 1.0
-): BigNumber {
-  return floatToBigNum(bigNumToFloat(liq) * Math.sqrt(price) * mult);
+): bigint {
+  return floatToBigInt(bigIntToFloat(liq) * Math.sqrt(price) * mult);
 }
 
 export function quoteVirtualReserves(
   price: number,
-  liq: BigNumber,
+  liq: bigint,
   mult: number = 1.0
-): BigNumber {
-  return floatToBigNum((bigNumToFloat(liq) / Math.sqrt(price)) * mult);
+): bigint {
+  return floatToBigInt((bigIntToFloat(liq) / Math.sqrt(price)) * mult);
 }
 
 /* Converts a fixed amount of base token deposits to liquidity for a concentrated range order
@@ -64,10 +63,10 @@ export function quoteVirtualReserves(
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this base token quantity. */
 export function liquidityForBaseConc(
   price: number,
-  qty: BigNumber,
+  qty: bigint,
   lower: number,
   upper: number
-): BigNumber {
+): bigint {
   const concFactor = baseConcFactor(price, lower, upper);
   return liquidityForBaseQty(price, qty, concFactor);
 }
@@ -81,35 +80,35 @@ export function liquidityForBaseConc(
  * @return The amount of virtual liquidity (in sqrt(X*Y)) supported by this quote token quantity. */
 export function liquidityForQuoteConc(
   price: number,
-  qty: BigNumber,
+  qty: bigint,
   lower: number,
   upper: number
-): BigNumber {
+): bigint {
   const concFactor = quoteConcFactor(price, lower, upper);
   return liquidityForQuoteQty(price, qty, concFactor);
 }
 
 export function baseTokenForConcLiq(
   price: number,
-  liq: BigNumber,
+  liq: bigint,
   lower: number,
   upper: number
-): BigNumber {
+): bigint {
   const concFactor = baseConcFactor(price, lower, upper);
   return baseVirtualReserves(price, liq, 1 / concFactor);
 }
 
 export function quoteTokenForConcLiq(
   price: number,
-  liq: BigNumber,
+  liq: bigint,
   lower: number,
   upper: number
-): BigNumber {
+): bigint {
   const concFactor = quoteConcFactor(price, lower, upper);
   return quoteVirtualReserves(price, liq, 1 / concFactor);
 }
 
-export function baseTokenForQuoteConc (baseQty: number, 
+export function baseTokenForQuoteConc (baseQty: number,
   lower: number, upper: number): number {
   const growth = Math.sqrt(upper/lower) - 1
   const virtBase = baseQty / growth;
@@ -117,7 +116,7 @@ export function baseTokenForQuoteConc (baseQty: number,
   return virtQuote * (1 / (1 - growth) - 1)
 }
 
-export function quoteTokenForBaseConc (quoteQty: number, 
+export function quoteTokenForBaseConc (quoteQty: number,
   lower: number, upper: number): number {
   return baseTokenForQuoteConc(quoteQty, 1/upper, 1/lower)
 }
@@ -212,7 +211,7 @@ export function concQuoteSlippagePrice (spotPrice: number, lowerPrice: number, s
 }
 
 /* Rounds a liquidity magnitude to a multiple that can be used inside the protocol. */
-export function roundForConcLiq(liq: BigNumber): BigNumber {
+export function roundForConcLiq(liq: bigint): bigint {
   const CONC_LOTS_BITS = 11;
   return truncateRightBits(liq, CONC_LOTS_BITS);
 }

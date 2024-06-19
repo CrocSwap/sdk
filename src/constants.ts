@@ -1,14 +1,13 @@
-import { BigNumber } from "ethers";
-
 type ChainAddress = string;
 type ChainId = string;
 
 export const MIN_TICK = -665454;
 export const MAX_TICK = 831818;
-export const MAX_SQRT_PRICE: BigNumber = BigNumber.from(
-  "21267430153580247136652501917186561138").sub(1);
-export const MIN_SQRT_PRICE: BigNumber = BigNumber.from("65538").sub(1);
-export const MAX_LIQ = BigNumber.from(2).pow(128).sub(1);
+export const MAX_SQRT_PRICE: bigint = BigInt(
+  "21267430153580247136652501917186561138") - BigInt(1);
+export const MIN_SQRT_PRICE: bigint = BigInt("65538") - BigInt(1);
+export const MAX_LIQ = BigInt(2) ** BigInt(128) - BigInt(1);
+
 
 export interface ChainSpec {
   nodeUrl: string;
@@ -39,14 +38,14 @@ const ETHEREUM_LOGO =
   "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg";
 const SCROLL_LOGO =
   "https://develop--ambient-finance.netlify.app/scroll_logo.png";
-const BLAST_LOGO = 
+const BLAST_LOGO =
  "https://assets-global.website-files.com/65a6baa1a3f8ed336f415cb4/65a6cc95aae1066cf96d497d_Logo%20Black%20on%20Yellow%20Background%402x-p-500.png"
 
 const DFLT_SDK_INFURA_KEY = '4741d1713bff4013bc3075ed6e7ce091'
 
 const GOERLI_CHAIN: ChainSpec = {
-  nodeUrl: "https://goerli.infura.io/v3/" + DFLT_SDK_INFURA_KEY, 
-  wsUrl: "wss://goerli.infura.io/ws/v3/" + DFLT_SDK_INFURA_KEY, 
+  nodeUrl: "https://goerli.infura.io/v3/" + DFLT_SDK_INFURA_KEY,
+  wsUrl: "wss://goerli.infura.io/ws/v3/" + DFLT_SDK_INFURA_KEY,
   addrs: {
     dex: "0xfafcd1f5530827e7398b6d3c509f450b1b24a209",
     query: "0xc9900777baa5EE94Cd2C6509fb09278A1A46b7e8",

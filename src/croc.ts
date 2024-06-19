@@ -1,58 +1,58 @@
 import { ConnectArg, CrocContext, connectCroc } from './context';
 import { CrocPoolView } from './pool';
-import { AddressZero } from '@ethersproject/constants';
+import { ZeroAddress } from 'ethers';
 import { TokenQty, CrocTokenView } from './tokens';
 import { CrocSwapPlan, CrocSwapPlanOpts } from './swap';
 import { Signer } from 'ethers';
 import { CrocKnockoutHandle } from './knockout';
 import { CrocPositionView } from './position';
 import { CrocSlotReader } from './slots';
-import { TransactionResponse } from "@ethersproject/providers";
+import { TransactionResponse } from 'ethers';
 
 /* This is the main entry point for the Croc SDK. It provides a high-level interface
  * for interacting with CrocSwap smart contracts in an ergonomic way. */
 export class CrocEnv {
     constructor (conn: ConnectArg, signer?: Signer) {
-        this.context = connectCroc(conn, signer)     
-        this.tokens = new TokenRepo(this.context)   
+        this.context = connectCroc(conn, signer)
+        this.tokens = new TokenRepo(this.context)
     }
 
-    /* Generates a prefix object for a swap with a fixed buy quantity. 
+    /* Generates a prefix object for a swap with a fixed buy quantity.
      * Example of generating a swap plan for buying 100 USDC by swapping DAI:
      *    crocEnv.buy(USDC, 100).with(DAI)
-     * 
+     *
      * @param token The address of the token to buy.
      * @param qty The fixed quantity of the token to buy. */
     buy (token: string, qty: TokenQty): BuyPrefix {
         return new BuyPrefix(token, qty, this.tokens, this.context)
     }
 
-    /* Generates a prefix object for a swap with a fixed buy quantity of native ETH. 
+    /* Generates a prefix object for a swap with a fixed buy quantity of native ETH.
      * Example of generating a swap plan for buying 100 USDC by swapping DAI:
      *    crocEnv.buyEth(100).with(DAI)
-     * 
+     *
      * @param qty The fixed quantity of native ETH to buy. */
     buyEth (qty: TokenQty): BuyPrefix {
-        return new BuyPrefix(AddressZero, qty, this.tokens, this.context)
+        return new BuyPrefix(ZeroAddress, qty, this.tokens, this.context)
     }
 
-    /* Generates a prefix object for a swap with a fixed sell quantity. 
+    /* Generates a prefix object for a swap with a fixed sell quantity.
      * Example of generating a swap plan for selling 100 USDC to swap into DAI:
      *    crocEnv.sell(USDC, 100).for(DAI)
-     * 
+     *
      * @param token The address of the token to sell.
      * @param qty The fixed quantity of the token to sell. */
     sell (token: string, qty: TokenQty): SellPrefix {
         return new SellPrefix(token, qty, this.tokens, this.context)
     }
 
-    /* Generates a prefix object for a swap with a fixed sell quantity of native ETH. 
+    /* Generates a prefix object for a swap with a fixed sell quantity of native ETH.
      * Example of generating a swap plan for selling 100 native ETH to swap into DAI:
      *    crocEnv.sellEth(100).for(DAI)
-     * 
+     *
      * @param qty The fixed quantity of native ETH to sell. */
     sellEth (qty: TokenQty): SellPrefix {
-        return new SellPrefix(AddressZero, qty, this.tokens, this.context)
+        return new SellPrefix(ZeroAddress, qty, this.tokens, this.context)
     }
 
     /* Returns a view of the canonical pool for the underlying token pair. For example the
@@ -69,11 +69,11 @@ export class CrocEnv {
         return new CrocPoolView(viewA, viewB, this.context)
     }
 
-    /* Returns a view of the canonical pool for the token pair against native ETH. For example 
+    /* Returns a view of the canonical pool for the token pair against native ETH. For example
      * the below woudl return a pool view for MKR/ETH with MKR priced in ETH for display purposes
      *       crocEnv.poolEth(MKR) */
     poolEth (token: string): CrocPoolView {
-        return this.pool(token, AddressZero)
+        return this.pool(token, ZeroAddress)
     }
 
     /* Returns a view of the canonical pool for the token pair against native ETH, but ETH is
@@ -81,7 +81,7 @@ export class CrocEnv {
      * or paired against Bitcoin. For example the below would return a pool view for ETH/USDC
      *       crocEnv.poolEthQuote(USDC) */
     poolEthQuote (token: string): CrocPoolView {
-        return this.pool(AddressZero, token)
+        return this.pool(ZeroAddress, token)
     }
 
     /* Returns a position view for a single user on the canonical pool for a single pair. */
@@ -91,14 +91,14 @@ export class CrocEnv {
     }
 
     /* Returns a tokenView for a single token
-     * @param token The address of the specifc token. */ 
+     * @param token The address of the specifc token. */
     token (token: string): CrocTokenView {
         return this.tokens.materialize(token)
     }
 
     /* Returns a tokenView for native ETH. */
     tokenEth(): CrocTokenView {
-        return this.tokens.materialize(AddressZero)
+        return this.tokens.materialize(ZeroAddress)
     }
 
     async approveBypassRouter(): Promise<TransactionResponse | undefined> {
@@ -122,16 +122,16 @@ class BuyPrefix {
     }
 
     with (token: string, args?: CrocSwapPlanOpts): CrocSwapPlan {
-        return new CrocSwapPlan(this.repo.materialize(token), 
+        return new CrocSwapPlan(this.repo.materialize(token),
             this.repo.materialize(this.token), this.qty, true, this.context, args)
     }
 
     withEth (args?: CrocSwapPlanOpts): CrocSwapPlan {
-        return this.with(AddressZero, args)
+        return this.with(ZeroAddress, args)
     }
 
     atLimit (token: string, tick: number): CrocKnockoutHandle {
-        return new CrocKnockoutHandle(this.repo.materialize(token), 
+        return new CrocKnockoutHandle(this.repo.materialize(token),
             this.repo.materialize(this.token), this.qty, false, tick, this.context)
     }
 
@@ -150,16 +150,16 @@ class SellPrefix {
     }
 
     for (token: string, args?: CrocSwapPlanOpts): CrocSwapPlan {
-        return new CrocSwapPlan(this.repo.materialize(this.token), 
+        return new CrocSwapPlan(this.repo.materialize(this.token),
             this.repo.materialize(token), this.qty, false, this.context, args)
 
     }
     forEth (args?: CrocSwapPlanOpts): CrocSwapPlan {
-        return this.for(AddressZero, args)
+        return this.for(ZeroAddress, args)
     }
 
     atLimit (token: string, tick: number): CrocKnockoutHandle {
-        return new CrocKnockoutHandle(this.repo.materialize(this.token), 
+        return new CrocKnockoutHandle(this.repo.materialize(this.token),
             this.repo.materialize(token), this.qty, true, tick, this.context)
     }
 

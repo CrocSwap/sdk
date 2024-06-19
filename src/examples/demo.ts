@@ -1,7 +1,7 @@
 import { CrocEnv } from '../croc';
 import { ethers } from 'ethers';
 
-//const ETH = ethers.constants.AddressZero
+//const ETH = ethers.constants.ZeroAddress
 //const DAI = "0xdc31Ee1784292379Fbb2964b3B9C4124D8F89C60"
 
 // Scroll
@@ -14,7 +14,7 @@ import { ethers } from 'ethers';
 //const USDC = "0x60bBA138A74C5e7326885De5090700626950d509"
 
 // Blast
-const USDB = "0x4300000000000000000000000000000000000003" 
+const USDB = "0x4300000000000000000000000000000000000003"
 
 // deepcode ignore HardcodedSecret: testnet dummy key
 const KEY = process.env.WALLET_KEY || "0x7c5e2cfbba7b00ba95e5ed7cd80566021da709442e147ad3e08f23f5044a3d5a"
@@ -44,7 +44,7 @@ async function demo() {
     //await croc.token(USDC).approve(0.001)
     //await croc.token(USDC).approveRouter()
     //await croc.token(USDC).approveBypassRouter()
-    
+
     //console.log((await croc.sell(USDC, 7.5).forEth().useBypass().swap()))
     //console.log((await croc.sellEth(0).for(USDC).swap()))
     //console.log((await croc.buy(USDC, 1).withEth().useBypass().swap()))
@@ -64,40 +64,40 @@ async function demo() {
     console.log(await croc.tokenEth().balanceDisplay("0xd825D73CDD050ecbEBC0B3a8D9C5952d1F64722e"))
     console.log(await croc.token(DAI).walletDisplay(wallet.address))*/
 
-    //let ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -78464+512, croc.context)
-    /*ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -78464+1024, croc.context)
-    //ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -78464+2048, croc.context)
-    //ko = new CrocKnockoutHandle(AddressZero, DAI, 0.01, -78464-2048, croc.context)
-    //ko = new CrocKnockoutHandle(AddressZero, DAI, 0.01, -78464-1024, croc.context)
+    //let ko = new CrocKnockoutHandle(DAI, ZeroAddress, 0.001, -78464+512, croc.context)
+    /*ko = new CrocKnockoutHandle(DAI, ZeroAddress, 0.001, -78464+1024, croc.context)
+    //ko = new CrocKnockoutHandle(DAI, ZeroAddress, 0.001, -78464+2048, croc.context)
+    //ko = new CrocKnockoutHandle(ZeroAddress, DAI, 0.01, -78464-2048, croc.context)
+    //ko = new CrocKnockoutHandle(ZeroAddress, DAI, 0.01, -78464-1024, croc.context)
     await (await ko.mint()).wait()*/
 
-    //let tx = croc.poolEth(DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001])
+    //let tx = croc.poolEth(DAI).burnAmbientLiq(BigInt(10).pow(7), [0.0001, 0.001])
     //let tx = croc.poolEth(DAI).mintRangeBase(0.0001, [-640000, 640000], [0.0001, 0.001])
     //let tx = croc.poolEth(DAI).mintRangeBase(1.0, [-100000, 0], [0.0001, 0.001])
 
-    //let tx = croc.poolEth(DAI).burnRangeLiq(BigNumber.from(10).pow(7), [-640000, 640000], [0.0001, 0.001])
+    //let tx = croc.poolEth(DAI).burnRangeLiq(BigInt(10).pow(7), [-640000, 640000], [0.0001, 0.001])
     /*let tx = croc.poolEth(DAI).harvestRange([-640000, 640000], [0.0001, 0.001])
     await (await tx).wait()*/
 
-    /*let ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -73152, croc.context)
+    /*let ko = new CrocKnockoutHandle(DAI, ZeroAddress, 0.001, -73152, croc.context)
     await (await ko.mint()).wait()
-    ko = new CrocKnockoutHandle(DAI, AddressZero, 0.001, -74432, croc.context)
+    ko = new CrocKnockoutHandle(DAI, ZeroAddress, 0.001, -74432, croc.context)
     await (await ko.mint()).wait()
-    
+
     croc.poolEth(DAI).spotTick().then(console.log)
     croc.poolEth(DAI).spotPrice().then(console.log)*/
 
     /*croc.poolEth(DAI).spotPrice().then(console.log);
-    croc.pool(DAI, AddressZero).displayPrice().then(console.log);
-    croc.pool(AddressZero, DAI).displayPrice().then(console.log);*/
+    croc.pool(DAI, ZeroAddress).displayPrice().then(console.log);
+    croc.pool(ZeroAddress, DAI).displayPrice().then(console.log);*/
 
-    //await (await croc.pool(AddressZero, USDC).initPool(3000)).wait()
+    //await (await croc.pool(ZeroAddress, USDC).initPool(3000)).wait()
 
     /*croc.poolEth(USDC).spotPrice().then(console.log);
-    croc.pool(USDC, AddressZero).displayPrice().then(console.log);
-    croc.pool(AddressZero, USDC).displayPrice().then(console.log);
+    croc.pool(USDC, ZeroAddress).displayPrice().then(console.log);
+    croc.pool(ZeroAddress, USDC).displayPrice().then(console.log);
 
-    croc.pool(AddressZero, USDC).mintAmbientQuote(100, [2000, 4000])*/
+    croc.pool(ZeroAddress, USDC).mintAmbientQuote(100, [2000, 4000])*/
 
     //croc.poolEth(DAI).initPool()
 
@@ -129,32 +129,32 @@ async function demo() {
     // Pay ETH from exchange balance, receive DAI to wallet
     await croc.sellEth(0.01).for(DAI).swap({surplus: [false, true]})
 
-    // Pay DAI from exchange balance, receive ETH to wallet 
+    // Pay DAI from exchange balance, receive ETH to wallet
     await croc.buyEth(0.01).with(DAI).swap({surplus: [true, false]})
 
     // Pay DAI from wallet, receive ETH to exchange balance
-    await croc.buyEth(0.01).with(DAI).swap({surplus: [false, true]})    
+    await croc.buyEth(0.01).with(DAI).swap({surplus: [false, true]})
 
-    // Pay ETH to receive DAI, both to/from exchange balance 
+    // Pay ETH to receive DAI, both to/from exchange balance
     await croc.buy(DAI, 100).withEth().swap({surplus: true})
 
-    // Pay ETH to receive DAI, both to/from wallet 
+    // Pay ETH to receive DAI, both to/from wallet
     await croc.buy(DAI, 10).withEth().swap({surplus: false})
 
-    // Pay ETH to receive DAI, both to/from wallet 
+    // Pay ETH to receive DAI, both to/from wallet
     await croc.buy(DAI, 10).withEth().swap()*/
 
     // Pays DAI to wallet and ETH to exchange balance
-    //await croc.pool(DAI, ETH).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001], {surplus: [false, true]})
+    //await croc.pool(DAI, ETH).burnAmbientLiq(BigInt(10).pow(7), [0.0001, 0.001], {surplus: [false, true]})
 
     // Pays DAI to exchange balance and ETH to wallet
-    /*await croc.pool(DAI, ETH).burnAmbientLiq(BigNumber.from(10).pow(7), [0.0001, 0.001], {surplus: [true, false]})
+    /*await croc.pool(DAI, ETH).burnAmbientLiq(BigInt(10).pow(7), [0.0001, 0.001], {surplus: [true, false]})
 
     // Pays ETH to exchange balance and DAI to wallet
-    await croc.pool(ETH, DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [1000, 10000], {surplus: [true, false]})
+    await croc.pool(ETH, DAI).burnAmbientLiq(BigInt(10).pow(7), [1000, 10000], {surplus: [true, false]})
 
     // Pays ETH to wallet and DAI to exchange balance
-    await croc.pool(ETH, DAI).burnAmbientLiq(BigNumber.from(10).pow(7), [1000, 10000], {surplus: [false, true]})*/
+    await croc.pool(ETH, DAI).burnAmbientLiq(BigInt(10).pow(7), [1000, 10000], {surplus: [false, true]})*/
 
     // Mint new limit order for $25. Pay from exchange balance
     /*croc.sell(DAI, 200).atLimit(ETH, -64000).burn({surplus: true})*/
@@ -163,7 +163,7 @@ async function demo() {
     //croc.sell(DAI, 10).atLimit(ETH, -64000).mint({surplus: false})
 
     // Burn 1 billion units of concentrated liquidity for the limit order
-    //croc.sell(DAI, 2).atLimit(ETH, -64000).burnLiq(BigNumber.from(1000000000))
+    //croc.sell(DAI, 2).atLimit(ETH, -64000).burnLiq(BigInt(1000000000))
 
     /*console.log(await (await croc.token(DAI).balance(wallet.address)).toString())
     console.log(await (await croc.tokenEth().balance(wallet.address)).toString())
@@ -192,8 +192,8 @@ async function demo() {
     console.log(await pool.displayToPinTick(1600))
 
 
-    let rebal = new CrocReposition(pool, { burn: [-64000 - 3200, -64000], mint: [-73792, -73088], 
-        liquidity: BigNumber.from(10).pow(14) })
+    let rebal = new CrocReposition(pool, { burn: [-64000 - 3200, -64000], mint: [-73792, -73088],
+        liquidity: BigInt(10).pow(14) })
 
     /*console.log((await rebal.currentCollateral()).toString())
     console.log((await rebal.balancePercent()))*/
@@ -204,7 +204,7 @@ async function demo() {
     /*const burnRange: [number, number] = [-64000 - 3200, -64000]
     const mintRange: [number, number] = [-76032, -72000]
     console.log(await rebal.rebal(burnRange, mintRange))*/
-    
+
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(5, [-72000 - 3200, -64000,], [0.00000001, 100000.0]))
     //console.log(await croc.poolEthQuote(DAI).mintRangeBase(5, [-76032, -72000,], [1600, 1700]))
     //console.log(await croc.poolEth(DAI).mintRangeQuote(50, [-64000 - 3200, -64000,], [0.00000001, 100000.0]))
