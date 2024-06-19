@@ -5,13 +5,13 @@ export class KnockoutEncoder {
         this.base = base;
         this.quote = quote;
         this.poolIdx = poolIdx;
-        this.abiCoder = new ethers.utils.AbiCoder();
+        this.abiCoder = new ethers.AbiCoder();
     }
-    
+
     private base: string;
     private quote: string;
     private poolIdx: number;
-    private abiCoder: ethers.utils.AbiCoder;
+    private abiCoder: ethers.AbiCoder;
 
     encodeKnockoutMint (qty: BigNumberish, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number): string {
@@ -43,9 +43,9 @@ export class KnockoutEncoder {
 
     private encodeCommonArgs (subcmd: number, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number, suppArgs: string): string {
-        return this.abiCoder.encode(KNOCKOUT_ARG_TYPES, 
-            [subcmd, this.base, this.quote, this.poolIdx, 
-                lowerTick, upperTick, isBid, 
+        return this.abiCoder.encode(KNOCKOUT_ARG_TYPES,
+            [subcmd, this.base, this.quote, this.poolIdx,
+                lowerTick, upperTick, isBid,
                 useSurplusFlags, suppArgs])
     }
 }

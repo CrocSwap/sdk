@@ -1,8 +1,8 @@
-import { Provider, JsonRpcProvider } from "@ethersproject/providers";
+import { Provider, JsonRpcProvider } from "ethers";
 import { Contract, ethers, Signer } from "ethers";
 import { ChainSpec, CHAIN_SPECS } from "./constants";
 import { CROC_ABI, QUERY_ABI, ERC20_ABI } from "./abis";
-import { AddressZero } from "@ethersproject/constants";
+import { ZeroAddress } from "ethers";
 import { IMPACT_ABI } from "./abis/impact";
 import { ERC20_READ_ABI } from "./abis/erc20.read";
 
@@ -40,7 +40,7 @@ async function buildProvider(
   } else if ("getNetwork" in arg) {
     return [arg, signer];
   } else {
-    const chainId = await arg.getChainId();
+    const chainId = Number((await arg.provider?.getNetwork())?.chainId);
     return buildProvider(chainId, signer);
   }
 }
@@ -49,26 +49,28 @@ async function setupProvider(
   provider: Provider,
   signer?: Signer
 ): Promise<CrocContext> {
-  const actor = determineActor(provider, signer);
+  const actor = await determineActor(provider, signer);
   const chainId = await getChain(provider);
   let cntx = inflateContracts(chainId, provider, actor);
   return await attachSenderAddr(cntx, actor)
 }
 
-async function attachSenderAddr (cntx: CrocContext, 
+async function attachSenderAddr (cntx: CrocContext,
   actor: Provider | Signer): Promise<CrocContext> {
   if ('getAddress' in actor) {
     try {
       cntx.senderAddr = await actor.getAddress()
-    } catch (e) { }
+    } catch (e) {
+      console.warn("Failed to get signer address:", e)
+     }
   }
   return cntx
 }
 
-function determineActor(
+async function determineActor(
   provider: Provider,
   signer?: Signer
-): Signer | Provider {
+): Promise<Signer | Provider> {
   if (signer) {
     try {
       return signer.connect(provider)
@@ -77,10 +79,10 @@ function determineActor(
     }
   } else if ("getSigner" in provider) {
     try {
-      let signer = (provider as ethers.providers.Web3Provider).getSigner();
+      let signer = await ((provider as ethers.JsonRpcProvider).getSigner());
       return signer
-    } catch { 
-      return provider 
+    } catch {
+      return provider
     }
   } else {
     return provider;
@@ -91,7 +93,7 @@ async function getChain(provider: Provider): Promise<number> {
   if ("chainId" in provider) {
     return (provider as any).chainId as number;
   } else if ("getNetwork" in provider) {
-    return provider.getNetwork().then((n) => n.chainId);
+    return provider.getNetwork().then((n) => Number(n.chainId));
   } else {
     throw new Error("Invalid provider");
   }
@@ -107,12 +109,12 @@ function inflateContracts(
   return {
     provider: provider,
     dex: new Contract(context.addrs.dex, CROC_ABI, actor),
-    router: context.addrs.router ? new Contract(context.addrs.router || AddressZero, CROC_ABI, actor) : undefined,
-    routerBypass: context.addrs.routerBypass ? new Contract(context.addrs.routerBypass || AddressZero, CROC_ABI, actor) : undefined,
+    router: context.addrs.router ? new Contract(context.addrs.router || ZeroAddress, CROC_ABI, actor) : undefined,
+    routerBypass: context.addrs.routerBypass ? new Contract(context.addrs.routerBypass || ZeroAddress, CROC_ABI, actor) : undefined,
     query: new Contract(context.addrs.query, QUERY_ABI, provider),
     slipQuery: new Contract(context.addrs.impact, IMPACT_ABI, provider),
-    erc20Write: new Contract(AddressZero, ERC20_ABI, actor),
-    erc20Read: new Contract(AddressZero, ERC20_READ_ABI, provider),
+    erc20Write: new Contract(ZeroAddress, ERC20_ABI, actor),
+    erc20Read: new Contract(ZeroAddress, ERC20_READ_ABI, provider),
     chain: context,
     senderAddr: addr
   };

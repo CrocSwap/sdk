@@ -10,7 +10,7 @@ export class PoolInitEncoder {
     this.baseToken = baseToken
     this.quoteToken = quoteToken
     this.poolIdx = poolIdx
-    this.abiCoder = new ethers.utils.AbiCoder();
+    this.abiCoder = new ethers.AbiCoder();
   }
 
   encodeInitialize (initPrice: number): string {
@@ -23,5 +23,5 @@ export class PoolInitEncoder {
   private baseToken: Address
   private quoteToken: Address
   private poolIdx: PoolType
-  private abiCoder: ethers.utils.AbiCoder;
+  private abiCoder: ethers.AbiCoder;
 }

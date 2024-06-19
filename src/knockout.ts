@@ -1,12 +1,11 @@
-import { BigNumber, BigNumberish } from "ethers";
-import { TransactionResponse } from '@ethersproject/providers';
+import { TransactionResponse } from 'ethers';
 import { CrocContext } from './context';
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
-import { AddressZero } from '@ethersproject/constants';
+import { ZeroAddress } from 'ethers';
 import { KnockoutEncoder } from "./encoding/knockout";
 import { ChainSpec } from "./constants";
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
-import { baseTokenForQuoteConc, bigNumToFloat, floatToBigNum, quoteTokenForBaseConc, roundForConcLiq } from "./utils";
+import { baseTokenForQuoteConc, bigIntToFloat, floatToBigInt, quoteTokenForBaseConc, roundForConcLiq } from "./utils";
 import { GAS_PADDING } from "./utils";
 
 
@@ -21,7 +20,7 @@ export class CrocKnockoutHandle {
     const tokenView = this.qtyInBase ? this.baseToken : this.quoteToken
     const specQty = tokenView.normQty(qty)
 
-    this.qty = inSellQty ? specQty : 
+    this.qty = inSellQty ? specQty :
       calcSellQty(specQty, !this.sellBase, knockoutTick, context)
 
     this.knockoutTick = knockoutTick
@@ -30,48 +29,48 @@ export class CrocKnockoutHandle {
 
   async mint (opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
     const chain = (await this.context).chain
-    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, 
+    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr,
       this.quoteToken.tokenAddr, chain.poolIndex)
     const [lowerTick, upperTick] = this.tickRange(chain)
     const surplus = this.maskSurplusFlags(opts)
 
-    const cmd = encoder.encodeKnockoutMint(await this.qty, lowerTick, upperTick, 
+    const cmd = encoder.encodeKnockoutMint(await this.qty, lowerTick, upperTick,
       this.sellBase, surplus);
     return this.sendCmd(cmd, { value: await this.msgVal(surplus) })
   }
 
   async burn (opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
     const chain = (await this.context).chain
-    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr,
       chain.poolIndex)
     const [lowerTick, upperTick] = this.tickRange(chain)
     const surplus = this.maskSurplusFlags(opts)
 
-    const cmd = encoder.encodeKnockoutBurnQty(await this.qty, lowerTick, upperTick, 
+    const cmd = encoder.encodeKnockoutBurnQty(await this.qty, lowerTick, upperTick,
       this.sellBase, surplus);
     return this.sendCmd(cmd)
   }
 
-  async burnLiq (liq: BigNumber, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
+  async burnLiq (liq: bigint, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
     const chain = (await this.context).chain
-    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr,
       chain.poolIndex)
     const [lowerTick, upperTick] = this.tickRange(chain)
     const surplus = this.maskSurplusFlags(opts)
 
-    const cmd = encoder.encodeKnockoutBurnLiq(roundForConcLiq(liq), lowerTick, upperTick, 
+    const cmd = encoder.encodeKnockoutBurnLiq(roundForConcLiq(liq), lowerTick, upperTick,
       this.sellBase, surplus);
     return this.sendCmd(cmd)
   }
 
   async recoverPost (pivotTime: number, opts?: CrocKnockoutOpts): Promise<TransactionResponse> {
     const chain = (await this.context).chain
-    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr, 
+    const encoder = new KnockoutEncoder(this.baseToken.tokenAddr, this.quoteToken.tokenAddr,
       chain.poolIndex)
     const [lowerTick, upperTick] = this.tickRange(chain)
     const surplus = this.maskSurplusFlags(opts)
 
-    const cmd = encoder.encodeKnockoutRecover(pivotTime, lowerTick, upperTick, 
+    const cmd = encoder.encodeKnockoutRecover(pivotTime, lowerTick, upperTick,
       this.sellBase, surplus);
     return this.sendCmd(cmd)
   }
@@ -85,24 +84,24 @@ export class CrocKnockoutHandle {
       (this.knockoutTick - await gridSize <= await marketTick)
   }
 
-  private async sendCmd (calldata: string, txArgs?: { value?: BigNumberish }):
+  private async sendCmd (calldata: string, txArgs?: { value?: bigint }):
       Promise<TransactionResponse> {
       let cntx = await this.context
       if (txArgs === undefined) { txArgs = {} }
-      const gasEst = await cntx.dex.estimateGas.userCmd(KNOCKOUT_PATH, calldata, txArgs)
-      Object.assign(txArgs, { gasLimit: gasEst.add(GAS_PADDING)})
+      const gasEst = await cntx.dex.userCmd.estimateGas(KNOCKOUT_PATH, calldata, txArgs)
+      Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING})
       return cntx.dex.userCmd(KNOCKOUT_PATH, calldata, txArgs);
   }
 
   private maskSurplusFlags (opts?: CrocKnockoutOpts): number {
     if (!opts || !opts.surplus) { return encodeSurplusArg(false) }
-    else { 
+    else {
       return encodeSurplusArg(opts.surplus) }
   }
 
-  private async msgVal (surplusFlags: number): Promise<BigNumber> {
-    if (this.baseToken.tokenAddr !== AddressZero || !this.sellBase) {
-      return BigNumber.from(0)
+  private async msgVal (surplusFlags: number): Promise<bigint> {
+    if (this.baseToken.tokenAddr !== ZeroAddress || !this.sellBase) {
+      return BigInt(0)
     }
 
     const useSurp = decodeSurplusFlag(surplusFlags)[0]
@@ -119,7 +118,7 @@ export class CrocKnockoutHandle {
 
   readonly baseToken: CrocTokenView
   readonly quoteToken: CrocTokenView
-  readonly qty: Promise<BigNumber>
+  readonly qty: Promise<bigint>
   readonly sellBase: boolean
   readonly qtyInBase: boolean
   readonly knockoutTick: number
@@ -132,10 +131,10 @@ export interface CrocKnockoutOpts {
 
 const KNOCKOUT_PATH = 7
 
-async function calcSellQty (buyQty: Promise<BigNumber>, isQtyInBase: boolean, knockoutTick: number,
-  context: Promise<CrocContext>): Promise<BigNumber> {
-  const sellQty = calcSellFloat(bigNumToFloat(await buyQty), isQtyInBase, knockoutTick, context)
-  return sellQty.then(floatToBigNum)
+async function calcSellQty (buyQty: Promise<bigint>, isQtyInBase: boolean, knockoutTick: number,
+  context: Promise<CrocContext>): Promise<bigint> {
+  const sellQty = calcSellFloat(bigIntToFloat(await buyQty), isQtyInBase, knockoutTick, context)
+  return sellQty.then(floatToBigInt)
 }
 
 async function calcSellFloat (buyQty: number, isQtyInBase: boolean, knockoutTick: number,
@@ -144,13 +143,13 @@ async function calcSellFloat (buyQty: number, isQtyInBase: boolean, knockoutTick
   const lowerPrice = Math.pow(1.0001, lowerTick)
   const upperPrice = Math.pow(1.0001, upperTick)
 
-  return isQtyInBase ? 
+  return isQtyInBase ?
     baseTokenForQuoteConc(buyQty, lowerPrice, upperPrice) :
     quoteTokenForBaseConc(buyQty, lowerPrice, upperPrice)
 }
 
 function tickRange (chain: ChainSpec, knockoutTick: number, sellBase: boolean): [number, number] {
-  return sellBase ? 
+  return sellBase ?
       [knockoutTick, knockoutTick + chain.gridSize] :
       [knockoutTick - chain.gridSize, knockoutTick]
 }

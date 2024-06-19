@@ -1,14 +1,14 @@
+import { ZeroAddress } from "ethers";
 import {
   getQuoteTokenAddress,
   getBaseTokenAddress,
   sortBaseQuoteTokens,
 } from "../utils/token";
-import { AddressZero } from "@ethersproject/constants";
 
 test("getQuoteTokenAddress returns correct address when ETH compared with Dai on Kovan", () => {
   const daiKovanAddress = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa";
   const quoteAddress = getQuoteTokenAddress(
-    AddressZero, daiKovanAddress
+    ZeroAddress, daiKovanAddress
   );
   expect(quoteAddress).toBe(daiKovanAddress);
 });
@@ -16,20 +16,20 @@ test("getQuoteTokenAddress returns correct address when ETH compared with Dai on
 test("getBaseTokenAddress returns correct address when ETH compared with Dai on Kovan", () => {
   const daiKovanAddress = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa";
   const quoteAddress = getBaseTokenAddress(
-    AddressZero, 
+    ZeroAddress, 
     daiKovanAddress
   );
-  expect(quoteAddress).toBe(AddressZero);
+  expect(quoteAddress).toBe(ZeroAddress);
 });
 
 test("sortBaseQuoteTokens returns correct address array when ETH compared with Dai on Kovan when already correctly sorted", () => {
   const daiKovanAddress = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa";
   const addressArray = sortBaseQuoteTokens(
-    AddressZero, 
+    ZeroAddress, 
     daiKovanAddress
   );
   expect(addressArray).toStrictEqual([
-    AddressZero, 
+    ZeroAddress, 
     daiKovanAddress,
   ]);
 });
@@ -38,10 +38,10 @@ test("sortBaseQuoteTokens returns correct address array when ETH compared with D
   const daiKovanAddress = "0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa";
   const addressArray = sortBaseQuoteTokens(
     daiKovanAddress,
-    AddressZero
+    ZeroAddress
   );
   expect(addressArray).toStrictEqual([
-    AddressZero, 
+    ZeroAddress, 
     daiKovanAddress,
   ]);
 });
