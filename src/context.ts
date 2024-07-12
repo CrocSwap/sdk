@@ -140,7 +140,6 @@ export async function ensureChain(cntx: CrocContext) {
       throw new Error('No network selected in the wallet')
   }
   const contextNetwork = cntx.chain
-  console.log('comparing wallet chain', walletNetwork.chainId, 'and context chain', BigInt(contextNetwork.chainId))
   if (walletNetwork.chainId !== BigInt(contextNetwork.chainId)) {
       throw new Error(`Wrong chain selected in the wallet: expected ${contextNetwork.displayName} (${contextNetwork.chainId}) but got ${walletNetwork.name} (0x${Number(walletNetwork.chainId).toString(16)})`)
   }
