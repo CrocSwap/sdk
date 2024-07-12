@@ -8,6 +8,7 @@ import { ERC20_READ_ABI } from "./abis/erc20.read";
 
 export interface CrocContext {
   provider: Provider;
+  actor: Provider | Signer;
   dex: Contract;
   router?: Contract;
   routerBypass?: Contract;
@@ -108,6 +109,7 @@ function inflateContracts(
   const context = lookupChain(chainId);
   return {
     provider: provider,
+    actor: actor,
     dex: new Contract(context.addrs.dex, CROC_ABI, actor),
     router: context.addrs.router ? new Contract(context.addrs.router || ZeroAddress, CROC_ABI, actor) : undefined,
     routerBypass: context.addrs.routerBypass ? new Contract(context.addrs.routerBypass || ZeroAddress, CROC_ABI, actor) : undefined,
@@ -129,5 +131,17 @@ export function lookupChain(chainId: number | string): ChainSpec {
       throw new Error("Unsupported chain ID: " + chainId);
     }
     return context;
+  }
+}
+
+export async function ensureChain(cntx: CrocContext) {
+  const walletNetwork = await cntx.actor.provider?.getNetwork()
+  if (!walletNetwork) {
+      throw new Error('No network selected in the wallet')
+  }
+  const contextNetwork = cntx.chain
+  console.log('comparing wallet chain', walletNetwork.chainId, 'and context chain', BigInt(contextNetwork.chainId))
+  if (walletNetwork.chainId !== BigInt(contextNetwork.chainId)) {
+      throw new Error(`Wrong chain selected in the wallet: expected ${contextNetwork.displayName} (${contextNetwork.chainId}) but got ${walletNetwork.name} (0x${Number(walletNetwork.chainId).toString(16)})`)
   }
 }

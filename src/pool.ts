@@ -1,4 +1,4 @@
-import { CrocContext } from "./context";
+import { CrocContext, ensureChain } from "./context";
 import { decodeCrocPrice, toDisplayPrice, bigIntToFloat, toDisplayQty, fromDisplayPrice, roundForConcLiq, concDepositSkew, pinTickLower, pinTickUpper, neighborTicks, pinTickOutside, tickToPrice, concBaseSlippagePrice, concQuoteSlippagePrice } from './utils';
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { TransactionResponse } from 'ethers';
@@ -129,8 +129,9 @@ export class CrocPoolView {
         let calldata = encoder.encodeInitialize(await spotPrice)
 
         let cntx = await this.context
+        await ensureChain(cntx)
         const gasEst = await cntx.dex.userCmd.estimateGas(cntx.chain.proxyPaths.cold, calldata, txArgs)
-        Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING})
+        Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
         return cntx.dex.userCmd(cntx.chain.proxyPaths.cold, calldata, txArgs)
     }
 
@@ -190,8 +191,9 @@ export class CrocPoolView {
         Promise<TransactionResponse> {
         let cntx = await this.context
         if (txArgs === undefined) { txArgs = {} }
+        await ensureChain(cntx)
         const gasEst = await cntx.dex.userCmd.estimateGas(cntx.chain.proxyPaths.liq, calldata, txArgs)
-        Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING})
+        Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
         return cntx.dex.userCmd(cntx.chain.proxyPaths.liq, calldata, txArgs);
     }
 

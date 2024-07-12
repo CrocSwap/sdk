@@ -1,5 +1,5 @@
 import { TransactionResponse, ZeroAddress, ethers } from "ethers";
-import { CrocContext } from './context';
+import { CrocContext, ensureChain } from './context';
 import { CrocPoolView } from './pool';
 import { decodeCrocPrice, getUnsignedRawTransaction } from './utils';
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
@@ -55,8 +55,9 @@ export class CrocSwapPlan {
   }
 
   async swap (args: CrocSwapExecOpts = { }): Promise<TransactionResponse> {
+    await ensureChain(await this.context);
     const gasEst = await this.estimateGas(args)
-    const callArgs = Object.assign({gasEst: gasEst }, args)
+    const callArgs = Object.assign({ gasEst: gasEst, chainId: (await this.context).chain.chainId }, args)
     return this.sendTx(Object.assign({}, args, callArgs))
   }
 
@@ -197,7 +198,7 @@ export class CrocSwapPlan {
     const txArgs = await this.attachEthMsg(surplusArg)
 
     if (gasEst) {
-      Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING})
+      Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING });
     }
 
     return txArgs
