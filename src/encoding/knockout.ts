@@ -1,4 +1,4 @@
-import { BigNumberish, ethers } from "ethers";
+import { ethers } from "ethers";
 
 export class KnockoutEncoder {
     constructor(base: string, quote: string, poolIdx: number) {
@@ -13,21 +13,21 @@ export class KnockoutEncoder {
     private poolIdx: number;
     private abiCoder: ethers.AbiCoder;
 
-    encodeKnockoutMint (qty: BigNumberish, lowerTick:number, upperTick: number,
+    encodeKnockoutMint (qty: bigint, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number): string {
         const MINT_SUBCMD = 91
         const suppArgs = this.abiCoder.encode(["uint128", "bool"], [qty, false])
         return this.encodeCommonArgs(MINT_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
     }
 
-    encodeKnockoutBurnQty (qty: BigNumberish, lowerTick:number, upperTick: number,
+    encodeKnockoutBurnQty (qty: bigint, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number): string {
         const BURN_SUBCMD = 92
         const suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [qty, false, false])
         return this.encodeCommonArgs(BURN_SUBCMD, lowerTick, upperTick, isBid, useSurplusFlags, suppArgs)
     }
 
-    encodeKnockoutBurnLiq (liq: BigNumberish, lowerTick:number, upperTick: number,
+    encodeKnockoutBurnLiq (liq: bigint, lowerTick:number, upperTick: number,
         isBid: boolean, useSurplusFlags: number): string {
         const BURN_SUBCMD = 92
         const suppArgs = this.abiCoder.encode(["uint128", "bool", "bool"], [liq, true, true])

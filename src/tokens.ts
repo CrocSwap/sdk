@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { CrocContext } from "./context";
+import { CrocContext, ensureChain } from "./context";
 import { ethers, TransactionResponse, ZeroAddress, MaxUint256, Contract } from "ethers";
 import { MAX_LIQ } from "./constants";
 import { toDisplayQty, fromDisplayQty } from "./utils/token";
@@ -50,6 +50,7 @@ export class CrocTokenView {
 
     const weiQty = approveQty ? await this.normQty(approveQty) : MaxUint256
 
+    await ensureChain(await this.context)
     // We want to hardcode the gas limit, so we can manually pad it from the estimated
     // transaction. The default value is low gas calldata, but Metamask and other wallets
     // will often ask users to change the approval amount. Without the padding, approval
@@ -60,7 +61,7 @@ export class CrocTokenView {
     );
 
     return (await this.resolveWrite()).approve(
-      addr, weiQty, { gasLimit: (await gasEst) + BigInt(15000)}
+      addr, weiQty, { gasLimit: (await gasEst) + BigInt(15000), chainId: ((await this.context).chain).chainId }
     );
   }
 
@@ -76,7 +77,8 @@ export class CrocTokenView {
     const COLD_PROXY_IDX = 3
     const cmd = abiCoder.encode(["uint8", "address", "uint32", "uint16[]"],
             [72, router.address, MANY_CALLS, [HOT_PROXY_IDX]])
-    return (await this.context).dex.userCmd(COLD_PROXY_IDX, cmd)
+    await ensureChain(await this.context)
+    return (await this.context).dex.userCmd(COLD_PROXY_IDX, cmd, { chainId: ((await this.context).chain).chainId })
   }
 
   async wallet (address: string, block: BlockTag = "latest"): Promise<bigint> {
@@ -173,8 +175,9 @@ export class CrocTokenView {
 
       const txArgs = useMsgVal ? { value: await weiQty } : { }
       let cntx = await this.context
+      await ensureChain(cntx)
       const gasEst = await cntx.dex.userCmd.estimateGas(cntx.chain.proxyPaths.cold, cmd, txArgs)
-      Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING })
+      Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
       return cntx.dex.userCmd(cntx.chain.proxyPaths.cold, cmd, txArgs)
   }
 

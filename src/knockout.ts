@@ -1,5 +1,5 @@
 import { TransactionResponse } from 'ethers';
-import { CrocContext } from './context';
+import { CrocContext, ensureChain } from './context';
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { ZeroAddress } from 'ethers';
 import { KnockoutEncoder } from "./encoding/knockout";
@@ -88,8 +88,9 @@ export class CrocKnockoutHandle {
       Promise<TransactionResponse> {
       let cntx = await this.context
       if (txArgs === undefined) { txArgs = {} }
+      await ensureChain(cntx)
       const gasEst = await cntx.dex.userCmd.estimateGas(KNOCKOUT_PATH, calldata, txArgs)
-      Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING})
+      Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
       return cntx.dex.userCmd(KNOCKOUT_PATH, calldata, txArgs);
   }
 
