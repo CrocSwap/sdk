@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { BigNumberish, ethers } from "ethers";
 
 export class KnockoutEncoder {
     constructor(base: string, quote: string, poolIdx: number) {
@@ -48,6 +48,46 @@ export class KnockoutEncoder {
                 lowerTick, upperTick, isBid,
                 useSurplusFlags, suppArgs])
     }
+}
+
+/* The decoded state of the tick from a CrocKnockoutCross event log. */
+export interface KnockoutCrossState {
+    pivotTime: number,
+    mileage: BigNumberish,
+    commitEntropy: bigint
+}
+
+/* Packs a list of knockout cross events into a 256-bit array that can be passed directly
+ * as a Merkle proof to the Croc knockout claim function.
+ *
+ * 
+ * 
+ * @remarks These values should be taken directly from the CrocKnockoutCross
+ *          event log. For an example see
+ *   https://etherscan.io/tx/0x022b1f3792b98a54c761c0a79268dbcb6e5f1a2a9f7494bab743f722957e7219#eventlog
+ * 
+ * @param crosses The list of knockout cross events *only* at the given tick since the knockout
+ *                order was minted. Input can be in any order.
+ * @returns The 256-bit array for the knockout proof.
+ */
+export function packKnockoutLinks (crosses: KnockoutCrossState[]): bigint[] {
+    // Sort in reverse order to conform to proof standard
+    crosses.sort((a, b) => b.pivotTime - a.pivotTime)
+    return crosses.map(cross => packKnockoutLink(cross.pivotTime, cross.mileage, cross.commitEntropy))
+}
+
+/* Creates a single entry for an entry in a knockout proof.
+ * 
+ * @param pivotTime The time of the pivot (from the event log).
+ * @param mileage The mileage at the knockout cross (from the event log).
+ * @param commitEntropy The random commit entropy (from the event log).
+ * @returns The 256-bit array entry for the knockout proof.
+ */
+function packKnockoutLink (pivotTime: BigNumberish, 
+    mileage: BigNumberish, commitEntropy: bigint): bigint {
+    // Converted BigInt code
+    const packed = (BigInt(pivotTime) << BigInt(64)) + BigInt(mileage);
+    return commitEntropy + BigInt(packed);
 }
 
 const KNOCKOUT_ARG_TYPES = [
