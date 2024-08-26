@@ -87,7 +87,7 @@ function packKnockoutLink (pivotTime: BigNumberish,
     mileage: BigNumberish, commitEntropy: bigint): bigint {
     // Converted BigInt code
     const packed = (BigInt(pivotTime) << BigInt(64)) + BigInt(mileage);
-    return commitEntropy + BigInt(packed);
+    return (commitEntropy << BigInt(96)) + BigInt(packed);
 }
 
 const KNOCKOUT_ARG_TYPES = [
