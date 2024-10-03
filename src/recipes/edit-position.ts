@@ -2,7 +2,7 @@ import { TransactionResponse } from "ethers";
 import { OrderDirective } from "../encoding/longform";
 import { CrocPoolView } from "../pool";
 import {  tickToPrice } from "../utils";
-import { baseTokenForConcLiq, quoteTokenForConcLiq } from "../utils/liquidity";
+import { baseTokenForConcLiq, liquidityForBaseConc, liquidityForQuoteConc, quoteTokenForConcLiq } from "../utils/liquidity";
 import { GAS_PADDING } from "../utils";
 import { ensureChain } from "../context";
 
@@ -50,37 +50,37 @@ export class CrocEditPosition {
         return [baseAmount, quoteAmount];
     }
 
-    async newCollateral(): Promise<[bigint, bigint]> {
-        const baseAmount = baseTokenForConcLiq(await this.spotPrice, this.liquidity,
+    async targetLiquidityViaBase(baseAmount: bigint): Promise<bigint> {
+        return liquidityForBaseConc(await this.spotPrice, baseAmount,
             tickToPrice(this.mintRange[0]), tickToPrice(this.mintRange[1]));
-        const quoteAmount = quoteTokenForConcLiq(await this.spotPrice, this.liquidity,
-            tickToPrice(this.mintRange[0]), tickToPrice(this.mintRange[1]));
-        return [baseAmount, quoteAmount];
     }
 
-    async surplus(): Promise<[bigint, bigint]> {
+    async targetLiquidityViaQuote(quoteAmount: bigint): Promise<bigint> {
+        return liquidityForQuoteConc(await this.spotPrice, quoteAmount,
+            tickToPrice(this.mintRange[0]), tickToPrice(this.mintRange[1]));
+    }
+
+    async targetMintParams(): Promise<[bigint, number]> {
         const [currentBase, currentQuote] = await this.currentCollateral();
-        const [newBase, newQuote] = await this.newCollateral();
-        return [currentBase - newBase, currentQuote - newQuote];
+        const liquidityViaBase = await this.targetLiquidityViaBase(currentBase);
+        const liquidityViaQuote = await this.targetLiquidityViaQuote(currentQuote);
+        return liquidityViaBase < liquidityViaQuote ? [liquidityViaBase, 4] : [liquidityViaQuote, 5];
     }
 
     private async formatDirective(): Promise<OrderDirective> {
         const directive = new OrderDirective(this.pool.baseToken.tokenAddr);
         directive.appendHop(this.pool.quoteToken.tokenAddr);
         directive.appendPool((await this.pool.context).chain.poolIndex);
-
+        
         directive.appendRangeBurn(this.burnRange[0], this.burnRange[1], this.liquidity);
+        
+        const [mintLiquidity, mintRollType] = await this.targetMintParams();
 
-        const [surplusBase, surplusQuote] = await this.surplus();
-        if (surplusBase > 0) {
-            directive.open.limitQty = surplusBase;
-        } else {
-            directive.hops[0].settlement.limitQty = surplusQuote;
-        }
+        const mint = directive.appendRangeMint(this.mintRange[0], this.mintRange[1], mintLiquidity);
+        mint.rollType = mintRollType;
 
-        const mint = directive.appendRangeMint(this.mintRange[0], this.mintRange[1], this.liquidity);
-        mint.rollType = 5;
-
+        directive.open.limitQty = BigInt(0)
+        directive.hops[0].settlement.limitQty = BigInt(0)
         return directive;
     }
 
