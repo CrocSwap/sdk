@@ -15,7 +15,6 @@ interface EditPositionTarget {
 type TickRange = [number, number]
 
 export interface CrocEditPositionOpts {
-    impact?: number
 }
 
 export class CrocEditPosition {
@@ -26,7 +25,6 @@ export class CrocEditPosition {
         this.liquidity = target.liquidity;
         this.spotPrice = this.pool.spotPrice();
         this.spotTick = this.pool.spotTick();
-        this.impact = opts?.impact || DEFAULT_EDIT_SLIPPAGE;
     }
 
     async edit(): Promise<TransactionResponse> {
@@ -92,7 +90,4 @@ export class CrocEditPosition {
     liquidity: bigint;
     spotPrice: Promise<number>;
     spotTick: Promise<number>;
-    impact: number;
 }
-
-const DEFAULT_EDIT_SLIPPAGE = .02;
