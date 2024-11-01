@@ -53,8 +53,13 @@ export class KnockoutEncoder {
 /* The decoded state of the tick from a CrocKnockoutCross event log. */
 export interface KnockoutCrossState {
     pivotTime: number,
-    mileage: BigNumberish,
+    feeMileage: BigNumberish,
     commitEntropy: bigint
+}
+
+export interface KnockoutClaimProof {
+    root: bigint,
+    steps: bigint[]
 }
 
 /* Packs a list of knockout cross events into a 256-bit array that can be passed directly
@@ -70,10 +75,13 @@ export interface KnockoutCrossState {
  *                order was minted. Input can be in any order.
  * @returns The 256-bit array for the knockout proof.
  */
-export function packKnockoutLinks (crosses: KnockoutCrossState[]): bigint[] {
-    // Sort in reverse order to conform to proof standard
-    crosses.sort((a, b) => b.pivotTime - a.pivotTime)
-    return crosses.map(cross => packKnockoutLink(cross.pivotTime, cross.mileage, cross.commitEntropy))
+export function packKnockoutLinks (crosses: KnockoutCrossState[], merkleRoot: bigint): KnockoutClaimProof {    
+    let steps: bigint[] = []
+    for (let i = 0; i < crosses.length - 1; i++) {
+        const link = packKnockoutLink(crosses[i].pivotTime, crosses[i].feeMileage, crosses[i+1].commitEntropy)
+        steps.push(link)
+    }
+    return { root: merkleRoot, steps: steps }
 }
 
 /* Creates a single entry for an entry in a knockout proof.
