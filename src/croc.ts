@@ -8,6 +8,7 @@ import { CrocKnockoutHandle } from './knockout';
 import { CrocPositionView } from './position';
 import { CrocSlotReader } from './slots';
 import { TransactionResponse } from 'ethers';
+import { TempestVault } from './vaults/tempest';
 
 /* This is the main entry point for the Croc SDK. It provides a high-level interface
  * for interacting with CrocSwap smart contracts in an ergonomic way. */
@@ -103,6 +104,12 @@ export class CrocEnv {
 
     async approveBypassRouter(): Promise<TransactionResponse | undefined> {
         return this.tokenEth().approveBypassRouter()
+    }
+
+    tempestVault (vaultAddr: string, token1Addr: string): TempestVault {
+        let vaultView = this.tokens.materialize(vaultAddr)
+        let token1View = this.tokens.materialize(token1Addr)
+        return new TempestVault(vaultView, token1View, this.context)
     }
 
     slotReader(): CrocSlotReader {
