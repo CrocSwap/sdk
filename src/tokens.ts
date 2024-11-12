@@ -43,7 +43,7 @@ export class CrocTokenView {
     return router && this.approveAddr(await router.getAddress(), approveQty)
   }
 
-  private async approveAddr (addr: string, approveQty?: TokenQty): Promise<TransactionResponse | undefined> {
+  async approveAddr (addr: string, approveQty?: TokenQty): Promise<TransactionResponse | undefined> {
     if (this.isNativeEth) {
       return undefined;
     }
@@ -103,13 +103,13 @@ export class CrocTokenView {
     return toDisplayQty(await balance, await this.decimals);
   }
 
-  async allowance(address: string): Promise<bigint> {
+  async allowance(address: string, spender?: string): Promise<bigint> {
     if (this.isNativeEth) {
       return MAX_LIQ;
     }
     return (await this.resolve()).allowance(
       address,
-      await (await this.context).dex.getAddress()
+      spender ? spender : await (await this.context).dex.getAddress()
     );
   }
 
