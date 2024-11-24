@@ -24,22 +24,22 @@ async function demo() {
 
     const croc = new CrocEnv("scroll", wallet)
 
-    const tempestVault = "0xB8404F9f06256c6d723d2A9c7304115efA63a6e4"
-    const tempestToken1 = "0xf55BEC9cafDbE8730f096Aa55dad6D22d44099Df"
+    const tempestVault = "0x3E9E7861D68a82783FAfbaCaB21ea8F37231c56e"
+    const tempestToken1 = "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"
     let vault = croc.tempestVault(tempestVault, tempestToken1)
 
-    /*console.log(await vault.allowance(wallet.address))
+    console.log(await vault.allowance(wallet.address))
     console.log(await vault.minDeposit())
 
     console.log(await vault.balanceVault(wallet.address))
     console.log(await vault.balanceToken1(wallet.address))
 
-    console.log(await vault.queryConversionRate())*/
+    console.log(await vault.queryConversionRate())
 
     /*let balance = vault.balanceVault(wallet.address)
     console.log(await vault.redeemZap(await balance, 5.0))*/
 
-    console.log(await vault.depositZap(10.0))
+    //console.log(await vault.depositZap(10.0))
 
     //let tx = croc.token(USDB).approve()
     //let tx = croc.tokenEth().deposit(0.01, wallet.address)
