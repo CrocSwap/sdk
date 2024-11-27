@@ -273,6 +273,28 @@ const SWELL_SEPOLIA_CHAIN: ChainSpec = {
   logoUrl: ETHEREUM_LOGO,
 };
 
+const BASE_SEPOLIA_CHAIN: ChainSpec = {
+  nodeUrl: "https://sepolia.base.org",
+  addrs: {
+    dex: "0xD553d97EfD5faAB29Dc92CC87d5259ff59278176",
+    query: "0x70a6a0C905af5737aD73Ceba4e6158e995031d4B",
+    impact: "0x3108E20b0Da8b267DaA13f538964940C6eBaCCB2",
+  },
+  poolIndex: 36000,
+  isTestNet: true,
+  chainId: "0x14a34",
+  gridSize: 1,
+  proxyPaths: {
+    cold: 3,
+    long: 130,
+    liq: 128
+  },
+  blockExplorer: "https://sepolia.basescan.org/",
+  displayName: "Base Sepolia",
+  logoUrl: ETHEREUM_LOGO,
+};
+
+
 const SCROLL_CHAIN: ChainSpec = {
   nodeUrl: "https://rpc.scroll.io",
   addrs: {
@@ -316,6 +338,7 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x13e31": BLAST_CHAIN,
   "0x18230": PLUME_SEPOLIA_CHAIN,
   "0x784": SWELL_SEPOLIA_CHAIN,
+  "0x14a34": BASE_SEPOLIA_CHAIN,
   "goerli": GOERLI_CHAIN,
   "sepolia": SEPOLIA_CHAIN,
   "arbtest": ARB_GOERLI_CHAIN,
@@ -330,5 +353,6 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "blastSepolia": BLAST_SEPOLIA_CHAIN,
   "plumeSepolia": PLUME_SEPOLIA_CHAIN,
   "swellSepolia": SWELL_SEPOLIA_CHAIN,
+  "baseSepolia": BASE_SEPOLIA_CHAIN,
   "zircuit": ZIRCUIT_CHAIN
 };
