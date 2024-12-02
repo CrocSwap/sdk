@@ -274,7 +274,7 @@ const SWELL_SEPOLIA_CHAIN: ChainSpec = {
 };
 
 const SWELL_CHAIN: ChainSpec = {
-  nodeUrl: "https://explorer.swellnetwork.io",
+  nodeUrl: "https://swell-mainnet.alt.technology",
   addrs: {
     dex: "0xaAAaAaaa82812F0a1f274016514ba2cA933bF24D",
     query: "0xaab17419F062bB28CdBE82f9FC05E7C47C3F6194",
