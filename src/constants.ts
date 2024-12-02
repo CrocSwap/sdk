@@ -274,14 +274,14 @@ const SWELL_SEPOLIA_CHAIN: ChainSpec = {
 };
 
 const SWELL_CHAIN: ChainSpec = {
-  nodeUrl: "https://swell-testnet.alt.technology",
+  nodeUrl: "https://explorer.swellnetwork.io",
   addrs: {
     dex: "0xaAAaAaaa82812F0a1f274016514ba2cA933bF24D",
     query: "0xaab17419F062bB28CdBE82f9FC05E7C47C3F6194",
     impact: "0xd83eF4d0e968A96329aC297bBf049CDdaC7E0362",
   },
   poolIndex: 420,
-  isTestNet: true,
+  isTestNet: false,
   chainId: "0x6435",
   gridSize: 4,
   proxyPaths: {
