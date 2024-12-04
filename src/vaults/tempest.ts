@@ -40,7 +40,12 @@ export class TempestVault {
         let owner = ((await this.context).actor as Signer).getAddress()
         let weiQty = this.vaultToken.normQty(vaultQty);
         let minWeiQty = this.token1.normQty(minToken1Qty);
-        return (await this.vault).redeem(await weiQty, owner, owner, await minWeiQty, true)
+        switch (this.strategy) {
+            case 'symetricAmbient':
+                return (await this.vault).redeem(await weiQty, owner, owner, Typed.uint256(await minWeiQty), Typed.bool(true))
+            case 'rswEth':
+                return (await this.vault).redeem(await weiQty, owner, owner, Typed.bytes('0x00'))
+        }
     }
 
     /* @notice Retrieves the min deposit quantity in token1 for the Tempest vault */
