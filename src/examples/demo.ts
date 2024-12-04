@@ -26,7 +26,7 @@ async function demo() {
 
     const tempestVault = "0x3E9E7861D68a82783FAfbaCaB21ea8F37231c56e"
     const tempestToken1 = "0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4"
-    let vault = croc.tempestVault(tempestVault, tempestToken1)
+    let vault = croc.tempestVault(tempestVault, tempestToken1, 'symetricAmbient')
 
     console.log(await vault.allowance(wallet.address))
     console.log(await vault.minDeposit())
