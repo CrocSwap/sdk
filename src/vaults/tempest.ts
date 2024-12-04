@@ -19,7 +19,11 @@ export class TempestVault {
     async depositZap (qty: TokenQty): Promise<TransactionResponse> {
         let owner = ((await this.context).actor as Signer).getAddress()
         let weiQty = this.token1.normQty(qty);
-        return (await this.vault).deposit(await weiQty, owner, true)
+        let txArgs = {};
+        if (this.token1.isNativeEth) {
+            txArgs = { value: await weiQty };
+        }
+        return (await this.vault).deposit(await weiQty, owner, true, txArgs)
     }
 
     /* @notice Sends a transaction to redeem shares in vault position back into token1
