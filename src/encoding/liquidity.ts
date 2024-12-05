@@ -1,7 +1,6 @@
-import { ethers } from "ethers";
+import { ethers, ZeroAddress } from "ethers";
 import { MAX_LIQ } from "../constants";
 import { encodeCrocPrice } from "../utils/price";
-import { ZeroAddress } from "ethers";
 
 type Address = string;
 type PoolType = number;

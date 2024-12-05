@@ -1,12 +1,10 @@
-import { TransactionResponse } from 'ethers';
-import { CrocContext, ensureChain } from './context';
-import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
-import { ZeroAddress } from 'ethers';
-import { KnockoutEncoder } from "./encoding/knockout";
+import { TransactionResponse, ZeroAddress } from 'ethers';
 import { ChainSpec } from "./constants";
+import { CrocContext, ensureChain } from './context';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
-import { baseTokenForQuoteConc, bigIntToFloat, floatToBigInt, quoteTokenForBaseConc, roundForConcLiq } from "./utils";
-import { GAS_PADDING } from "./utils";
+import { KnockoutEncoder } from "./encoding/knockout";
+import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
+import { baseTokenForQuoteConc, bigIntToFloat, floatToBigInt, GAS_PADDING, quoteTokenForBaseConc, roundForConcLiq } from "./utils";
 
 
 export class CrocKnockoutHandle {

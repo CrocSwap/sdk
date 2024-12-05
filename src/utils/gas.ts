@@ -1,6 +1,6 @@
 import { Contract, ContractTransaction, Transaction, keccak256 } from "ethers";
-import { CrocEnv } from "../croc";
 import { L1_GAS_PRICE_ORACLE_ABI } from "../abis/external/L1GasPriceOracle";
+import { CrocEnv } from "../croc";
 
 // Applied to all gas estimates.
 export const GAS_PADDING = BigInt(30000);
