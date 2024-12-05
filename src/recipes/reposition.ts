@@ -1,12 +1,11 @@
 import { TransactionResponse } from "ethers";
+import { ensureChain } from "../context";
 import { OrderDirective, PoolDirective } from "../encoding/longform";
 import { CrocPoolView } from "../pool";
 import { CrocSwapPlan } from "../swap";
 import { CrocTokenView } from "../tokens";
-import { encodeCrocPrice, tickToPrice } from "../utils";
+import { encodeCrocPrice, GAS_PADDING, tickToPrice } from "../utils";
 import { baseTokenForConcLiq, concDepositBalance, quoteTokenForConcLiq } from "../utils/liquidity";
-import { GAS_PADDING } from "../utils";
-import { ensureChain } from "../context";
 
 
 interface RepositionTarget {

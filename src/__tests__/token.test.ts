@@ -1,8 +1,8 @@
 import { ZeroAddress } from "ethers";
 import {
-  getQuoteTokenAddress,
-  getBaseTokenAddress,
-  sortBaseQuoteTokens,
+    getBaseTokenAddress,
+    getQuoteTokenAddress,
+    sortBaseQuoteTokens,
 } from "../utils/token";
 
 test("getQuoteTokenAddress returns correct address when ETH compared with Dai on Kovan", () => {

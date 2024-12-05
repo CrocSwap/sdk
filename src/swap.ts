@@ -1,12 +1,11 @@
-import { TransactionResponse, ZeroAddress, ethers } from "ethers";
-import { CrocContext, ensureChain } from './context';
-import { CrocPoolView } from './pool';
-import { decodeCrocPrice, getUnsignedRawTransaction } from './utils';
-import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
-import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
+import { ethers, TransactionResponse, ZeroAddress } from "ethers";
 import { MAX_SQRT_PRICE, MIN_SQRT_PRICE } from "./constants";
+import { CrocContext, ensureChain } from './context';
+import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
+import { CrocPoolView } from './pool';
 import { CrocSlotReader } from "./slots";
-import { GAS_PADDING } from "./utils";
+import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
+import { decodeCrocPrice, GAS_PADDING, getUnsignedRawTransaction } from './utils';
 
 /* Describes the predicted impact of a given swap.
  * @property sellQty The total quantity of tokens predicted to be sold by the swapper to the dex.

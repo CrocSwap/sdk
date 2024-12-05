@@ -4,9 +4,9 @@ describe('Placeholder Test Suite', () => {
   });
 });
 
-/*import { queryClaim, AmbientClaim, RangeClaim, queryPos, AmbientLiqPos, RangeLiqPos, queryPosAnchors } from "../position";
-import { ethers } from "ethers";
-import { NODE_URL } from "..";
+/*import  { queryClaim, AmbientClaim, RangeClaim, queryPos, AmbientLiqPos, RangeLiqPos, queryPosAnchors } from "../position";
+import  { ethers } from "ethers";
+import  { NODE_URL } from "..";
 
 let ropstenProvider = new ethers.providers.JsonRpcProvider(NODE_URL);
 const ambPos = "0x83143c5d6e1dadd337e7d8618d6c0bf50bdfd154f08c7f9310dda845cf77ad53"
