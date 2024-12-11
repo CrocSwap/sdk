@@ -1,15 +1,17 @@
-import { Contract, Signer, TransactionResponse } from "ethers";
+import { Contract, Signer, TransactionResponse, Typed } from "ethers";
 import { CrocContext } from "../context";
 import { CrocTokenView, TokenQty } from "../tokens";
 import { TEMPEST_VAULT_ABI } from "../abis/external/TempestVaultAbi";
 
+export type TempestStrategy = 'rswEth' | 'symetricAmbient'
 
 /* @notice Class for interacting with a specific Tempest pair vault. */
 export class TempestVault {
-    constructor (vaultToken: CrocTokenView, token1: CrocTokenView, context: Promise<CrocContext>) {
+    constructor (vaultToken: CrocTokenView, token1: CrocTokenView, strategy: TempestStrategy, context: Promise<CrocContext>) {
         this.vaultAddr = vaultToken.tokenAddr
         this.token1 = token1
         this.vaultToken = vaultToken
+        this.strategy = strategy
         this.vault = context.then(c => new Contract(this.vaultAddr, TEMPEST_VAULT_ABI, c.actor));
         this.context = context
     }
@@ -19,7 +21,16 @@ export class TempestVault {
     async depositZap (qty: TokenQty): Promise<TransactionResponse> {
         let owner = ((await this.context).actor as Signer).getAddress()
         let weiQty = this.token1.normQty(qty);
-        return (await this.vault).deposit(await weiQty, owner, true)
+        let txArgs = {};
+        if (this.token1.isNativeEth) {
+            txArgs = { value: await weiQty };
+        }
+        switch (this.strategy) {
+            case 'symetricAmbient':
+                return (await this.vault).deposit(await weiQty, owner, Typed.bool(true), txArgs)
+            case 'rswEth':
+                return (await this.vault).deposit(await weiQty, owner, Typed.bytes('0x00'), txArgs)
+        }
     }
 
     /* @notice Sends a transaction to redeem shares in vault position back into token1
@@ -29,7 +40,12 @@ export class TempestVault {
         let owner = ((await this.context).actor as Signer).getAddress()
         let weiQty = this.vaultToken.normQty(vaultQty);
         let minWeiQty = this.token1.normQty(minToken1Qty);
-        return (await this.vault).redeem(await weiQty, owner, owner, await minWeiQty, true)
+        switch (this.strategy) {
+            case 'symetricAmbient':
+                return (await this.vault).redeem(await weiQty, owner, owner, Typed.uint256(await minWeiQty), Typed.bool(true))
+            case 'rswEth':
+                return (await this.vault).redeem(await weiQty, owner, owner, Typed.bytes('0x00'))
+        }
     }
 
     /* @notice Retrieves the min deposit quantity in token1 for the Tempest vault */
@@ -58,7 +74,7 @@ export class TempestVault {
         return denom / Number(numer)
     }
 
-    /* @notice Checks a wallet's token approval for the vault's token1. */ 
+    /* @notice Checks a wallet's token approval for the vault's token1. */
     async allowance(wallet: string): Promise<bigint> {
         return (await this.token1).allowance(wallet, await this.vaultAddr);
     }
@@ -72,6 +88,7 @@ export class TempestVault {
     private vaultAddr: string;
     private token1: CrocTokenView;
     private vaultToken: CrocTokenView;
+    private strategy: TempestStrategy
     private vault: Promise<Contract>;
     private minDepositCache: Promise<bigint> | undefined
     private context: Promise<CrocContext>

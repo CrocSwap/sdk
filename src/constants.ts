@@ -282,7 +282,7 @@ const SWELL_CHAIN: ChainSpec = {
   },
   poolIndex: 420,
   isTestNet: false,
-  chainId: "0x6435",
+  chainId: "0x783",
   gridSize: 4,
   proxyPaths: {
     cold: 3,
@@ -380,7 +380,7 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x13e31": BLAST_CHAIN,
   "0x18230": PLUME_SEPOLIA_CHAIN,
   "0x784": SWELL_SEPOLIA_CHAIN,
-  "0x6435": SWELL_CHAIN,
+  "0x783": SWELL_CHAIN,
   "0x14a34": BASE_SEPOLIA_CHAIN,
   "0x18231": PLUME_CHAIN,
   "goerli": GOERLI_CHAIN,
