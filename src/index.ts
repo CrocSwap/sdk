@@ -4,6 +4,7 @@ export * from "./abis";
 export * from "./pool";
 export * from "./position";
 export * from "./swap";
+export * from "./smartSwap";
 export * from "./croc";
 
 export * from "./encoding/liquidity";

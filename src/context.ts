@@ -4,6 +4,7 @@ import { ChainSpec, CHAIN_SPECS } from "./constants";
 import { CROC_ABI, QUERY_ABI, ERC20_ABI } from "./abis";
 import { ZeroAddress } from "ethers";
 import { IMPACT_ABI } from "./abis/impact";
+import { MULTI_IMPACT_ABI } from "./abis/multiImpact";
 import { ERC20_READ_ABI } from "./abis/erc20.read";
 
 export interface CrocContext {
@@ -14,6 +15,7 @@ export interface CrocContext {
   routerBypass?: Contract;
   query: Contract;
   slipQuery: Contract;
+  multiImpact?: Contract;
   erc20Read: Contract;
   erc20Write: Contract;
   chain: ChainSpec;
@@ -115,6 +117,7 @@ function inflateContracts(
     routerBypass: context.addrs.routerBypass ? new Contract(context.addrs.routerBypass || ZeroAddress, CROC_ABI, actor) : undefined,
     query: new Contract(context.addrs.query, QUERY_ABI, provider),
     slipQuery: new Contract(context.addrs.impact, IMPACT_ABI, provider),
+    multiImpact: context.addrs.multiImpact ? new Contract(context.addrs.multiImpact, MULTI_IMPACT_ABI, provider) : undefined,
     erc20Write: new Contract(ZeroAddress, ERC20_ABI, actor),
     erc20Read: new Contract(ZeroAddress, ERC20_READ_ABI, provider),
     chain: context,

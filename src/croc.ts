@@ -9,6 +9,7 @@ import { CrocPositionView } from './position';
 import { CrocSlotReader } from './slots';
 import { TransactionResponse } from 'ethers';
 import { TempestStrategy, TempestVault } from './vaults/tempest';
+import { CrocSmartSwapPlan, CrocSmartSwapExecOpts } from './smartSwap';
 
 /* This is the main entry point for the Croc SDK. It provides a high-level interface
  * for interacting with CrocSwap smart contracts in an ergonomic way. */
@@ -54,6 +55,19 @@ export class CrocEnv {
      * @param qty The fixed quantity of native ETH to sell. */
     sellEth (qty: TokenQty): SellPrefix {
         return new SellPrefix(ZeroAddress, qty, this.tokens, this.context)
+    }
+
+    /* Creates a smart swap plan for swapping from one token to another. The plan will
+     * automatically select the best route to swap through.
+
+     * @param fromToken The address of the token to swap from.
+     * @param toToken The address of the token to swap to.
+     * @param qty The quantity of the swap, either input or output depending on isFixedOutput.
+     * @param isFixedOutput Whether the quantity is fixed output or fixed input.
+     * @param opts Optional parameters for the swap plan. */
+    smartSwap (fromToken: string, toToken: string, qty: TokenQty, isFixedOutput: boolean, opts?: CrocSmartSwapExecOpts): CrocSmartSwapPlan {
+        return new CrocSmartSwapPlan(this.tokens.materialize(fromToken),
+            this.tokens.materialize(toToken), qty, isFixedOutput, this.context, opts)
     }
 
     /* Returns a view of the canonical pool for the underlying token pair. For example the
