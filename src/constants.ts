@@ -1,5 +1,5 @@
 type ChainAddress = string;
-type ChainId = string;
+export type ChainId = string;
 
 export const MIN_TICK = -665454;
 export const MAX_TICK = 831818;
@@ -17,6 +17,7 @@ export interface ChainSpec {
     dex: ChainAddress;
     query: ChainAddress;
     impact: ChainAddress;
+    multiImpact?: ChainAddress;
     router?: ChainAddress
     routerBypass?: ChainAddress
   }
@@ -343,6 +344,7 @@ const SCROLL_CHAIN: ChainSpec = {
     dex: "0xaaaaAAAACB71BF2C8CaE522EA5fa455571A74106",
     query: "0x62223e90605845Cf5CC6DAE6E0de4CDA130d6DDf",
     impact: "0xc2c301759B5e0C385a38e678014868A33E2F3ae3",
+    multiImpact: "0x0F5Ef3835d0D1Ecf25A395CcB91E061CBde69205",
     router: "0xfB5f26851E03449A0403Ca945eBB4201415fd1fc",
     routerBypass: "0xED5535C6237f72BD9b4fDEAa3b6D8d9998b4C4e4",
   },
