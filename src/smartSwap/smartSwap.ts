@@ -248,7 +248,7 @@ export class CrocSmartSwapPlan {
         continue
 
       const side = this.fixedOutput ? 0 : 1
-      if (maxImpactResult.status == 'rejected' || impactResult.value[side] < maxImpactResult.value[side])
+      if ((maxImpactResult.status == 'rejected' || maxImpactResult.value[side] == BigInt(0)) || (impactResult.value[side] < maxImpactResult.value[side]))
         maxReturn = i
     }
     console.log('impacts maxReturn', maxReturn)
