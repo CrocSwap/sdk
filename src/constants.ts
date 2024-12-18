@@ -294,6 +294,27 @@ const SWELL_CHAIN: ChainSpec = {
   logoUrl: ETHEREUM_LOGO,
 };
 
+const PLUME_CHAIN: ChainSpec = {
+  nodeUrl: "https://phoenix-rpc.plumenetwork.xyz",
+  addrs: {
+    dex: "0xAaAaAAAA81a99d2a05eE428eC7a1d8A3C2237D85",
+    query: "0xA3BD3bE19012De72190c885FB270beb93e36a8A7",
+    impact: "0x6A699AB45ADce02891E6115b81Dfb46CAa5efDb9",
+  },
+  poolIndex: 420,
+  isTestNet: false,
+  chainId: "0x18231",
+  gridSize: 4,
+  proxyPaths: {
+    cold: 3,
+    long: 130,
+    liq: 128
+  },
+  blockExplorer: "https://phoenix-explorer.plumenetwork.xyz/",
+  displayName: "Plume",
+  logoUrl: ETHEREUM_LOGO,
+};
+
 const BASE_SEPOLIA_CHAIN: ChainSpec = {
   nodeUrl: "https://sepolia.base.org",
   addrs: {
@@ -361,6 +382,7 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x784": SWELL_SEPOLIA_CHAIN,
   "0x783": SWELL_CHAIN,
   "0x14a34": BASE_SEPOLIA_CHAIN,
+  "0x18231": PLUME_CHAIN,
   "goerli": GOERLI_CHAIN,
   "sepolia": SEPOLIA_CHAIN,
   "arbtest": ARB_GOERLI_CHAIN,
@@ -377,5 +399,6 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "swellSepolia": SWELL_SEPOLIA_CHAIN,
   "baseSepolia": BASE_SEPOLIA_CHAIN,
   "swell": SWELL_CHAIN,
+  "plume": PLUME_CHAIN,
   "zircuit": ZIRCUIT_CHAIN
 };
