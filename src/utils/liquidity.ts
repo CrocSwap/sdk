@@ -1,7 +1,7 @@
 import {
-  bigIntToFloat,
-  floatToBigInt,
-  truncateRightBits,
+    bigIntToFloat,
+    floatToBigInt,
+    truncateRightBits,
 } from "./";
 
 /* Converts a fixed base token collateral amount to pool liquidity units. This conversion only applies
