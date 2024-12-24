@@ -33,13 +33,6 @@ export interface ChainSpec {
   logoUrl?: string;
 }
 
-const ETHEREUM_LOGO =
-  "https://d33wubrfki0l68.cloudfront.net/fcd4ecd90386aeb50a235ddc4f0063cfbb8a7b66/4295e/static/bfc04ac72981166c740b189463e1f74c/40129/eth-diamond-black-white.jpg";
-const SCROLL_LOGO =
-  "https://develop--ambient-finance.netlify.app/scroll_logo.png";
-const BLAST_LOGO =
- "https://assets-global.website-files.com/65a6baa1a3f8ed336f415cb4/65a6cc95aae1066cf96d497d_Logo%20Black%20on%20Yellow%20Background%402x-p-500.png"
-
 const MAINNET_CHAIN: ChainSpec = {
   nodeUrl: "https://ethereum-rpc.publicnode.com" ,
   addrs: {
@@ -61,7 +54,6 @@ const MAINNET_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://etherscan.io/",
   displayName: "Ethereum",
-  logoUrl: ETHEREUM_LOGO,
 };
 
 const SEPOLIA_CHAIN: ChainSpec = {
@@ -84,7 +76,6 @@ const SEPOLIA_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://sepolia.etherscan.io/",
   displayName: "Sepolia",
-  logoUrl: ETHEREUM_LOGO,
 };
 
 const BLAST_CHAIN: ChainSpec = {
@@ -108,7 +99,6 @@ const BLAST_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://blastscan.io/",
   displayName: "Blast",
-  logoUrl: BLAST_LOGO,
 };
 
 const ZIRCUIT_CHAIN: ChainSpec = {
@@ -132,7 +122,6 @@ const ZIRCUIT_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://blastscan.io/",
   displayName: "Zircuit",
-  logoUrl: BLAST_LOGO,
 };
 
 const BLAST_SEPOLIA_CHAIN: ChainSpec = {
@@ -156,7 +145,6 @@ const BLAST_SEPOLIA_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://testnet.blastscan.io/",
   displayName: "Blast Sepolia",
-  logoUrl: BLAST_LOGO,
 };
 
 const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
@@ -179,7 +167,6 @@ const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://sepolia.scrollscan.dev/",
   displayName: "Scroll Sepolia",
-  logoUrl: SCROLL_LOGO,
 };
 
 const PLUME_SEPOLIA_CHAIN: ChainSpec = {
@@ -200,7 +187,6 @@ const PLUME_SEPOLIA_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://test-explorer.plumenetwork.xyz/",
   displayName: "Plume Sepolia",
-  logoUrl: ETHEREUM_LOGO,
 };
 
 const SWELL_SEPOLIA_CHAIN: ChainSpec = {
@@ -221,7 +207,6 @@ const SWELL_SEPOLIA_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://swell-testnet-explorer.alt.technology/",
   displayName: "Swell Sepolia",
-  logoUrl: ETHEREUM_LOGO,
 };
 
 const SWELL_CHAIN: ChainSpec = {
@@ -242,7 +227,6 @@ const SWELL_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://explorer.swellnetwork.io/",
   displayName: "Swell",
-  logoUrl: ETHEREUM_LOGO,
 };
 
 const PLUME_CHAIN: ChainSpec = {
@@ -263,7 +247,6 @@ const PLUME_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://phoenix-explorer.plumenetwork.xyz/",
   displayName: "Plume",
-  logoUrl: ETHEREUM_LOGO,
 };
 
 const BASE_SEPOLIA_CHAIN: ChainSpec = {
@@ -284,7 +267,6 @@ const BASE_SEPOLIA_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://sepolia.basescan.org/",
   displayName: "Base Sepolia",
-  logoUrl: ETHEREUM_LOGO,
 };
 
 
@@ -309,7 +291,6 @@ const SCROLL_CHAIN: ChainSpec = {
   },
   blockExplorer: "https://scrollscan.com/",
   displayName: "Scroll",
-  logoUrl: SCROLL_LOGO,
 };
 
 
