@@ -27,7 +27,6 @@
     "build-local": "yarn build-all && yarn copy-local"
   },
   "devDependencies": {
-    "@types/node": "^22.10.2",
     "@typescript-eslint/eslint-plugin": "^8.18.2",
     "@typescript-eslint/parser": "^8.18.2",
     "esbuild": "^0.24.2",

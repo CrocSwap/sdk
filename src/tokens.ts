@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Contract, ethers, MaxUint256, TransactionResponse, ZeroAddress } from "ethers";
 import { MAX_LIQ } from "./constants";
 import { CrocContext, ensureChain } from "./context";
