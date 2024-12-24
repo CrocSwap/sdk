@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { CrocContext, ensureChain } from "./context";
-import { ethers, TransactionResponse, ZeroAddress, MaxUint256, Contract } from "ethers";
+import { Contract, ethers, MaxUint256, TransactionResponse, ZeroAddress } from "ethers";
 import { MAX_LIQ } from "./constants";
-import { toDisplayQty, fromDisplayQty } from "./utils/token";
+import { CrocContext, ensureChain } from "./context";
 import { BlockTag } from "./position";
 import { GAS_PADDING } from "./utils";
+import { fromDisplayQty, toDisplayQty } from "./utils/token";
 
 /* Type representing specified token quantities. This type can either represent the raw non-decimalized
  * on-chain value in wei, if passed as a BigNuber. Or it can represent the decimalized value if passed

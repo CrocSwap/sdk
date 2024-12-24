@@ -1,13 +1,11 @@
+import { Signer, TransactionResponse, ZeroAddress } from 'ethers';
 import { ConnectArg, CrocContext, connectCroc } from './context';
-import { CrocPoolView } from './pool';
-import { ZeroAddress } from 'ethers';
-import { TokenQty, CrocTokenView } from './tokens';
-import { CrocSwapPlan, CrocSwapPlanOpts } from './swap';
-import { Signer } from 'ethers';
 import { CrocKnockoutHandle } from './knockout';
+import { CrocPoolView } from './pool';
 import { CrocPositionView } from './position';
 import { CrocSlotReader } from './slots';
-import { TransactionResponse } from 'ethers';
+import { CrocSwapPlan, CrocSwapPlanOpts } from './swap';
+import { CrocTokenView, TokenQty } from './tokens';
 import { TempestStrategy, TempestVault } from './vaults/tempest';
 
 /* This is the main entry point for the Croc SDK. It provides a high-level interface

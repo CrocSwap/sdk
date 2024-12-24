@@ -1,4 +1,4 @@
-import { MIN_TICK, MAX_TICK } from "../constants";
+import { MAX_TICK, MIN_TICK } from "../constants";
 
 type Tick = number;
 
