@@ -1,10 +1,8 @@
-import { Provider, JsonRpcProvider } from "ethers";
-import { Contract, ethers, Signer } from "ethers";
-import { ChainSpec, CHAIN_SPECS } from "./constants";
-import { CROC_ABI, QUERY_ABI, ERC20_ABI } from "./abis";
-import { ZeroAddress } from "ethers";
-import { IMPACT_ABI } from "./abis/impact";
+import { Contract, ethers, JsonRpcProvider, Provider, Signer, ZeroAddress } from "ethers";
+import { CROC_ABI, ERC20_ABI, QUERY_ABI } from "./abis";
 import { ERC20_READ_ABI } from "./abis/erc20.read";
+import { IMPACT_ABI } from "./abis/impact";
+import { CHAIN_SPECS, ChainSpec } from "./constants";
 
 export interface CrocContext {
   provider: Provider;
