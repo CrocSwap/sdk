@@ -30,7 +30,6 @@ export interface ChainSpec {
   }
   blockExplorer?: string;
   displayName: string;
-  logoUrl?: string;
 }
 
 const MAINNET_CHAIN: ChainSpec = {
