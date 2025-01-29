@@ -29,7 +29,7 @@ export class TempestVault {
             case 'symetricAmbient':
                 return (await this.vault).deposit(await weiQty, owner, Typed.bool(true), txArgs)
             case 'rswEth':
-                return (await this.vault).deposit(await weiQty, owner, Typed.bytes('0x00'), txArgs)
+                return (await this.vault).deposit(await weiQty, owner, Typed.bytes('0x'), txArgs)
         }
     }
 
@@ -44,7 +44,7 @@ export class TempestVault {
             case 'symetricAmbient':
                 return (await this.vault).redeem(await weiQty, owner, owner, Typed.uint256(await minWeiQty), Typed.bool(true))
             case 'rswEth':
-                return (await this.vault).redeem(await weiQty, owner, owner, Typed.bytes('0x00'))
+                return (await this.vault).redeem(await weiQty, owner, owner, Typed.bytes('0x'))
         }
     }
 
