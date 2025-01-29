@@ -87,7 +87,7 @@ const BLAST_CHAIN: ChainSpec = {
     routerBypass: "0xd83eF4d0e968A96329aC297bBf049CDdaC7E0362"
   },
   poolIndex: 420,
-  isTestNet: true,
+  isTestNet: false,
   chainId: "0x13e31",
   gridSize: 4,
   proxyPaths: {
@@ -110,7 +110,7 @@ const ZIRCUIT_CHAIN: ChainSpec = {
     routerBypass: "0xd83eF4d0e968A96329aC297bBf049CDdaC7E0362"
   },
   poolIndex: 420,
-  isTestNet: true,
+  isTestNet: false,
   chainId: "0x13e31",
   gridSize: 4,
   proxyPaths: {
