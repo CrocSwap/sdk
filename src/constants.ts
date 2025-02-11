@@ -229,7 +229,7 @@ const SWELL_CHAIN: ChainSpec = {
 };
 
 const PLUME_CHAIN: ChainSpec = {
-  nodeUrl: "https://phoenix-rpc.plumenetwork.xyz",
+  nodeUrl: "https://rpc.plumenetwork.xyz",
   addrs: {
     dex: "0xAaAaAAAA81a99d2a05eE428eC7a1d8A3C2237D85",
     query: "0xA3BD3bE19012De72190c885FB270beb93e36a8A7",
@@ -244,7 +244,7 @@ const PLUME_CHAIN: ChainSpec = {
     long: 130,
     liq: 128
   },
-  blockExplorer: "https://phoenix-explorer.plumenetwork.xyz/",
+  blockExplorer: "https://explorer.plumenetwork.xyz/",
   displayName: "Plume",
 };
 
