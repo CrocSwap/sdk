@@ -292,6 +292,28 @@ const SCROLL_CHAIN: ChainSpec = {
   displayName: "Scroll",
 };
 
+const MONAD_TESTNET_CHAIN: ChainSpec = {
+  nodeUrl: "https://testnet-rpc2.monad.xyz/52227f026fa8fac9e2014c58fbf5643369b3bfc6",
+  addrs: {
+    dex: "0x88B96aF200c8a9c35442C8AC6cd3D22695AaE4F0",
+    query: "0x1C74Dd2DF010657510715244DA10ba19D1F3D2B7",
+    impact: "0x70a6a0C905af5737aD73Ceba4e6158e995031d4B",
+    router: "0x3108E20b0Da8b267DaA13f538964940C6eBaCCB2",
+    routerBypass: "0x8415bFC3b1ff76B804Ab8a6810a1810f9df32483",
+  },
+  poolIndex: 36000,
+  isTestNet: true,
+  chainId: "0x279f",
+  gridSize: 1,
+  proxyPaths: {
+    cold: 3,
+    long: 130,
+    liq: 128,
+    dfltColdSwap: true
+  },
+  blockExplorer: "https://testnet.monadexplorer.com/",
+  displayName: "Monad Testnet",
+};
 
 export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x1": MAINNET_CHAIN,
@@ -305,6 +327,7 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x783": SWELL_CHAIN,
   "0x14a34": BASE_SEPOLIA_CHAIN,
   "0x18231": PLUME_CHAIN,
+  "0x279f": MONAD_TESTNET_CHAIN,
   "sepolia": SEPOLIA_CHAIN,
   "ethereum": MAINNET_CHAIN,
   "mainnet": MAINNET_CHAIN,
@@ -318,5 +341,6 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "baseSepolia": BASE_SEPOLIA_CHAIN,
   "swell": SWELL_CHAIN,
   "plume": PLUME_CHAIN,
-  "zircuit": ZIRCUIT_CHAIN
+  "zircuit": ZIRCUIT_CHAIN,
+  "monadTestnet": MONAD_TESTNET_CHAIN
 };
