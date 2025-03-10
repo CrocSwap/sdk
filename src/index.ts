@@ -9,3 +9,4 @@ export * from "./croc";
 export * from "./encoding/liquidity";
 export * from "./encoding/longform";
 export * from "./recipes/reposition";
+export * from "./recipes/edit-position";
