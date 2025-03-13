@@ -188,6 +188,7 @@ class TokenRepo {
     /* Either generates or loads a previously cached token view object.
      * @param tokenAddr The Ethereum address of the token contract. */
     materialize (tokenAddr: string): CrocTokenView {
+        tokenAddr = tokenAddr.toLowerCase()
         let tokenView = this.tokenViews.get(tokenAddr)
         if (!tokenView) {
             tokenView = new CrocTokenView(this.context, tokenAddr)
