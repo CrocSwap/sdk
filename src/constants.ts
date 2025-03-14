@@ -293,7 +293,7 @@ const SCROLL_CHAIN: ChainSpec = {
 };
 
 const MONAD_TESTNET_CHAIN: ChainSpec = {
-  nodeUrl: "https://testnet-rpc2.monad.xyz/52227f026fa8fac9e2014c58fbf5643369b3bfc6",
+  nodeUrl: "https://testnet-rpc.monad.xyz",
   addrs: {
     dex: "0x88B96aF200c8a9c35442C8AC6cd3D22695AaE4F0",
     query: "0x1C74Dd2DF010657510715244DA10ba19D1F3D2B7",
