@@ -228,7 +228,7 @@ const SWELL_CHAIN: ChainSpec = {
   displayName: "Swell",
 };
 
-const PLUME_CHAIN: ChainSpec = {
+const PLUME_LEGACY_CHAIN: ChainSpec = {
   nodeUrl: "https://rpc.plumenetwork.xyz",
   addrs: {
     dex: "0xAaAaAAAA81a99d2a05eE428eC7a1d8A3C2237D85",
@@ -238,6 +238,26 @@ const PLUME_CHAIN: ChainSpec = {
   poolIndex: 420,
   isTestNet: false,
   chainId: "0x18231",
+  gridSize: 4,
+  proxyPaths: {
+    cold: 3,
+    long: 130,
+    liq: 128
+  },
+  blockExplorer: "https://explorer.plumenetwork.xyz/",
+  displayName: "Plume",
+};
+
+const PLUME_CHAIN: ChainSpec = {
+  nodeUrl: "https://phoenix-rpc.plumenetwork.xyz",
+  addrs: {
+    dex: "0xAaAaAAAA81a99d2a05eE428eC7a1d8A3C2237D85",
+    query: "0x62223e90605845Cf5CC6DAE6E0de4CDA130d6DDf",
+    impact: "0xc2c301759B5e0C385a38e678014868A33E2F3ae3",
+  },
+  poolIndex: 420,
+  isTestNet: false,
+  chainId: "0x18232",
   gridSize: 4,
   proxyPaths: {
     cold: 3,
@@ -293,7 +313,7 @@ const SCROLL_CHAIN: ChainSpec = {
 };
 
 const MONAD_TESTNET_CHAIN: ChainSpec = {
-  nodeUrl: "https://testnet-rpc.monad.xyz",
+  nodeUrl: "https://testnet-rpc.monad.xyz/",
   addrs: {
     dex: "0x88B96aF200c8a9c35442C8AC6cd3D22695AaE4F0",
     query: "0x1C74Dd2DF010657510715244DA10ba19D1F3D2B7",
@@ -326,7 +346,8 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x784": SWELL_SEPOLIA_CHAIN,
   "0x783": SWELL_CHAIN,
   "0x14a34": BASE_SEPOLIA_CHAIN,
-  "0x18231": PLUME_CHAIN,
+  "0x18231": PLUME_LEGACY_CHAIN,
+  "0x18232": PLUME_CHAIN,
   "0x279f": MONAD_TESTNET_CHAIN,
   "sepolia": SEPOLIA_CHAIN,
   "ethereum": MAINNET_CHAIN,
@@ -341,6 +362,7 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "baseSepolia": BASE_SEPOLIA_CHAIN,
   "swell": SWELL_CHAIN,
   "plume": PLUME_CHAIN,
+  "plumeLegacy": PLUME_LEGACY_CHAIN,
   "zircuit": ZIRCUIT_CHAIN,
   "monadTestnet": MONAD_TESTNET_CHAIN
 };
