@@ -264,7 +264,7 @@ const PLUME_CHAIN: ChainSpec = {
     long: 130,
     liq: 128
   },
-  blockExplorer: "https://explorer.plumenetwork.xyz/",
+  blockExplorer: "https://phoenix-explorer.plumenetwork.xyz/",
   displayName: "Plume",
 };
 
