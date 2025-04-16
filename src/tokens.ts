@@ -47,7 +47,7 @@ export class CrocTokenView {
       return undefined;
     }
 
-    const weiQty = approveQty ? await this.normQty(approveQty) : MaxUint256
+    const weiQty = approveQty !== undefined ? await this.normQty(approveQty) : MaxUint256
 
     await ensureChain(await this.context)
     // We want to hardcode the gas limit, so we can manually pad it from the estimated
