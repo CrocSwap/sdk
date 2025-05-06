@@ -161,6 +161,9 @@ export class CrocSwapPlan {
       (this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP, limitPrice);
 
+    if ((impact[0] > 0 && impact[1] > 0) || (impact[0] < 0 && impact[1] < 0))
+      throw new Error("Invalid impact: base and quote flows have matching signs")
+
     const baseQty = this.baseToken.toDisplay(impact[0] < 0 ? -impact[0] : impact[0])
     const quoteQty = this.quoteToken.toDisplay(impact[1] < 0 ? -impact[1] : impact[1])
     const spotPrice = decodeCrocPrice(impact[2])
