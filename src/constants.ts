@@ -168,26 +168,6 @@ const SCROLL_SEPOLIA_CHAIN: ChainSpec = {
   displayName: "Scroll Sepolia",
 };
 
-const PLUME_SEPOLIA_CHAIN: ChainSpec = {
-  nodeUrl: "https://test-rpc.plumenetwork.xyz",
-  addrs: {
-    dex: "0x21B5E1aC7154A34d0ae38684A4c27CbE6b9c4f1E",
-    query: "0x1C74Dd2DF010657510715244DA10ba19D1F3D2B7",
-    impact: "0x70a6a0C905af5737aD73Ceba4e6158e995031d4B",
-  },
-  poolIndex: 36000,
-  isTestNet: true,
-  chainId: "0x18230",
-  gridSize: 1,
-  proxyPaths: {
-    cold: 3,
-    long: 130,
-    liq: 128
-  },
-  blockExplorer: "https://test-explorer.plumenetwork.xyz/",
-  displayName: "Plume Sepolia",
-};
-
 const SWELL_SEPOLIA_CHAIN: ChainSpec = {
   nodeUrl: "https://swell-testnet.alt.technology",
   addrs: {
@@ -249,7 +229,7 @@ const PLUME_LEGACY_CHAIN: ChainSpec = {
 };
 
 const PLUME_CHAIN: ChainSpec = {
-  nodeUrl: "https://phoenix-rpc.plumenetwork.xyz",
+  nodeUrl: "https://rpc.plume.org",
   addrs: {
     dex: "0xAaAaAAAA81a99d2a05eE428eC7a1d8A3C2237D85",
     query: "0x62223e90605845Cf5CC6DAE6E0de4CDA130d6DDf",
@@ -264,7 +244,7 @@ const PLUME_CHAIN: ChainSpec = {
     long: 130,
     liq: 128
   },
-  blockExplorer: "https://phoenix-explorer.plumenetwork.xyz/",
+  blockExplorer: "https://explorer.plume.org/",
   displayName: "Plume",
 };
 
@@ -342,7 +322,6 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "0x82750": SCROLL_CHAIN,
   "0xa0c71fd": BLAST_SEPOLIA_CHAIN,
   "0x13e31": BLAST_CHAIN,
-  "0x18230": PLUME_SEPOLIA_CHAIN,
   "0x784": SWELL_SEPOLIA_CHAIN,
   "0x783": SWELL_CHAIN,
   "0x14a34": BASE_SEPOLIA_CHAIN,
@@ -357,7 +336,6 @@ export const CHAIN_SPECS: { [chainId: string]: ChainSpec } = {
   "scrollsepolia": SCROLL_SEPOLIA_CHAIN,
   "blast": BLAST_CHAIN,
   "blastSepolia": BLAST_SEPOLIA_CHAIN,
-  "plumeSepolia": PLUME_SEPOLIA_CHAIN,
   "swellSepolia": SWELL_SEPOLIA_CHAIN,
   "baseSepolia": BASE_SEPOLIA_CHAIN,
   "swell": SWELL_CHAIN,
