@@ -204,7 +204,7 @@ const SWELL_CHAIN: ChainSpec = {
     long: 130,
     liq: 128
   },
-  blockExplorer: "https://explorer.swellnetwork.io/",
+  blockExplorer: "https://swellchainscan.io/",
   displayName: "Swell",
 };
 
