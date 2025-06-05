@@ -227,8 +227,8 @@ export class CrocPoolView {
             }
         }
 
-        return this.untransformLimits(
-                [Math.max(amplifyLower, boundLower), Math.min(amplifyUpper, boundUpper)])
+        return this.untransformLimits(  
+                [Math.min(amplifyLower, boundLower), Math.max(amplifyUpper, boundUpper)])
     }
 
     private rangeToPrice (range: TickRange): PriceRange {
