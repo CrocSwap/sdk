@@ -1,9 +1,10 @@
 import { Contract, ethers, MaxUint256, TransactionResponse, ZeroAddress } from "ethers";
 import { MAX_LIQ } from "./constants";
-import { CrocContext, ensureChain } from "./context";
+import { CrocContext, ensureChain, estimateGas } from "./context";
 import { BlockTag } from "./position";
 import { GAS_PADDING } from "./utils";
 import { fromDisplayQty, toDisplayQty } from "./utils/token";
+import { sendTransaction } from "./vendorEthers";
 
 /* Type representing specified token quantities. This type can either represent the raw non-decimalized
  * on-chain value in wei, if passed as a BigNuber. Or it can represent the decimalized value if passed
@@ -50,18 +51,14 @@ export class CrocTokenView {
     const weiQty = approveQty !== undefined ? await this.normQty(approveQty) : MaxUint256
 
     await ensureChain(await this.context)
+    const populatedTx = await (await this.resolveWrite()).approve.populateTransaction(addr, weiQty, { chainId: (await this.context).chain.chainId })
     // We want to hardcode the gas limit, so we can manually pad it from the estimated
     // transaction. The default value is low gas calldata, but Metamask and other wallets
     // will often ask users to change the approval amount. Without the padding, approval
     // transactions can run out of gas.
-    const gasEst = (await this.resolveWrite()).approve.estimateGas(
-      addr,
-      weiQty
-    );
-
-    return (await this.resolveWrite()).approve(
-      addr, weiQty, { gasLimit: (await gasEst) + BigInt(15000), chainId: ((await this.context).chain).chainId }
-    );
+    const gasEst = await estimateGas((await this.context), populatedTx);
+    populatedTx.gasLimit = gasEst + BigInt(15000);
+    return await sendTransaction(await this.context, populatedTx);
   }
 
   async approveBypassRouter(): Promise<TransactionResponse | undefined> {
@@ -75,9 +72,13 @@ export class CrocTokenView {
     const HOT_PROXY_IDX = 1
     const COLD_PROXY_IDX = 3
     const cmd = abiCoder.encode(["uint8", "address", "uint32", "uint16[]"],
-            [72, router.address, MANY_CALLS, [HOT_PROXY_IDX]])
+      [72, router.target, MANY_CALLS, [HOT_PROXY_IDX]])
     await ensureChain(await this.context)
-    return (await this.context).dex.userCmd(COLD_PROXY_IDX, cmd, { chainId: ((await this.context).chain).chainId })
+    const populatedTx = await (await this.context).dex.userCmd.populateTransaction(
+      COLD_PROXY_IDX, cmd, { chainId: ((await this.context).chain).chainId })
+    const gasEst = await estimateGas((await this.context), populatedTx);
+    populatedTx.gasLimit = gasEst + BigInt(15000);
+    return sendTransaction(await this.context, populatedTx);
   }
 
   async wallet (address: string, block: BlockTag = "latest"): Promise<bigint> {
@@ -172,12 +173,13 @@ export class CrocTokenView {
       const cmd = abiCoder.encode(["uint8", "address", "uint128", "address"],
         [subCode, recv, await weiQty, this.tokenAddr])
 
-      const txArgs = useMsgVal ? { value: await weiQty } : { }
+    const txArgs = useMsgVal ? { value: await weiQty } : {}
       let cntx = await this.context
       await ensureChain(cntx)
-      const gasEst = await cntx.dex.userCmd.estimateGas(cntx.chain.proxyPaths.cold, cmd, txArgs)
-      Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
-      return cntx.dex.userCmd(cntx.chain.proxyPaths.cold, cmd, txArgs)
+    const populatedTx = await cntx.dex.userCmd.populateTransaction(cntx.chain.proxyPaths.cold, cmd, txArgs)
+    const gasEst = await estimateGas(cntx, populatedTx)
+    Object.assign(populatedTx, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
+    return sendTransaction(cntx, populatedTx);
   }
 
   readonly tokenAddr: string;

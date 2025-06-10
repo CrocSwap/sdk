@@ -1,11 +1,12 @@
 import { TransactionResponse } from "ethers";
-import { ensureChain } from "../context";
+import { ensureChain, estimateGas } from "../context";
 import { OrderDirective, PoolDirective } from "../encoding/longform";
 import { CrocPoolView } from "../pool";
 import { CrocSwapPlan } from "../swap";
 import { CrocTokenView } from "../tokens";
 import { encodeCrocPrice, GAS_PADDING, tickToPrice } from "../utils";
 import { baseTokenForConcLiq, concDepositBalance, quoteTokenForConcLiq } from "../utils/liquidity";
+import { sendTransaction } from "../vendorEthers";
 
 
 interface RepositionTarget {
@@ -37,8 +38,10 @@ export class CrocReposition {
         const cntx = await this.pool.context
         const path = cntx.chain.proxyPaths.long
         await ensureChain(cntx)
-        const gasEst = await cntx.dex.userCmd.estimateGas(path, directive.encodeBytes())
-        return cntx.dex.userCmd(path, directive.encodeBytes(), { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
+        const populatedTx = await cntx.dex.userCmd.populateTransaction(path, directive.encodeBytes())
+        const gasEst = await estimateGas(cntx, populatedTx)
+        Object.assign(populatedTx, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
+        return sendTransaction(cntx, populatedTx)
     }
 
     async simStatic() {
