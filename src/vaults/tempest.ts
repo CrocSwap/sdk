@@ -2,6 +2,7 @@ import { Contract, Signer, TransactionResponse, Typed } from "ethers";
 import { TEMPEST_VAULT_ABI } from "../abis/external/TempestVaultAbi";
 import { CrocContext, ensureChain } from "../context";
 import { CrocTokenView, TokenQty } from "../tokens";
+import { sendTransaction } from "../vendorEthers";
 
 export type TempestStrategy = 'rswEth' | 'symetricAmbient'
 
@@ -29,9 +30,11 @@ export class TempestVault {
         await ensureChain(await this.context)
         switch (this.strategy) {
             case 'symetricAmbient':
-                return (await this.vaultWrite).deposit(await weiQty, owner, Typed.bool(true), txArgs)
+                const populatedTx = await (await this.vaultWrite).deposit.populateTransaction(await weiQty, owner, Typed.bool(true), txArgs);
+                return sendTransaction(await this.context, populatedTx);
             case 'rswEth':
-                return (await this.vaultWrite).deposit(await weiQty, owner, Typed.bytes('0x'), txArgs)
+                const populatedTxRsw = await (await this.vaultWrite).deposit.populateTransaction(await weiQty, owner, Typed.bytes('0x'), txArgs);
+                return sendTransaction(await this.context, populatedTxRsw);
         }
     }
 
@@ -45,9 +48,11 @@ export class TempestVault {
         await ensureChain(await this.context)
         switch (this.strategy) {
             case 'symetricAmbient':
-                return (await this.vaultWrite).redeem(await weiQty, owner, owner, Typed.uint256(await minWeiQty), Typed.bool(true))
+                const populatedTx = await (await this.vaultWrite).redeem.populateTransaction(await weiQty, owner, owner, Typed.uint256(await minWeiQty), Typed.bool(true));
+                return sendTransaction(await this.context, populatedTx);
             case 'rswEth':
-                return (await this.vaultWrite).redeem(await weiQty, owner, owner, Typed.bytes('0x'))
+                const populatedTxRsw = await (await this.vaultWrite).redeem.populateTransaction(await weiQty, owner, owner, Typed.bytes('0x'));
+                return sendTransaction(await this.context, populatedTxRsw);
         }
     }
 

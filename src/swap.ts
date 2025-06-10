@@ -1,11 +1,12 @@
 import { ethers, TransactionResponse, ZeroAddress } from "ethers";
 import { MAX_SQRT_PRICE, MIN_SQRT_PRICE } from "./constants";
-import { CrocContext, ensureChain } from './context';
+import { CrocContext, ensureChain, estimateGas } from './context';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 import { CrocPoolView } from './pool';
 import { CrocSlotReader } from "./slots";
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { decodeCrocPrice, GAS_PADDING, getUnsignedRawTransaction } from './utils';
+import { sendTransaction, staticCall } from "./vendorEthers";
 
 /* Describes the predicted impact of a given swap.
  * @property sellQty The total quantity of tokens predicted to be sold by the swapper to the dex.
@@ -67,15 +68,15 @@ export class CrocSwapPlan {
   }
 
   private async sendTx (args: CrocSwapExecOpts): Promise<TransactionResponse> {
-    return this.hotPathCall(await this.txBase(), 'send', args)
+    return this.hotPathCall(await this.txBase(), 'send', args) as Promise<TransactionResponse>;
   }
 
   private async callStatic (args: CrocSwapExecOpts): Promise<TransactionResponse> {
-    return this.hotPathCall(await this.txBase(), 'staticCall', args)
+    return this.hotPathCall(await this.txBase(), 'staticCall', args) as Promise<TransactionResponse>;
   }
 
   async estimateGas (args: CrocSwapExecOpts = { }): Promise<bigint> {
-    return this.hotPathCall(await this.txBase(), 'estimateGas', args)
+    return this.hotPathCall(await this.txBase(), 'estimateGas', args) as Promise<bigint>;
   }
 
   private async txBase() {
@@ -112,10 +113,21 @@ export class CrocSwapPlan {
     const TIP = 0
     const surplusFlags = this.maskSurplusArgs(args)
 
-    return contract.swap[callType](this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
+    const populatedTx = await contract.swap.populateTransaction(this.baseToken.tokenAddr, this.quoteToken.tokenAddr, (await this.context).chain.poolIndex,
       this.sellBase, this.qtyInBase, await this.qty, TIP,
       await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags,
       await this.buildTxArgs(surplusFlags, args.gasEst), )
+
+    switch (callType) {
+      case 'estimateGas':
+        return estimateGas(await this.context, populatedTx);
+      case 'send':
+        return sendTransaction(await this.context, populatedTx);
+      case 'staticCall':
+        return await staticCall(await this.context, populatedTx, contract, contract.swap.fragment);
+      default:
+        throw new Error(`Invalid call type: ${callType}`);
+    }
   }
 
   private async userCmdCall(contract: ethers.Contract, callType: 'send' | 'staticCall' | 'estimateGas', args: CrocSwapExecOpts) {
@@ -130,7 +142,17 @@ export class CrocSwapPlan {
        this.sellBase, this.qtyInBase, await this.qty, TIP,
        await this.calcLimitPrice(), await this.calcSlipQty(), surplusFlags])
 
-    return contract.userCmd[callType](HOT_PROXY_IDX, cmd, await this.buildTxArgs(surplusFlags, args.gasEst))
+    const populatedTx = await contract.userCmd.populateTransaction(HOT_PROXY_IDX, cmd, await this.buildTxArgs(surplusFlags, args.gasEst))
+    switch (callType) {
+      case 'estimateGas':
+        return estimateGas(await this.context, populatedTx);
+      case 'send':
+        return sendTransaction(await this.context, populatedTx);
+      case 'staticCall':
+        return await staticCall(await this.context, populatedTx, contract, contract.userCmd.fragment);
+      default:
+        throw new Error(`Invalid call type: ${callType}`);
+    }
   }
 
   /**

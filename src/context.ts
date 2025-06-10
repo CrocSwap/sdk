@@ -6,7 +6,7 @@ import { CHAIN_SPECS, ChainSpec } from "./constants";
 
 export interface CrocContext {
   provider: Provider;
-  actor: Provider | Signer;
+  actor: Signer;
   dex: Contract;
   router?: Contract;
   routerBypass?: Contract;
@@ -107,7 +107,7 @@ function inflateContracts(
   const context = lookupChain(chainId);
   return {
     provider: provider,
-    actor: actor,
+    actor: actor as Signer,
     dex: new Contract(context.addrs.dex, CROC_ABI, actor),
     router: context.addrs.router ? new Contract(context.addrs.router || ZeroAddress, CROC_ABI, actor) : undefined,
     routerBypass: context.addrs.routerBypass ? new Contract(context.addrs.routerBypass || ZeroAddress, CROC_ABI, actor) : undefined,
@@ -141,4 +141,24 @@ export async function ensureChain(cntx: CrocContext) {
   if (walletNetwork.chainId !== BigInt(contextNetwork.chainId)) {
       throw new Error(`Wrong chain selected in the wallet: expected ${contextNetwork.displayName} (${contextNetwork.chainId}) but got ${walletNetwork.name} (0x${Number(walletNetwork.chainId).toString(16)})`)
   }
+}
+
+// Attempt to call `eth_estimateGas` using the wallet's provider, and fall back
+// to the frontend's provider if it fails or times out.
+export async function estimateGas(cntx: CrocContext, populatedTx: ethers.ContractTransaction): Promise<bigint> {
+  if (cntx.actor) {
+    if (!populatedTx.from)
+      populatedTx.from = (await cntx.actor.getAddress()).toLowerCase();
+    try {
+      const result = await Promise.race([
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Gas estimation timed out")), 2000)),
+        cntx.actor.estimateGas(populatedTx)
+      ]) as bigint;
+      return result;
+    } catch (e) {
+      console.warn("Failed to estimate gas with wallet provider, falling back to frontend provider", e);
+    }
+  }
+
+  return await cntx.provider.estimateGas(populatedTx);
 }

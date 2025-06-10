@@ -1,10 +1,11 @@
 import { TransactionResponse, ZeroAddress } from 'ethers';
-import { CrocContext, ensureChain } from "./context";
+import { CrocContext, ensureChain, estimateGas } from "./context";
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 import { PoolInitEncoder } from "./encoding/init";
 import { WarmPathEncoder } from './encoding/liquidity';
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { bigIntToFloat, concBaseSlippagePrice, concDepositSkew, concQuoteSlippagePrice, decodeCrocPrice, fromDisplayPrice, GAS_PADDING, neighborTicks, pinTickLower, pinTickOutside, pinTickUpper, roundForConcLiq, tickToPrice, toDisplayPrice, toDisplayQty } from './utils';
+import { sendTransaction } from './vendorEthers';
 
 type PriceRange = [number, number]
 type TickRange = [number, number]
@@ -128,9 +129,10 @@ export class CrocPoolView {
 
         let cntx = await this.context
         await ensureChain(cntx)
-        const gasEst = await cntx.dex.userCmd.estimateGas(cntx.chain.proxyPaths.cold, calldata, txArgs)
-        Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
-        return cntx.dex.userCmd(cntx.chain.proxyPaths.cold, calldata, txArgs)
+        const populatedTx = await cntx.dex.userCmd.populateTransaction(cntx.chain.proxyPaths.cold, calldata, txArgs)
+        const gasEst = await estimateGas(cntx, populatedTx)
+        Object.assign(populatedTx, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
+        return sendTransaction(cntx, populatedTx);
     }
 
     async mintAmbientBase (qty: TokenQty, limits: PriceRange, opts?: CrocLpOpts):
@@ -190,9 +192,10 @@ export class CrocPoolView {
         let cntx = await this.context
         if (txArgs === undefined) { txArgs = {} }
         await ensureChain(cntx)
-        const gasEst = await cntx.dex.userCmd.estimateGas(cntx.chain.proxyPaths.liq, calldata, txArgs)
-        Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
-        return cntx.dex.userCmd(cntx.chain.proxyPaths.liq, calldata, txArgs);
+        const populatedTx = await cntx.dex.userCmd.populateTransaction(cntx.chain.proxyPaths.liq, calldata, txArgs)
+        const gasEst = await estimateGas(cntx, populatedTx);
+        Object.assign(populatedTx, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
+        return sendTransaction(cntx, populatedTx);
     }
 
     private async mintAmbient (qty: TokenQty, isQtyBase: boolean,

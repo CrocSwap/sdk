@@ -1,10 +1,11 @@
 import { TransactionResponse, ZeroAddress } from 'ethers';
 import { ChainSpec } from "./constants";
-import { CrocContext, ensureChain } from './context';
+import { CrocContext, ensureChain, estimateGas } from './context';
 import { CrocSurplusFlags, decodeSurplusFlag, encodeSurplusArg } from "./encoding/flags";
 import { KnockoutEncoder } from "./encoding/knockout";
 import { CrocEthView, CrocTokenView, sortBaseQuoteViews, TokenQty } from './tokens';
 import { baseTokenForQuoteConc, bigIntToFloat, floatToBigInt, GAS_PADDING, quoteTokenForBaseConc, roundForConcLiq } from "./utils";
+import { sendTransaction } from './vendorEthers';
 
 
 export class CrocKnockoutHandle {
@@ -87,9 +88,10 @@ export class CrocKnockoutHandle {
       let cntx = await this.context
       if (txArgs === undefined) { txArgs = {} }
       await ensureChain(cntx)
-      const gasEst = await cntx.dex.userCmd.estimateGas(KNOCKOUT_PATH, calldata, txArgs)
-      Object.assign(txArgs, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
-      return cntx.dex.userCmd(KNOCKOUT_PATH, calldata, txArgs);
+      const populatedTx = await cntx.dex.userCmd.populateTransaction(KNOCKOUT_PATH, calldata, txArgs)
+      const gasEst = await estimateGas(cntx, populatedTx);
+      Object.assign(populatedTx, { gasLimit: gasEst + GAS_PADDING, chainId: cntx.chain.chainId })
+      return sendTransaction(cntx, populatedTx);
   }
 
   private maskSurplusFlags (opts?: CrocKnockoutOpts): number {
