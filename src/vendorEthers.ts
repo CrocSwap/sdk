@@ -13,7 +13,6 @@ export async function sendTransaction(cntx: CrocContext, populatedTx: ethers.Con
 //
 // https://github.com/ethers-io/ethers.js/blob/v6.13.5/src.ts/providers/provider-jsonrpc.ts#L353-L415
 export async function ethers_sendTransaction(cntx: CrocContext, txParams: ethers.JsonRpcTransactionRequest): Promise<ethers.TransactionResponse> {
-  console.log('manual ethers_sendTransaction', txParams);
   const signer = cntx.actor;
   const walletProvider = signer.provider as ethers.JsonRpcApiProvider;
   if (!signer || !walletProvider)
